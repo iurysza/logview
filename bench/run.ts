@@ -4,6 +4,7 @@ import { ScriptedSource } from "../tests/support/scripted-source.ts";
 import { generateLines } from "./generate.ts";
 
 const DEFAULT_COUNT = 1_000;
+
 const SEED = 20260918;
 
 type BenchMode = "headless" | "tui";
@@ -53,6 +54,7 @@ async function main(): Promise<void> {
 	const count = readCount(process.argv);
 	const source = new ScriptedSource();
 	const scheduler = new ManualScheduler();
+
 	const created = createSession(
 		defaultSessionOptions({
 			sessionId: "bench",
