@@ -74,32 +74,38 @@ type KeyCommand = Readonly<{
 	shift: boolean;
 }>;
 
-function keyFromBytes(data: Uint8Array): KeyCommand | null {
-	if (data.length === 1 && data[0] === 0x03) return { key: "c", ctrl: true, shift: false };
+function decodeChunk(chunk: Uint8Array | string): string {
+	if (chunk instanceof Uint8Array) return new TextDecoder().decode(chunk);
 
-	if (data.length === 1 && data[0] === 0x1b) return { key: "escape", ctrl: false, shift: false };
+	return chunk;
+}
 
-	if (data.length === 1 && (data[0] === 0x0d || data[0] === 0x0a)) {
-		return { key: "enter", ctrl: false, shift: false };
-	}
+function keyFromText(text: string): KeyCommand | null {
+	if (text === "\u0003") return { key: "c", ctrl: true, shift: false };
 
-	if (data.length === 1 && data[0] === 0x09) return { key: "tab", ctrl: false, shift: false };
+	if (text === "\u001b") return { key: "escape", ctrl: false, shift: false };
 
-	if (data.length === 1 && (data[0] === 0x7f || data[0] === 0x08)) {
-		return { key: "backspace", ctrl: false, shift: false };
-	}
+	if (text === "\r" || text === "\n") return { key: "enter", ctrl: false, shift: false };
 
-	if (data.length === 3 && data[0] === 0x1b && data[1] === 0x5b && data[2] === 0x41) {
-		return { key: "up", ctrl: false, shift: false };
-	}
+	if (text === "\t") return { key: "tab", ctrl: false, shift: false };
 
-	if (data.length === 3 && data[0] === 0x1b && data[1] === 0x5b && data[2] === 0x42) {
-		return { key: "down", ctrl: false, shift: false };
-	}
+	if (text === "\u001b[Z") return { key: "tab", ctrl: false, shift: true };
 
-	if (data.length === 1) {
-		return { key: String.fromCharCode(data[0]!), ctrl: false, shift: false };
-	}
+	if (text === "\u007f" || text === "\b") return { key: "backspace", ctrl: false, shift: false };
+
+	if (text === "\u001b[A") return { key: "up", ctrl: false, shift: false };
+
+	if (text === "\u001b[B") return { key: "down", ctrl: false, shift: false };
+
+	if (text === "\u001b[5~") return { key: "pageup", ctrl: false, shift: false };
+
+	if (text === "\u001b[6~") return { key: "pagedown", ctrl: false, shift: false };
+
+	if (text === "\u001b[H" || text === "\u001b[1~") return { key: "home", ctrl: false, shift: false };
+
+	if (text === "\u001b[F" || text === "\u001b[4~") return { key: "end", ctrl: false, shift: false };
+
+	if (text.length === 1) return { key: text, ctrl: false, shift: false };
 
 	return null;
 }
@@ -124,13 +130,16 @@ export async function attachTui(
 	process.stdin.resume();
 	process.stdout.write("\x1b[?1049h\x1b[?25l");
 
-	const unsubscribe = session.subscribe((snapshot) => {
+	const paint = (snapshot: SessionSnapshot): void => {
 		const lines = layoutLines(snapshot, interaction);
 		process.stdout.write(`\x1b[H\x1b[J${lines.join("\r\n")}`);
-	});
+	};
 
-	const onData = (chunk: Uint8Array): void => {
-		const mapped = keyFromBytes(chunk);
+	const unsubscribe = session.subscribe(paint);
+	paint(session.snapshot());
+
+	const onData = (chunk: Uint8Array | string): void => {
+		const mapped = keyFromText(decodeChunk(chunk));
 
 		if (!mapped) return;
 
@@ -143,11 +152,21 @@ export async function attachTui(
 		interaction = result.state;
 
 		if (result.command) session.dispatch(result.command);
+		else paint(session.snapshot());
 
 		if (result.quit) void shutdown();
 	};
 
+	const onResize = (): void => {
+		session.dispatch({
+			kind: "resize",
+			columns: process.stdout.columns ?? 80,
+			rows: process.stdout.rows ?? 24,
+		});
+	};
+
 	process.stdin.on("data", onData);
+	process.stdout.on("resize", onResize);
 
 	async function shutdown(): Promise<void> {
 		if (closed) return;
@@ -155,6 +174,7 @@ export async function attachTui(
 		closed = true;
 		unsubscribe();
 		process.stdin.off("data", onData);
+		process.stdout.off("resize", onResize);
 		process.stdin.setRawMode?.(wasRaw ?? false);
 		process.stdout.write("\x1b[?25h\x1b[?1049l");
 		resolveDone();

@@ -74,4 +74,28 @@ describe("headless session", () => {
 		const stopped = scenario.session.dispatch({ kind: "tail" });
 		expect(stopped.ok).toBe(false);
 	});
+
+	test("down on the newest event stays in browse; only tail command resumes following", async () => {
+		const scenario = await openScenario({ maxEvents: 8, rows: 8, columns: 120 });
+		await scenario.deliver([1, 2, 3, 4, 5, 6, 7, 8]);
+
+		scenario.session.dispatch({ kind: "move", delta: 1 });
+		let snap = scenario.session.snapshot();
+		expect(snap.view.mode).toBe("browse");
+		expect(snap.view.selectedId).toBe(8);
+
+		await scenario.deliver([9]);
+		snap = scenario.session.snapshot();
+		expect(snap.view.mode).toBe("browse");
+		expect(snap.view.selectedId).toBe(8);
+		expect(snap.view.newSincePause).toBe(1);
+
+		scenario.session.dispatch({ kind: "tail" });
+		snap = scenario.session.snapshot();
+		expect(snap.view.mode).toBe("tail");
+		expect(snap.view.selectedId).toBe(9);
+
+		await scenario.finish();
+		await scenario.session.stop();
+	});
 });

@@ -301,7 +301,7 @@ async function attachOrHeadless(session: Session, headless: boolean): Promise<nu
 		return 1;
 	}
 
-	await session.sourceDone.catch(() => undefined);
+	await attached.value.done;
 	await attached.value.close();
 	await session.stop();
 

@@ -72,6 +72,7 @@ Public contracts stay those in `specs/2026-09-18-logview-technical-design.md` (`
 | `bun run test:adapters` | process and recording file tests |
 | `bun run typecheck` | `tsc --noEmit` |
 | `bun run check` | lint + typecheck + headless tests |
-| `bun run bench:headless` | workload stub |
+| `bun run bench:headless` | fixed-seed headless ingest measurement |
+| `bun run bench:tui` | same engine workload labeled as TUI mode |
 
 Recordings under `sessions/` are gitignored. Keep synthetic fixtures in `tests/fixtures/synthetic/`.
