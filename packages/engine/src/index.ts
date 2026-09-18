@@ -83,7 +83,7 @@ export { BunRecordingFiles, createRecordingFiles } from "./adapters/recording-fi
 
 export { RealScheduler, createScheduler } from "./adapters/scheduler.ts";
 
-export { createJevClassifier } from "./adapters/jev.ts";
+export { createJevClassifier, DEFAULT_JEV_TIMEOUT_MS } from "./adapters/jev.ts";
 
 export type { JevClassifierConfig } from "./adapters/jev.ts";
 

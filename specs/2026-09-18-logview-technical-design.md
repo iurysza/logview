@@ -793,6 +793,8 @@ Package direction is `core ← engine ← CLI` and `core ← TUI → engine`. Co
 
 The CLI chooses the mode before loading an adapter. Live and replay with a TUI dynamically load the TUI package. `record`, `--headless`, and all headless tests never load that package, including through an index barrel.
 
+Live and replay read optional `logview.json` from the working directory, or `--config PATH`. Flags override the file. `TYPESAFE_API_KEY` stays in the environment.
+
 Keep entrypoints separate: `logview/core`, `logview/engine`, and `logview/tui`. Names are provisional local package names, not claims about registry availability.
 
 ## Call Stacks and Data Flow
@@ -1039,6 +1041,7 @@ No existing files are changed or deleted because no target repository was suppli
 | New file | Responsibility |
 |---|---|
 | `packages/cli/src/main.ts` | Argument validation, subcommand selection, and deferred TUI loading. |
+| `packages/cli/src/config.ts` | `logview.json` schema, file load, and flag overlay. |
 | `packages/cli/src/headless.ts` | `HeadlessOutput` and replay or live session without terminal setup. |
 | `packages/cli/src/record.ts` | `record` command arguments and recorder lifecycle. |
 | `packages/tui/src/app.ts` | `attachTui`, renderer lifecycle, subscription, and normalized input forwarding. |

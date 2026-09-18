@@ -9,19 +9,24 @@ import {
 	createSession,
 	defaultSessionOptions,
 	DEFAULT_MAX_RECORDING_BYTES,
-	DEFAULT_SEMANTIC_THRESHOLD,
-	JEV_MODEL_ID,
 	type LogClassifier,
 	type Session,
 } from "@logview/engine";
+import {
+	readConfigFile,
+	resolveViewerSettings,
+	semanticSessionOptions,
+	type CliOverlay,
+	type ResolvedSemantic,
+} from "./config.ts";
 import { runHeadless } from "./headless.ts";
 import { runRecord } from "./record.ts";
 
 type CliError = { exit: 1 | 2; message: string };
 
-type SemanticCli = Readonly<{
-	enabled: boolean | null;
-	threshold: number;
+type ViewerFlags = Readonly<{
+	configPath: string | null;
+	overlay: CliOverlay;
 }>;
 
 type ParsedCli =
@@ -34,8 +39,7 @@ type ParsedCli =
 			columns: number;
 			rows: number;
 			maxEvents: number | null;
-			filter: FilterSpec;
-			semantic: SemanticCli;
+			viewer: ViewerFlags;
 	  }
 	| {
 			command: "replay";
@@ -46,8 +50,7 @@ type ParsedCli =
 			columns: number;
 			rows: number;
 			maxEvents: number | null;
-			filter: FilterSpec;
-			semantic: SemanticCli;
+			viewer: ViewerFlags;
 	  }
 	| {
 			command: "record";
@@ -63,13 +66,15 @@ function usage(): string {
 	return `logview — keyboard-driven Android log viewer
 
 Usage:
-  logview live [--serial DEVICE] [--headless] [--semantic]
+  logview live [--serial DEVICE] [--headless] [--semantic] [--config PATH]
   logview record --out PATH [--serial DEVICE] [--duration SEC]
-  logview replay PATH [--speed N|instant] [--headless] [--allow-partial] [--semantic]
+  logview replay PATH [--speed N|instant] [--headless] [--allow-partial] [--semantic] [--config PATH]
 
 Jev text filter:
-  Set TYPESAFE_API_KEY and pass --semantic. The / text field is then a natural-language
-  query. Eligible logs are classified in batches. Pending rows stay visible until scored.
+  Set TYPESAFE_API_KEY. Enable with --semantic or semantic.enabled in logview.json.
+  The / text field is then a natural-language query. Eligible logs are classified
+  in batches. Pending rows stay visible until scored. Flags override the config file.
+  Do not put API keys in the file.
 
 Capture profile:
   adb -s <serial> logcat -b main -b system -b crash -v threadtime -v epoch -v usec *:V
@@ -105,9 +110,10 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 	let maxFileBytes = DEFAULT_MAX_RECORDING_BYTES;
 	let speed: { kind: "timed"; multiplier: number } | { kind: "instant" } = { kind: "timed", multiplier: 1 };
 	let path: string | null = null;
-	let filterText = "";
+	let configPath: string | null = null;
+	let filterText: string | null = null;
 	let semanticEnabled: boolean | null = null;
-	let semanticThreshold = DEFAULT_SEMANTIC_THRESHOLD;
+	let semanticThreshold: number | null = null;
 
 	for (let i = 0; i < rest.length; i++) {
 		const arg = rest[i]!;
@@ -217,6 +223,14 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 			continue;
 		}
 
+		if (arg === "--config") {
+			const value = takeValue(rest, ++i, "--config");
+
+			if (!value.ok) return value;
+			configPath = value.value;
+			continue;
+		}
+
 		if (arg === "--semantic") {
 			semanticEnabled = true;
 			continue;
@@ -251,6 +265,17 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 		return err({ exit: 2, message: `unexpected argument ${arg}` });
 	}
 
+	const modelFromEnv = process.env.TYPESAFE_DEFAULT_MODEL?.trim() ?? "";
+
+	const overlay: CliOverlay = {
+		enabled: semanticEnabled,
+		threshold: semanticThreshold,
+		filterText,
+		modelFromEnv: modelFromEnv.length === 0 ? null : modelFromEnv,
+	};
+
+	const viewer: ViewerFlags = { configPath, overlay };
+
 	if (command === "live") {
 		return ok({
 			command: "live",
@@ -261,8 +286,7 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 			columns,
 			rows,
 			maxEvents,
-			filter: { ...EMPTY_FILTER, text: filterText },
-			semantic: { enabled: semanticEnabled, threshold: semanticThreshold },
+			viewer,
 		});
 	}
 
@@ -278,8 +302,7 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 			columns,
 			rows,
 			maxEvents,
-			filter: { ...EMPTY_FILTER, text: filterText },
-			semantic: { enabled: semanticEnabled, threshold: semanticThreshold },
+			viewer,
 		});
 	}
 
@@ -332,18 +355,19 @@ function recordingLabel(path: string): string {
 	return last && last.length > 0 ? last : path;
 }
 
-function resolveClassifier(semantic: SemanticCli): Result<LogClassifier | undefined, CliError> {
-	if (semantic.enabled !== true) return ok(undefined);
+function resolveClassifier(semantic: ResolvedSemantic): Result<LogClassifier | undefined, CliError> {
+	if (!semantic.enabled) return ok(undefined);
 
 	const apiKey = process.env.TYPESAFE_API_KEY?.trim() ?? "";
 
 	if (apiKey.length === 0) {
-		return err({ exit: 2, message: "--semantic requires TYPESAFE_API_KEY" });
+		return err({ exit: 2, message: "semantic filter requires TYPESAFE_API_KEY" });
 	}
 
 	const created = createJevClassifier({
 		apiKey,
-		modelId: process.env.TYPESAFE_DEFAULT_MODEL ?? JEV_MODEL_ID,
+		modelId: semantic.modelId,
+		timeoutMs: semantic.timeoutMs,
 	});
 
 	if (!created.ok) {
@@ -417,7 +441,16 @@ export async function main(argv = process.argv): Promise<number> {
 	}
 
 	if (request.command === "live" || request.command === "replay") {
-		const classifier = resolveClassifier(request.semantic);
+		const loaded = await readConfigFile(request.viewer.configPath);
+
+		if (!loaded.ok) {
+			process.stderr.write(`${loaded.error.message}\n`);
+
+			return loaded.error.exit;
+		}
+
+		const viewer = resolveViewerSettings(loaded.value, request.viewer.overlay);
+		const classifier = resolveClassifier(viewer.semantic);
 
 		if (!classifier.ok) {
 			process.stderr.write(`${classifier.error.message}\n`);
@@ -429,6 +462,9 @@ export async function main(argv = process.argv): Promise<number> {
 			process.stderr.write("Jev semantic filter enabled. The text field is classified in batches.\n");
 		}
 
+		const filter = { ...EMPTY_FILTER, text: viewer.filterText };
+		const semantic = semanticSessionOptions(viewer.semantic);
+
 		if (request.command === "live") {
 			const source = createAdbSource(
 				{ adbPath: request.adbPath, serial: request.serial },
@@ -438,6 +474,7 @@ export async function main(argv = process.argv): Promise<number> {
 			const created = createSession(
 				sessionFromFlags({
 					...request,
+					filter,
 					sessionId: `live-${Date.now()}`,
 					sourceKind: "live",
 					label: request.serial ?? "adb",
@@ -446,7 +483,7 @@ export async function main(argv = process.argv): Promise<number> {
 					source,
 					scheduler,
 					classifier: classifier.value,
-					semantic: { threshold: request.semantic.threshold },
+					semantic,
 				},
 			);
 
@@ -473,6 +510,7 @@ export async function main(argv = process.argv): Promise<number> {
 		const created = createSession(
 			sessionFromFlags({
 				...request,
+				filter,
 				sessionId: `replay-${request.path}`,
 				sourceKind: "replay",
 				label: recordingLabel(request.path),
@@ -481,7 +519,7 @@ export async function main(argv = process.argv): Promise<number> {
 				source: replay.value,
 				scheduler,
 				classifier: classifier.value,
-				semantic: { threshold: request.semantic.threshold },
+				semantic,
 			},
 		);
 

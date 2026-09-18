@@ -16,6 +16,8 @@ import type { ClassifierError, ClassifyRequest, LogClassifier, Relevance } from 
 import { JEV_MODEL_ID } from "../semantic/contracts.ts";
 import { eventKey, relevanceInstructions, RELEVANCE_FALSE, RELEVANCE_TRUE } from "../semantic/prompt.ts";
 
+export const DEFAULT_JEV_TIMEOUT_MS = 30_000;
+
 export type JevClassifierConfig = Readonly<{
 	apiKey: string;
 	modelId?: string;
@@ -110,7 +112,7 @@ export function createJevClassifier(config: JevClassifierConfig): Result<LogClas
 			apiKey: config.apiKey,
 			baseURL: config.baseURL,
 			defaultModel: modelId,
-			timeout: config.timeoutMs ?? 30_000,
+			timeout: config.timeoutMs ?? DEFAULT_JEV_TIMEOUT_MS,
 			retry: { maxRetries: 0 },
 			logLevel: "off",
 			fetch: config.fetch,
