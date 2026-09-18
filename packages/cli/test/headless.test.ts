@@ -79,4 +79,15 @@ describe("headless CLI", () => {
 
 		expect(code).toBe(2);
 	});
+
+	test("--semantic without TYPESAFE_API_KEY is exit 2", async () => {
+		const previous = process.env.TYPESAFE_API_KEY;
+		delete process.env.TYPESAFE_API_KEY;
+		const code = await main(["bun", "logview", "replay", "missing.lvr.jsonl", "--semantic"]);
+
+		if (previous === undefined) delete process.env.TYPESAFE_API_KEY;
+		else process.env.TYPESAFE_API_KEY = previous;
+
+		expect(code).toBe(2);
+	});
 });

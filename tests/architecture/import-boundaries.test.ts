@@ -66,4 +66,16 @@ describe("import boundaries", () => {
 			expect(specifier.includes("@logview/tui") || specifier.includes("opentui")).toBe(false);
 		}
 	});
+
+	test("core does not import the TypeSafe SDK", async () => {
+		const files = await collectTsFiles(join(import.meta.dir, "../../packages/core/src"));
+
+		for (const file of files) {
+			const source = await readFile(file, "utf8");
+
+			for (const specifier of importedSpecifiers(source)) {
+				expect(specifier.includes("@typesafe-ai")).toBe(false);
+			}
+		}
+	});
 });

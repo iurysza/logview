@@ -1,4 +1,4 @@
-import type { RowKind, RowSpan, ViewRow } from "./commands.ts";
+import { NONE_CLASSIFICATION, type ClassificationMark, type RowKind, type RowSpan, type ViewRow } from "./commands.ts";
 import { clipToWidth, displayWidth, padToWidth } from "./display-text.ts";
 import { messageText, tagText } from "./logcat.ts";
 import type { EventId, LogEvent, LogLevel } from "./types.ts";
@@ -9,6 +9,8 @@ export const MARKER_WIDTH = 2;
 export const MARKER_SELECTED = "▸ ";
 
 export const MARKER_IDLE = "  ";
+
+export const MARKER_PENDING = "? ";
 
 export const MAX_LIST_CONTINUATIONS = 6;
 
@@ -108,8 +110,9 @@ function rowOf(
 	kind: RowKind,
 	spans: RowSpan[],
 	clipped: boolean,
+	classification: ClassificationMark = NONE_CLASSIFICATION,
 ): ViewRow {
-	return { id: event.id, selected, level, kind, spans, clipped };
+	return { id: event.id, selected, level, kind, spans, clipped, classification };
 }
 
 function projectHeader(event: LogEvent, selected: boolean, columns: number, layout: ColumnLayout): ViewRow {
@@ -245,13 +248,15 @@ export function rowText(row: ViewRow): string {
 }
 
 export function rowDisplayText(row: ViewRow): string {
-	const marker = row.selected && row.kind === "header" ? MARKER_SELECTED : MARKER_IDLE;
-
-	return `${marker}${rowText(row)}`;
+	return `${markerFor(row)}${rowText(row)}`;
 }
 
 export function markerFor(row: ViewRow): string {
 	if (row.selected && row.kind === "header") return MARKER_SELECTED;
+
+	if (row.kind === "header" && row.classification.kind !== "none" && row.classification.kind !== "scored") {
+		return MARKER_PENDING;
+	}
 
 	return MARKER_IDLE;
 }

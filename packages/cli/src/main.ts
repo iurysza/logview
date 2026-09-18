@@ -1,6 +1,7 @@
 import { EMPTY_FILTER, err, ok, type FilterSpec, type Result, type SourceKind } from "@logview/core";
 import {
 	createAdbSource,
+	createJevClassifier,
 	createProcessRunner,
 	createRecordingFiles,
 	createReplaySource,
@@ -8,12 +9,20 @@ import {
 	createSession,
 	defaultSessionOptions,
 	DEFAULT_MAX_RECORDING_BYTES,
+	DEFAULT_SEMANTIC_THRESHOLD,
+	JEV_MODEL_ID,
+	type LogClassifier,
 	type Session,
 } from "@logview/engine";
 import { runHeadless } from "./headless.ts";
 import { runRecord } from "./record.ts";
 
 type CliError = { exit: 1 | 2; message: string };
+
+type SemanticCli = Readonly<{
+	enabled: boolean | null;
+	threshold: number;
+}>;
 
 type ParsedCli =
 	| {
@@ -26,6 +35,7 @@ type ParsedCli =
 			rows: number;
 			maxEvents: number | null;
 			filter: FilterSpec;
+			semantic: SemanticCli;
 	  }
 	| {
 			command: "replay";
@@ -37,6 +47,7 @@ type ParsedCli =
 			rows: number;
 			maxEvents: number | null;
 			filter: FilterSpec;
+			semantic: SemanticCli;
 	  }
 	| {
 			command: "record";
@@ -52,9 +63,13 @@ function usage(): string {
 	return `logview — keyboard-driven Android log viewer
 
 Usage:
-  logview live [--serial DEVICE] [--headless]
+  logview live [--serial DEVICE] [--headless] [--semantic]
   logview record --out PATH [--serial DEVICE] [--duration SEC]
-  logview replay PATH [--speed N|instant] [--headless] [--allow-partial]
+  logview replay PATH [--speed N|instant] [--headless] [--allow-partial] [--semantic]
+
+Jev text filter:
+  Set TYPESAFE_API_KEY and pass --semantic. The / text field is then a natural-language
+  query. Eligible logs are classified in batches. Pending rows stay visible until scored.
 
 Capture profile:
   adb -s <serial> logcat -b main -b system -b crash -v threadtime -v epoch -v usec *:V
@@ -91,6 +106,8 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 	let speed: { kind: "timed"; multiplier: number } | { kind: "instant" } = { kind: "timed", multiplier: 1 };
 	let path: string | null = null;
 	let filterText = "";
+	let semanticEnabled: boolean | null = null;
+	let semanticThreshold = DEFAULT_SEMANTIC_THRESHOLD;
 
 	for (let i = 0; i < rest.length; i++) {
 		const arg = rest[i]!;
@@ -200,6 +217,30 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 			continue;
 		}
 
+		if (arg === "--semantic") {
+			semanticEnabled = true;
+			continue;
+		}
+
+		if (arg === "--no-semantic") {
+			semanticEnabled = false;
+			continue;
+		}
+
+		if (arg === "--semantic-threshold") {
+			const value = takeValue(rest, ++i, "--semantic-threshold");
+
+			if (!value.ok) return value;
+			const n = Number(value.value);
+
+			if (!Number.isFinite(n) || n < 0 || n > 1) {
+				return err({ exit: 2, message: "semantic-threshold must be a number between 0 and 1" });
+			}
+
+			semanticThreshold = n;
+			continue;
+		}
+
 		if (arg.startsWith("-")) return err({ exit: 2, message: `unknown option ${arg}` });
 
 		if (command === "replay" && path === null) {
@@ -221,6 +262,7 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 			rows,
 			maxEvents,
 			filter: { ...EMPTY_FILTER, text: filterText },
+			semantic: { enabled: semanticEnabled, threshold: semanticThreshold },
 		});
 	}
 
@@ -237,6 +279,7 @@ function parseArgs(argv: string[]): Result<ParsedCli, CliError> {
 			rows,
 			maxEvents,
 			filter: { ...EMPTY_FILTER, text: filterText },
+			semantic: { enabled: semanticEnabled, threshold: semanticThreshold },
 		});
 	}
 
@@ -287,6 +330,27 @@ function recordingLabel(path: string): string {
 	const last = parts[parts.length - 1];
 
 	return last && last.length > 0 ? last : path;
+}
+
+function resolveClassifier(semantic: SemanticCli): Result<LogClassifier | undefined, CliError> {
+	if (semantic.enabled !== true) return ok(undefined);
+
+	const apiKey = process.env.TYPESAFE_API_KEY?.trim() ?? "";
+
+	if (apiKey.length === 0) {
+		return err({ exit: 2, message: "--semantic requires TYPESAFE_API_KEY" });
+	}
+
+	const created = createJevClassifier({
+		apiKey,
+		modelId: process.env.TYPESAFE_DEFAULT_MODEL ?? JEV_MODEL_ID,
+	});
+
+	if (!created.ok) {
+		return err({ exit: 2, message: created.error.message });
+	}
+
+	return ok(created.value);
 }
 
 async function attachOrHeadless(session: Session, headless: boolean): Promise<number> {
@@ -352,20 +416,73 @@ export async function main(argv = process.argv): Promise<number> {
 		}
 	}
 
-	if (request.command === "live") {
-		const source = createAdbSource(
-			{ adbPath: request.adbPath, serial: request.serial },
-			{ processes: createProcessRunner(), scheduler },
+	if (request.command === "live" || request.command === "replay") {
+		const classifier = resolveClassifier(request.semantic);
+
+		if (!classifier.ok) {
+			process.stderr.write(`${classifier.error.message}\n`);
+
+			return classifier.error.exit;
+		}
+
+		if (classifier.value) {
+			process.stderr.write("Jev semantic filter enabled. The text field is classified in batches.\n");
+		}
+
+		if (request.command === "live") {
+			const source = createAdbSource(
+				{ adbPath: request.adbPath, serial: request.serial },
+				{ processes: createProcessRunner(), scheduler },
+			);
+
+			const created = createSession(
+				sessionFromFlags({
+					...request,
+					sessionId: `live-${Date.now()}`,
+					sourceKind: "live",
+					label: request.serial ?? "adb",
+				}),
+				{
+					source,
+					scheduler,
+					classifier: classifier.value,
+					semantic: { threshold: request.semantic.threshold },
+				},
+			);
+
+			if (!created.ok) {
+				process.stderr.write(`${created.error.message}\n`);
+
+				return 2;
+			}
+
+			return attachOrHeadless(created.value, request.headless);
+		}
+
+		const replay = createReplaySource(
+			{ path: request.path, speed: request.speed, allowPartial: request.allowPartial },
+			{ files: createRecordingFiles(), scheduler },
 		);
+
+		if (!replay.ok) {
+			process.stderr.write(`${replay.error.message}\n`);
+
+			return 2;
+		}
 
 		const created = createSession(
 			sessionFromFlags({
 				...request,
-				sessionId: `live-${Date.now()}`,
-				sourceKind: "live",
-				label: request.serial ?? "adb",
+				sessionId: `replay-${request.path}`,
+				sourceKind: "replay",
+				label: recordingLabel(request.path),
 			}),
-			{ source, scheduler },
+			{
+				source: replay.value,
+				scheduler,
+				classifier: classifier.value,
+				semantic: { threshold: request.semantic.threshold },
+			},
 		);
 
 		if (!created.ok) {
@@ -377,34 +494,7 @@ export async function main(argv = process.argv): Promise<number> {
 		return attachOrHeadless(created.value, request.headless);
 	}
 
-	const replay = createReplaySource(
-		{ path: request.path, speed: request.speed, allowPartial: request.allowPartial },
-		{ files: createRecordingFiles(), scheduler },
-	);
-
-	if (!replay.ok) {
-		process.stderr.write(`${replay.error.message}\n`);
-
-		return 2;
-	}
-
-	const created = createSession(
-		sessionFromFlags({
-			...request,
-			sessionId: `replay-${request.path}`,
-			sourceKind: "replay",
-			label: recordingLabel(request.path),
-		}),
-		{ source: replay.value, scheduler },
-	);
-
-	if (!created.ok) {
-		process.stderr.write(`${created.error.message}\n`);
-
-		return 2;
-	}
-
-	return attachOrHeadless(created.value, request.headless);
+	return 2;
 }
 
 if (import.meta.main) {

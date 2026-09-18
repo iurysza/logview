@@ -1,6 +1,8 @@
-import { matches, type EventId, type PreparedFilter } from "@logview/core";
+import { matches, type EventId, type LogEvent, type PreparedFilter } from "@logview/core";
 import type { History } from "./history.ts";
 import { VisibleIndexStore } from "./visible-index.ts";
+
+export type FilterMatcher = (event: LogEvent) => boolean;
 
 export class FilterJob {
 	readonly prefix = new VisibleIndexStore();
@@ -12,15 +14,16 @@ export class FilterJob {
 		readonly revision: number,
 		readonly prepared: PreparedFilter,
 		readonly highWater: EventId | null,
+		private readonly matcher: FilterMatcher = (event) => matches(event, prepared),
 	) {}
 
-	scanSlice(history: History, maxLines: number): boolean {
-		if (this.done) return true;
+	scanSlice(history: History, maxLines: number): { done: boolean; matchedIds: readonly EventId[] } {
+		if (this.done) return { done: true, matchedIds: [] };
 
 		if (this.highWater === null) {
 			this.done = true;
 
-			return true;
+			return { done: true, matchedIds: [] };
 		}
 
 		const batch = history.readAfter(this.scanAfter, this.highWater, maxLines);
@@ -28,21 +31,27 @@ export class FilterJob {
 		if (batch.length === 0) {
 			this.done = true;
 
-			return true;
+			return { done: true, matchedIds: [] };
 		}
 
+		const matchedIds: EventId[] = [];
+
 		for (const event of batch) {
-			if (matches(event, this.prepared)) this.prefix.append([event.id]);
+			if (this.matcher(event)) {
+				this.prefix.append([event.id]);
+				matchedIds.push(event.id);
+			}
+
 			this.scanAfter = event.id;
 		}
 
 		if (this.scanAfter === this.highWater) {
 			this.done = true;
 
-			return true;
+			return { done: true, matchedIds };
 		}
 
-		return false;
+		return { done: false, matchedIds };
 	}
 
 	appendArrival(id: EventId, matchesPending: boolean): void {

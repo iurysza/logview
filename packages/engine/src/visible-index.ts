@@ -4,6 +4,8 @@ import { EMPTY_LOCATION, type Location } from "@logview/core";
 export interface VisibleIndex {
 	readonly size: number;
 	append(ids: readonly EventId[]): void;
+	insert(id: EventId): void;
+	remove(id: EventId): boolean;
 	pruneBefore(firstRetainedId: EventId | null): void;
 	locate(id: EventId | null): Location;
 	at(rank: number): EventId | null;
@@ -28,6 +30,25 @@ export class VisibleIndexStore implements VisibleIndex {
 
 			this.ids.push(id);
 		}
+	}
+
+	insert(id: EventId): void {
+		const location = this.locate(id);
+
+		if (location.exactRank !== null) return;
+
+		const rank = location.nextRank === null ? this.size : location.nextRank;
+		this.ids.splice(this.start + rank, 0, id);
+	}
+
+	remove(id: EventId): boolean {
+		const location = this.locate(id);
+
+		if (location.exactRank === null) return false;
+
+		this.ids.splice(this.start + location.exactRank, 1);
+
+		return true;
 	}
 
 	pruneBefore(firstRetainedId: EventId | null): void {

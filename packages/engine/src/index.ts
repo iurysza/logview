@@ -83,9 +83,40 @@ export { BunRecordingFiles, createRecordingFiles } from "./adapters/recording-fi
 
 export { RealScheduler, createScheduler } from "./adapters/scheduler.ts";
 
+export { createJevClassifier } from "./adapters/jev.ts";
+
+export type { JevClassifierConfig } from "./adapters/jev.ts";
+
 export {
 	LogSourceService,
 	ProcessRunnerService,
 	RecordingFilesService,
 	SchedulerService,
 } from "./layers.ts";
+
+export {
+	DEFAULT_SEMANTIC_BATCH_ITEMS,
+	DEFAULT_SEMANTIC_FLUSH_MS,
+	DEFAULT_SEMANTIC_MAX_IN_FLIGHT,
+	DEFAULT_SEMANTIC_MAX_QUEUED,
+	DEFAULT_SEMANTIC_MAX_REQUEST_BYTES,
+	DEFAULT_SEMANTIC_THRESHOLD,
+	JEV_MODEL_ID,
+	PROMPT_VERSION,
+	REDACTION_VERSION,
+	defaultSemanticOptions,
+} from "./semantic/contracts.ts";
+
+export type {
+	ClassifierError,
+	ClassifierItem,
+	ClassifyRequest,
+	ClassifyResponse,
+	LogClassifier,
+	Relevance,
+	SemanticOptions,
+	SemanticQuery,
+	SemanticStats,
+} from "./semantic/contracts.ts";
+
+export { validateClassifyResponse } from "./semantic/validate.ts";

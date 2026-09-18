@@ -721,7 +721,7 @@ The CLI owns the session lifetime. The attachment owns renderer resources, input
 
 The headless CLI emits one `HeadlessOutput` JSON line after `sourceDone`. Diagnostics use stderr. It does not dump an entire retained history into the final snapshot. Test scenarios subscribe or call `snapshot()` for intermediate behavior.
 
-### Future classifier contract: specification only
+### Classifier contract
 
 ```ts
 type SemanticQuery = Readonly<{
@@ -774,7 +774,7 @@ interface LogClassifier {
 
 A relevance value is finite and lies in `[0, 1]`. A valid response covers each requested event exactly once, by ID, regardless of response order. Unknown IDs, duplicates, missing IDs, or invalid values invalidate the response. The caller leaves the batch unclassified rather than hiding its events.
 
-This contract is not a Jev SDK API. It is the application's later port. It remains in this specification until the semantic-filter milestone; do not create unused V1 runtime modules for it.
+This contract is the application's classifier port. The Jev adapter lives in `packages/engine/src/adapters/jev.ts`. Headless tests inject a fake `LogClassifier` and must not contact TypeSafe.
 
 ## Boundaries and Adapters
 

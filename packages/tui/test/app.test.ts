@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { INSPECT_FOCUS, LIST_FOCUS, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
+import { INSPECT_FOCUS, LIST_FOCUS, NONE_CLASSIFICATION, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
 import type { SessionSnapshot } from "@logview/engine";
 import { EMPTY_FILTER, EMPTY_VIEW } from "@logview/core";
 import {
@@ -43,6 +43,7 @@ const snapshot: SessionSnapshot = {
 		lagging: false,
 		upstreamLoss: "unknown",
 	},
+	semantic: null,
 	notice: null,
 };
 
@@ -128,6 +129,7 @@ describe("tui chrome", () => {
 				kind: "header",
 				spans: [{ text: "hello", role: "message" }],
 				clipped: false,
+				classification: NONE_CLASSIFICATION,
 			},
 		];
 
@@ -147,6 +149,7 @@ describe("tui chrome", () => {
 				{ text: "  boom", role: "message" },
 			],
 			clipped: false,
+			classification: NONE_CLASSIFICATION,
 		};
 
 		const ansi = renderRowText(row, "ansi");

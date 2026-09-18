@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@logview/core": "workspace:*",
+    "@typesafe-ai/sdk": "0.6.0",
     "effect": "3.22.2"
   }
 }

@@ -15,6 +15,7 @@ bun run logview record --serial DEVICE --out sessions/example.lvr.jsonl --durati
 bun run logview replay sessions/example.lvr.jsonl
 bun run logview replay sessions/example.lvr.jsonl --speed 4
 bun run logview replay sessions/example.lvr.jsonl --speed instant --headless
+bun run logview replay sessions/example.lvr.jsonl --semantic --filter-text "database locks"
 ```
 
 `--headless` prints one JSON `HeadlessOutput` line after the source completes. Diagnostics go to stderr. Exit codes: `0` success (including a size-limit recording), `1` source/recording failure, `2` invalid arguments.
@@ -111,7 +112,7 @@ Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). 
 
 Public contracts stay those in `specs/2026-09-18-logview-technical-design.md` (`Session`, snapshots, commands, `LogEvent`).
 
-Natural-language filtering (Jev) remains specified as a post-storage classifier port. V1 does not add a runtime classifier module.
+Natural-language filtering uses TypeSafe **Jev**. Pass `--semantic` with `TYPESAFE_API_KEY` set. The `/` text field becomes a query: eligible logs (after level/tag/PID) are classified in batches. Pending and failed rows stay visible; scored rows below the threshold are hidden. Headless tests never call Jev.
 
 ## Scripts
 
