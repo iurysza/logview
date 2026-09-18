@@ -68,6 +68,10 @@ function layoutLines(snapshot: SessionSnapshot, interaction: InteractionState): 
 	return lines;
 }
 
+export function layoutSession(snapshot: SessionSnapshot, interaction: InteractionState): readonly string[] {
+	return layoutLines(snapshot, interaction);
+}
+
 type KeyCommand = Readonly<{
 	key: string;
 	ctrl: boolean;
@@ -108,6 +112,10 @@ function keyFromText(text: string): KeyCommand | null {
 	if (text.length === 1) return { key: text, ctrl: false, shift: false };
 
 	return null;
+}
+
+export function decodeTerminalKey(text: string): KeyCommand | null {
+	return keyFromText(text);
 }
 
 export async function attachTui(

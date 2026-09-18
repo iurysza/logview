@@ -277,6 +277,19 @@ export function syntheticRecordingHeader(): RecordingHeader {
 	};
 }
 
+export const SANITIZED_REDACTION_VERSION = "2026-09-18.public-aosp-pattern.v1";
+
+export function sanitizedRecordingHeader(): RecordingHeader {
+	return {
+		kind: "header",
+		format: "logview-recording",
+		version: 1,
+		profile: RECORDING_PROFILE,
+		provenance: "sanitized-real",
+		redactionVersion: SANITIZED_REDACTION_VERSION,
+	};
+}
+
 export function recordingError(
 	kind: RecordingError["kind"],
 	message: string,
