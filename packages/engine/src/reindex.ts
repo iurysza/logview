@@ -4,6 +4,11 @@ import { VisibleIndexStore } from "./visible-index.ts";
 
 export type FilterMatcher = (event: LogEvent) => boolean;
 
+export type FilterScanStep = Readonly<{
+	done: boolean;
+	matchedIds: readonly EventId[];
+}>;
+
 export class FilterJob {
 	readonly prefix = new VisibleIndexStore();
 	readonly tail = new VisibleIndexStore();
@@ -17,7 +22,7 @@ export class FilterJob {
 		private readonly matcher: FilterMatcher = (event) => matches(event, prepared),
 	) {}
 
-	scanSlice(history: History, maxLines: number): { done: boolean; matchedIds: readonly EventId[] } {
+	scanSlice(history: History, maxLines: number): FilterScanStep {
 		if (this.done) return { done: true, matchedIds: [] };
 
 		if (this.highWater === null) {

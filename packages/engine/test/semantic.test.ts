@@ -7,6 +7,7 @@ import {
 	type ClassifyRequest,
 	type ClassifyResponse,
 	type LogClassifier,
+	type Relevance,
 } from "@logview/engine";
 import { openScenario, tick } from "../../../tests/support/scenario.ts";
 
@@ -37,7 +38,7 @@ function requestOf(ids: readonly number[]): ClassifyRequest {
 function scoringClassifier(scoreFor: (eventId: number) => number): LogClassifier {
 	return {
 		async classifyBatch(request) {
-			const results: ClassifyResponse["results"] = [];
+			const results: Relevance[] = [];
 
 			for (const entry of request.items) {
 				results.push({ eventId: entry.eventId, kind: "scored", relevance: scoreFor(entry.eventId) });
@@ -66,6 +67,7 @@ class ScriptedClassifier implements LogClassifier {
 				signal.removeEventListener("abort", onAbort);
 				resolve(result);
 			};
+
 			const onAbort = (): void => {
 				let index = -1;
 
@@ -93,13 +95,13 @@ class ScriptedClassifier implements LogClassifier {
 		const batch = this.pending.splice(0, this.pending.length);
 
 		for (const item of batch) {
-			const scored: ClassifyResponse["results"] = [];
+			const scored: Relevance[] = [];
 
 			for (const entry of item.request.items) {
 				scored.push({ eventId: entry.eventId, kind: "scored", relevance: scoreFor(entry.eventId) });
 			}
 
-			const results: ClassifyResponse["results"] = [];
+			const results: Relevance[] = [];
 
 			for (let i = scored.length - 1; i >= 0; i -= 1) results.push(scored[i]!);
 
@@ -119,6 +121,7 @@ class ScriptedClassifier implements LogClassifier {
 describe("semantic classification", () => {
 	test("validateClassifyResponse rejects missing IDs and out-of-range scores", () => {
 		const request = requestOf([1, 2]);
+
 		const valid = validateClassifyResponse(request, {
 			sessionId: "s",
 			requestId: "r1",
@@ -147,6 +150,7 @@ describe("semantic classification", () => {
 		const ids = Array.from({ length: 20 }, (_, i) => i + 1);
 		const keep = new Set([3, 8, 15]);
 		const classifier = scoringClassifier((eventId) => (keep.has(eventId) ? 0.91 : 0.05));
+
 		const scenario = await openScenario({
 			maxEvents: 50,
 			rows: 24,
@@ -176,6 +180,7 @@ describe("semantic classification", () => {
 
 	test("a later query ignores a late response from the previous query", async () => {
 		const classifier = new ScriptedClassifier();
+
 		const scenario = await openScenario({
 			maxEvents: 20,
 			rows: 12,
@@ -191,6 +196,7 @@ describe("semantic classification", () => {
 		});
 		await tick(scenario.scheduler);
 		expect(classifier.pending.length).toBeGreaterThan(0);
+
 		const first = classifier.pending[0]!;
 
 		scenario.session.dispatch({
@@ -199,7 +205,7 @@ describe("semantic classification", () => {
 		});
 		await tick(scenario.scheduler);
 
-		const lowResults: ClassifyResponse["results"] = [];
+		const lowResults: Relevance[] = [];
 
 		for (const entry of first.request.items) {
 			lowResults.push({ eventId: entry.eventId, kind: "scored", relevance: 0.01 });
@@ -217,6 +223,7 @@ describe("semantic classification", () => {
 		await tick(scenario.scheduler);
 
 		classifier.resolveShuffled((eventId) => (eventId === 2 || eventId === 4 ? 0.9 : 0.01));
+
 		const snap = await scenario.waitUntil(
 			(current) => current.pendingFilter === null && current.semantic !== null && current.semantic.pendingEvents === 0,
 		);
@@ -229,6 +236,7 @@ describe("semantic classification", () => {
 
 	test("a full queue marks extra IDs skipped without stopping ingestion", async () => {
 		const classifier = new ScriptedClassifier();
+
 		const scenario = await openScenario({
 			maxEvents: 50,
 			rows: 12,

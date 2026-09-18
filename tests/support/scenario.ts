@@ -40,18 +40,6 @@ export async function openScenario(options?: {
 		}),
 		{ source, scheduler, classifier: options?.classifier, semantic: options?.semantic },
 	);
-	const source = new ScriptedSource();
-	const scheduler = new ManualScheduler();
-
-	const created = createSession(
-		defaultSessionOptions({
-			sessionId: options?.sessionId ?? "scenario",
-			maxEvents: options?.maxEvents ?? 8,
-			rows: options?.rows ?? 8,
-			columns: options?.columns ?? 80,
-		}),
-		{ source, scheduler },
-	);
 
 	if (!created.ok) throw new Error(created.error.message);
 

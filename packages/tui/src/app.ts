@@ -86,6 +86,7 @@ export function formatFooter(snapshot: SessionSnapshot): string {
 
 	const shown = snapshot.stats.matchedEvents;
 	const buffered = snapshot.stats.retainedEvents;
+
 	const semantic =
 		snapshot.semantic && snapshot.semantic.queryText.length > 0
 			? ` · ${snapshot.semantic.classifiedEvents} classified · ${snapshot.semantic.pendingEvents} pending`

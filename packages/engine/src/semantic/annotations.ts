@@ -27,7 +27,7 @@ export class AnnotationTable {
 			return;
 		}
 
-		for (const id of [...this.byId.keys()]) {
+		for (const id of this.byId.keys()) {
 			if (id < firstRetainedId) this.byId.delete(id);
 		}
 	}

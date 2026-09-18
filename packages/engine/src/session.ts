@@ -570,6 +570,7 @@ class SessionImpl implements Session {
 			promptVersion: this.semanticOptions.promptVersion,
 			redactionVersion: this.semanticOptions.redactionVersion,
 		};
+
 		const current = this.coordinator.activeQuery();
 
 		if (current && queryIdentity({ ...current, revision: 0 }) === queryIdentity({ ...next, revision: 0 })) {

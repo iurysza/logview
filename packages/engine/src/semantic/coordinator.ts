@@ -99,7 +99,7 @@ export class SemanticCoordinator {
 			return;
 		}
 
-		for (const id of [...this.queued]) {
+		for (const id of this.queued.keys()) {
 			if (id < firstRetainedId) this.queued.delete(id);
 		}
 	}
@@ -240,6 +240,7 @@ export class SemanticCoordinator {
 			}
 
 			items.push(item);
+
 			const encoded = encodedRequestBytes({
 				sessionId: this.sessionId,
 				requestId: "size",

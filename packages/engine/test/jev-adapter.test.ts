@@ -4,14 +4,19 @@ import { createJevClassifier } from "@logview/engine";
 describe("Jev adapter", () => {
 	test("maps a TypeSafe noul batch onto relevance by event ID", async () => {
 		const fetchCalls: string[] = [];
+
 		const created = createJevClassifier({
 			apiKey: "test-key",
 			modelId: "jev-1.13.0",
 			fetch: async (input, init) => {
 				fetchCalls.push(String(input));
-				const body = JSON.parse(String(init?.body ?? "{}")) as {
-					state: { query: string; logs: Array<{ id: string; eventId: number }> };
-					questions: { [name: string]: { type: string } };
+
+				const raw: unknown = JSON.parse(String(init?.body ?? "{}"));
+
+				// SAFETY: this test supplies the request body as JSON with query, questions, and model.
+				const body = raw as {
+					state: { query: string };
+					questions: { e7?: { type: string }; e9?: { type: string } };
 					model: string;
 				};
 
@@ -89,6 +94,7 @@ describe("Jev adapter", () => {
 		if (!created.ok) return;
 
 		const abort = new AbortController();
+
 		const pending = created.value.classifyBatch(
 			{
 				sessionId: "session-1",
