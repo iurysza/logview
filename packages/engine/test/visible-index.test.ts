@@ -11,5 +11,10 @@ describe("visible index", () => {
 		index.pruneBefore(3);
 		expect(index.snapshotIds()).toEqual([3, 4, 5]);
 		expect(index.locate(2)).toEqual({ exactRank: null, nextRank: 0, previousRank: null });
+		index.insert(6);
+		expect(index.snapshotIds()).toEqual([3, 4, 5, 6]);
+		expect(index.remove(4)).toBe(true);
+		expect(index.snapshotIds()).toEqual([3, 5, 6]);
+		expect(index.remove(9)).toBe(false);
 	});
 });

@@ -2,6 +2,7 @@ export type {
 	ConfigurationError,
 	CommandError,
 	FilterField,
+	ClassificationMark,
 	NavigationCause,
 	RowKind,
 	RowSpan,
@@ -10,7 +11,7 @@ export type {
 	ViewRow,
 } from "./commands.ts";
 
-export { FILTER_FIELDS, validateDimensions } from "./commands.ts";
+export { FILTER_FIELDS, NONE_CLASSIFICATION, validateDimensions } from "./commands.ts";
 
 export {
 	clipToWidth,
@@ -77,7 +78,7 @@ export { emptyFramerState, frameBytes } from "./framing.ts";
 
 export type { FrameStep, FramedLine, FramerState } from "./framing.ts";
 
-export { foldText, matches, parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
+export { foldText, matches, matchesLocal, parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
 
 export { LIST_FOCUS, INSPECT_FOCUS, HELP_FOCUS, EMPTY_SELECTION, reduceInteraction } from "./interaction.ts";
 
@@ -105,6 +106,7 @@ export {
 	logViewportHeight,
 	markerFor,
 	MARKER_IDLE,
+	MARKER_PENDING,
 	MARKER_SELECTED,
 	MARKER_WIDTH,
 	MAX_LIST_CONTINUATIONS,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { matches, parseLogcatLine, prepareFilter } from "@logview/core";
+import { matches, matchesLocal, parseLogcatLine, prepareFilter } from "@logview/core";
 import { EMPTY_FILTER, eventChargeBytes, LIST_FOCUS, reduceInteraction } from "@logview/core";
 
 function parsedEvent(raw: string) {
@@ -91,5 +91,19 @@ describe("filters and interaction", () => {
 
 		expect(matches(grouped, prepared.value)).toBe(true);
 		expect(matches(parent, prepared.value)).toBe(false);
+	});
+
+	test("local matching ignores the text field", () => {
+		const prepared = prepareFilter({ minLevel: "W", tag: "Database", pid: 12, text: "LOCK" });
+		expect(prepared.ok).toBe(true);
+
+		if (!prepared.ok) return;
+
+		const related = parsedEvent("1760000000.000001    12    12 W Database: sqlite busy");
+		expect(matches(related, prepared.value)).toBe(false);
+		expect(matchesLocal(related, prepared.value)).toBe(true);
+		expect(
+			matchesLocal(parsedEvent("1760000000.000001    12    12 I Database: sqlite busy"), prepared.value),
+		).toBe(false);
 	});
 });

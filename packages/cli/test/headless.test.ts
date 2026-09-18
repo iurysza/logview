@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Either, Schema } from "effect";
 import {
@@ -76,6 +78,73 @@ describe("headless CLI", () => {
 
 	test("missing replay path is exit 2", async () => {
 		const code = await main(["bun", "logview", "replay"]);
+
+		expect(code).toBe(2);
+	});
+
+	test("--semantic without TYPESAFE_API_KEY is exit 2", async () => {
+		const previous = process.env.TYPESAFE_API_KEY;
+		delete process.env.TYPESAFE_API_KEY;
+		const code = await main(["bun", "logview", "replay", "missing.lvr.jsonl", "--semantic"]);
+
+		if (previous === undefined) delete process.env.TYPESAFE_API_KEY;
+		else process.env.TYPESAFE_API_KEY = previous;
+
+		expect(code).toBe(2);
+	});
+
+	test("--config with semantic.enabled and no TYPESAFE_API_KEY is exit 2", async () => {
+		const previous = process.env.TYPESAFE_API_KEY;
+		delete process.env.TYPESAFE_API_KEY;
+		const dir = await mkdtemp(join(tmpdir(), "logview-cli-config-"));
+		const path = join(dir, "logview.json");
+
+		await writeFile(path, JSON.stringify({ semantic: { enabled: true } }));
+
+		const code = await main(["bun", "logview", "replay", "missing.lvr.jsonl", "--config", path]);
+
+		if (previous === undefined) delete process.env.TYPESAFE_API_KEY;
+		else process.env.TYPESAFE_API_KEY = previous;
+
+		expect(code).toBe(2);
+	});
+
+	test("--no-semantic overrides a config that enables Jev", async () => {
+		const previous = process.env.TYPESAFE_API_KEY;
+		delete process.env.TYPESAFE_API_KEY;
+		const dir = await mkdtemp(join(tmpdir(), "logview-cli-config-"));
+		const path = join(dir, "logview.json");
+
+		await writeFile(path, JSON.stringify({ semantic: { enabled: true } }));
+
+		const fixture = join(process.cwd(), "tests/fixtures/synthetic/hello.lvr.jsonl");
+
+		const code = await main([
+			"bun",
+			"logview",
+			"replay",
+			fixture,
+			"--headless",
+			"--config",
+			path,
+			"--no-semantic",
+		]);
+
+		if (previous === undefined) delete process.env.TYPESAFE_API_KEY;
+		else process.env.TYPESAFE_API_KEY = previous;
+
+		expect(code).toBe(0);
+	});
+
+	test("missing --config path is exit 2", async () => {
+		const code = await main([
+			"bun",
+			"logview",
+			"replay",
+			"missing.lvr.jsonl",
+			"--config",
+			"no-such-logview.json",
+		]);
 
 		expect(code).toBe(2);
 	});

@@ -1,6 +1,8 @@
 import {
 	createSession,
 	defaultSessionOptions,
+	type LogClassifier,
+	type SemanticOptions,
 	type Session,
 	type SessionSnapshot,
 } from "@logview/engine";
@@ -23,6 +25,8 @@ export async function openScenario(options?: {
 	rows?: number;
 	columns?: number;
 	sessionId?: string;
+	classifier?: LogClassifier;
+	semantic?: Partial<SemanticOptions>;
 }): Promise<Scenario> {
 	const source = new ScriptedSource();
 	const scheduler = new ManualScheduler();
@@ -34,7 +38,7 @@ export async function openScenario(options?: {
 			rows: options?.rows ?? 8,
 			columns: options?.columns ?? 80,
 		}),
-		{ source, scheduler },
+		{ source, scheduler, classifier: options?.classifier, semantic: options?.semantic },
 	);
 
 	if (!created.ok) throw new Error(created.error.message);

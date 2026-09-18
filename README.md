@@ -15,9 +15,34 @@ bun run logview record --serial DEVICE --out sessions/example.lvr.jsonl --durati
 bun run logview replay sessions/example.lvr.jsonl
 bun run logview replay sessions/example.lvr.jsonl --speed 4
 bun run logview replay sessions/example.lvr.jsonl --speed instant --headless
+bun run logview replay sessions/example.lvr.jsonl --semantic --filter-text "database locks"
+bun run logview replay sessions/example.lvr.jsonl --config logview.json
 ```
 
 `--headless` prints one JSON `HeadlessOutput` line after the source completes. Diagnostics go to stderr. Exit codes: `0` success (including a size-limit recording), `1` source/recording failure, `2` invalid arguments.
+
+## Config file
+
+`live` and `replay` read `logview.json` in the working directory. Pass `--config PATH` to use another file. Flags override the file. Keep `TYPESAFE_API_KEY` in the environment.
+
+```json
+{
+  "filter": { "text": "database locks" },
+  "semantic": {
+    "enabled": true,
+    "threshold": 0.5,
+    "model": "jev-1.13.0",
+    "flushMs": 50,
+    "batchItems": 100,
+    "maxInFlight": 2,
+    "maxQueued": 2000,
+    "maxRequestBytes": 131072,
+    "timeoutMs": 30000
+  }
+}
+```
+
+`semantic.enabled` is the file equivalent of `--semantic`. `--no-semantic` turns it off for one run. `TYPESAFE_DEFAULT_MODEL` overrides `semantic.model` when set.
 
 ## Capture profile
 
@@ -105,13 +130,13 @@ Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). 
 
 - `Either` / `Effect` at session construction, mapped to documented `Result` types at public boundaries
 - `Match` for tagged commands and recording records
-- `Schema` for recording JSONL
+- `Schema` for recording JSONL and `logview.json`
 - `Context.Tag` layers for scheduler, source, files, and processes
 - `Effect.scoped` / finalizers for recording and process lifetime
 
 Public contracts stay those in `specs/2026-09-18-logview-technical-design.md` (`Session`, snapshots, commands, `LogEvent`).
 
-Natural-language filtering (Jev) remains specified as a post-storage classifier port. V1 does not add a runtime classifier module.
+Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or `semantic.enabled` in `logview.json`, and set `TYPESAFE_API_KEY`. The `/` text field becomes a query: eligible logs (after level/tag/PID) are classified in batches. Pending and failed rows stay visible; scored rows below the threshold are hidden. Headless tests never call Jev.
 
 ## Scripts
 

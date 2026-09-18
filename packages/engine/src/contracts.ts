@@ -26,6 +26,7 @@ import {
 	type ViewRow,
 	type ViewState,
 } from "@logview/core";
+import type { LogClassifier, SemanticOptions, SemanticStats } from "./semantic/contracts.ts";
 import type { LogSource, Scheduler, SourceNotice, SourceStatus, SourceTerminal } from "./ports.ts";
 
 export type SessionStats = Readonly<{
@@ -57,6 +58,7 @@ export type SessionSnapshot = Readonly<{
 	rows: readonly ViewRow[];
 	selectedEvent: LogEvent | null;
 	stats: SessionStats;
+	semantic: SemanticStats | null;
 	notice: "history-expired" | "applying-filter" | "resize-required" | null;
 }>;
 
@@ -100,6 +102,8 @@ export interface TerminalAttachment {
 export type SessionDependencies = Readonly<{
 	source: LogSource;
 	scheduler: Scheduler;
+	classifier?: LogClassifier;
+	semantic?: Partial<SemanticOptions>;
 }>;
 
 export function defaultSessionOptions(

@@ -146,3 +146,7 @@ export function matches(event: LogEvent, filter: PreparedFilter): boolean {
 
 	return true;
 }
+
+export function matchesLocal(event: LogEvent, filter: PreparedFilter): boolean {
+	return matches(event, { spec: { ...filter.spec, text: "" }, foldedText: "" });
+}

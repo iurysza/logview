@@ -721,7 +721,7 @@ The CLI owns the session lifetime. The attachment owns renderer resources, input
 
 The headless CLI emits one `HeadlessOutput` JSON line after `sourceDone`. Diagnostics use stderr. It does not dump an entire retained history into the final snapshot. Test scenarios subscribe or call `snapshot()` for intermediate behavior.
 
-### Future classifier contract: specification only
+### Classifier contract
 
 ```ts
 type SemanticQuery = Readonly<{
@@ -774,7 +774,7 @@ interface LogClassifier {
 
 A relevance value is finite and lies in `[0, 1]`. A valid response covers each requested event exactly once, by ID, regardless of response order. Unknown IDs, duplicates, missing IDs, or invalid values invalidate the response. The caller leaves the batch unclassified rather than hiding its events.
 
-This contract is not a Jev SDK API. It is the application's later port. It remains in this specification until the semantic-filter milestone; do not create unused V1 runtime modules for it.
+This contract is the application's classifier port. The Jev adapter lives in `packages/engine/src/adapters/jev.ts`. Headless tests inject a fake `LogClassifier` and must not contact TypeSafe.
 
 ## Boundaries and Adapters
 
@@ -792,6 +792,8 @@ This contract is not a Jev SDK API. It is the application's later port. It remai
 Package direction is `core ← engine ← CLI` and `core ← TUI → engine`. Core has no Bun-specific or OpenTUI imports. Engine adapters can use Bun APIs but do not import the TUI. Only the TUI package depends on `@opentui/core`.
 
 The CLI chooses the mode before loading an adapter. Live and replay with a TUI dynamically load the TUI package. `record`, `--headless`, and all headless tests never load that package, including through an index barrel.
+
+Live and replay read optional `logview.json` from the working directory, or `--config PATH`. Flags override the file. `TYPESAFE_API_KEY` stays in the environment.
 
 Keep entrypoints separate: `logview/core`, `logview/engine`, and `logview/tui`. Names are provisional local package names, not claims about registry availability.
 
@@ -1039,6 +1041,7 @@ No existing files are changed or deleted because no target repository was suppli
 | New file | Responsibility |
 |---|---|
 | `packages/cli/src/main.ts` | Argument validation, subcommand selection, and deferred TUI loading. |
+| `packages/cli/src/config.ts` | `logview.json` schema, file load, and flag overlay. |
 | `packages/cli/src/headless.ts` | `HeadlessOutput` and replay or live session without terminal setup. |
 | `packages/cli/src/record.ts` | `record` command arguments and recorder lifecycle. |
 | `packages/tui/src/app.ts` | `attachTui`, renderer lifecycle, subscription, and normalized input forwarding. |

@@ -66,7 +66,8 @@ export function formatFilter(snapshot: SessionSnapshot): string {
 	const level = filter.minLevel ? `${filter.minLevel}+` : "ALL";
 	const tag = filter.tag ? `tag:${filter.tag}` : "tag:*";
 	const pid = filter.pid === null ? "pid:*" : `pid:${filter.pid}`;
-	const text = filter.text ? `/ ${filter.text}` : "/";
+	const semantic = snapshot.semantic !== null && filter.text.length > 0;
+	const text = filter.text ? `${semantic ? "~" : "/"} ${filter.text}` : "/";
 
 	return `${level}   ${tag}   ${pid}   ${text}`;
 }
@@ -86,6 +87,11 @@ export function formatFooter(snapshot: SessionSnapshot): string {
 	const shown = snapshot.stats.matchedEvents;
 	const buffered = snapshot.stats.retainedEvents;
 
+	const semantic =
+		snapshot.semantic && snapshot.semantic.queryText.length > 0
+			? ` · ${snapshot.semantic.classifiedEvents} classified · ${snapshot.semantic.pendingEvents} pending`
+			: "";
+
 	const unseen =
 		snapshot.view.mode === "browse" && snapshot.view.newSincePause > 0
 			? ` · ${snapshot.view.newSincePause} unseen`
@@ -93,7 +99,7 @@ export function formatFooter(snapshot: SessionSnapshot): string {
 
 	const mode = modeLabel(snapshot).split(" • ")[0] ?? "LIVE";
 
-	return `${mode}   ${shown}/${buffered} shown${unseen}${extra}    ${formatHints()}`;
+	return `${mode}   ${shown}/${buffered} shown${unseen}${semantic}${extra}    ${formatHints()}`;
 }
 
 function splitEnds(left: string, right: string, columns: number): string {
@@ -144,7 +150,7 @@ function paintFilterLine(
 	const levelText = filter.minLevel ? `${filter.minLevel}+` : "ALL";
 	const tagTextValue = filter.tag ? `tag:${filter.tag}` : "tag:*";
 	const pidText = filter.pid === null ? "pid:*" : `pid:${filter.pid}`;
-	const searchText = filter.text ? `/ ${filter.text}` : "/";
+	const searchText = filter.text ? `${snapshot.semantic && filter.text ? "~" : "/"} ${filter.text}` : "/";
 	const level = paintChrome(levelText, filter.minLevel ? MOCHA.yellow : MOCHA.overlay2, style);
 	const tag = paintChrome(tagTextValue, filter.tag ? MOCHA.green : MOCHA.overlay2, style);
 	const pid = paintChrome(pidText, filter.pid === null ? MOCHA.overlay2 : MOCHA.teal, style);
@@ -166,7 +172,32 @@ function inspectWidth(columns: number): number {
 	return Math.min(48, Math.max(32, Math.floor(columns * 0.36)));
 }
 
-function inspectLines(event: LogEvent | null, width: number, height: number): string[] {
+function selectedHeaderRow(snapshot: SessionSnapshot): SessionSnapshot["rows"][number] | undefined {
+	for (const row of snapshot.rows) {
+		if (row.id === snapshot.view.selectedId && row.kind === "header") return row;
+	}
+
+	return undefined;
+}
+
+function classificationLabel(row: SessionSnapshot["rows"][number] | undefined): string | null {
+	if (!row || row.classification.kind === "none") return null;
+
+	if (row.classification.kind === "scored") {
+		return `Jev ${row.classification.relevance.toFixed(2)}`;
+	}
+
+	if (row.classification.kind === "pending") return "Jev pending";
+
+	return `Jev ${row.classification.reason}`;
+}
+
+function inspectLines(
+	event: LogEvent | null,
+	width: number,
+	height: number,
+	classification: string | null = null,
+): string[] {
 	const actions = ["t filter tag", "p filter pid", "Esc close"];
 	const content: string[] = [];
 
@@ -184,6 +215,11 @@ function inspectLines(event: LogEvent | null, width: number, height: number): st
 			content.push(sanitizeDisplay(messageText(event.rawText, event.metadata.message)));
 		} else {
 			content.push(sanitizeDisplay(event.rawText));
+		}
+
+		if (classification) {
+			content.push("");
+			content.push(classification);
 		}
 
 		if (event.continuations.length > 0) {
@@ -222,7 +258,7 @@ function helpLines(width: number): string[] {
 		"G / End      jump to end",
 		"Home         oldest",
 		"Enter        inspect event",
-		"/            search text",
+		"/            text filter (Jev when enabled)",
 		"f            filter editor",
 		"t / p        from inspect: filter tag or pid",
 		"?            this help",
@@ -323,15 +359,22 @@ function layoutLines(
 	const wideInspect = inspectOpen && columns >= INSPECT_WIDE_COLUMNS;
 	const logWidth = wideInspect ? Math.max(1, columns - inspectWidth(columns) - 1) : columns;
 	let body = paintLogRows(snapshot.rows, logWidth, viewport, style);
+	const selectedRow = selectedHeaderRow(snapshot);
+	const classification = classificationLabel(selectedRow);
 
 	if (helpOpen) {
 		body = fillPane(helpLines(columns), viewport, columns, style);
 	} else if (inspectOpen && !wideInspect) {
-		body = fillPane(inspectLines(snapshot.selectedEvent, columns, viewport), viewport, columns, style);
+		body = fillPane(
+			inspectLines(snapshot.selectedEvent, columns, viewport, classification),
+			viewport,
+			columns,
+			style,
+		);
 	} else if (wideInspect) {
 		body = splitPane(
 			body,
-			inspectLines(snapshot.selectedEvent, inspectWidth(columns), viewport),
+			inspectLines(snapshot.selectedEvent, inspectWidth(columns), viewport, classification),
 			columns,
 			style,
 		);

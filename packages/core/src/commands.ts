@@ -62,6 +62,14 @@ export type RowSpan = Readonly<{
 
 export type RowKind = "header" | "continuation" | "more";
 
+export type ClassificationMark =
+	| { kind: "none" }
+	| { kind: "pending" }
+	| { kind: "scored"; relevance: number }
+	| { kind: "unknown"; reason: "unsupported" | "too-large" | "failed" | "skipped" };
+
+export const NONE_CLASSIFICATION: ClassificationMark = { kind: "none" };
+
 export type ViewRow = Readonly<{
 	id: EventId;
 	selected: boolean;
@@ -69,4 +77,5 @@ export type ViewRow = Readonly<{
 	kind: RowKind;
 	spans: readonly RowSpan[];
 	clipped: boolean;
+	classification: ClassificationMark;
 }>;
