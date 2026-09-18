@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { openScenario } from "../../../tests/support/scenario.ts";
+import { openScenario, tick } from "../../../tests/support/scenario.ts";
 
 describe("headless session", () => {
 	test("the PRD acceptance scenario: tail, browse, eviction, filter, resume", async () => {
@@ -94,6 +94,26 @@ describe("headless session", () => {
 		snap = scenario.session.snapshot();
 		expect(snap.view.mode).toBe("tail");
 		expect(snap.view.selectedId).toBe(9);
+
+		await scenario.finish();
+		await scenario.session.stop();
+	});
+
+	test("attaches unmatched lines to the previous event", async () => {
+		const scenario = await openScenario({ maxEvents: 20, rows: 16, columns: 100 });
+		await scenario.deliver([1], () => ({ level: "E", message: "failed" }));
+		scenario.source.pushLine("\tat com.example.App.crash(App.java:32)", 2);
+		scenario.source.pushLine("not a header line", 3);
+		await tick(scenario.scheduler);
+
+		const snap = scenario.session.snapshot();
+		expect(snap.stats.admittedEvents).toBe(1);
+		expect(snap.stats.unparsedEvents).toBe(2);
+		expect(snap.selectedEvent?.continuations).toEqual([
+			"\tat com.example.App.crash(App.java:32)",
+			"not a header line",
+		]);
+		expect(snap.rows.some((row) => row.kind === "continuation")).toBe(true);
 
 		await scenario.finish();
 		await scenario.session.stop();

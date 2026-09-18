@@ -40,7 +40,7 @@ The interface remains responsive while logs arrive. Resource limits and overload
 
 ## Non-Goals
 
-Do not implement Jev integration, Rust, an engine worker, IPC, generic plugins, session diffing, pattern clustering, package-to-PID tracking, automatic reconnect, arbitrary Logcat format detection, multiline-event reconstruction, regex search, or variable-height rows in V1.
+Do not implement Jev integration, Rust, an engine worker, IPC, generic plugins, session diffing, pattern clustering, package-to-PID tracking, automatic reconnect, arbitrary Logcat format detection, regex search, or variable-height wrapped rows. Multiline continuation grouping is in scope: unmatched logcat lines attach to the previous event.
 
 Do not implement a mock copy of the parser, history, navigation engine, or filter engine. Tests use production logic and replace only external effects.
 

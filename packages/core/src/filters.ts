@@ -135,7 +135,13 @@ export function matches(event: LogEvent, filter: PreparedFilter): boolean {
 	}
 
 	if (foldedText.length > 0) {
-		if (!foldText(event.rawText).includes(foldedText)) return false;
+		if (foldText(event.rawText).includes(foldedText)) return true;
+
+		for (const line of event.continuations) {
+			if (foldText(line).includes(foldedText)) return true;
+		}
+
+		return false;
 	}
 
 	return true;

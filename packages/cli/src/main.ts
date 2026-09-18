@@ -1,4 +1,4 @@
-import { EMPTY_FILTER, err, ok, type FilterSpec, type Result } from "@logview/core";
+import { EMPTY_FILTER, err, ok, type FilterSpec, type Result, type SourceKind } from "@logview/core";
 import {
 	createAdbSource,
 	createProcessRunner,
@@ -262,9 +262,13 @@ function sessionFromFlags(flags: {
 	maxEvents: number | null;
 	filter: FilterSpec;
 	sessionId: string;
+	sourceKind: SourceKind;
+	label: string;
 }): ReturnType<typeof defaultSessionOptions> {
 	const options = defaultSessionOptions({
 		sessionId: flags.sessionId,
+		sourceKind: flags.sourceKind,
+		label: flags.label,
 		columns: flags.columns,
 		rows: flags.rows,
 		initialFilter: flags.filter,
@@ -276,6 +280,13 @@ function sessionFromFlags(flags: {
 		...options,
 		maxEvents: flags.maxEvents,
 	};
+}
+
+function recordingLabel(path: string): string {
+	const parts = path.split(/[/\\]/);
+	const last = parts[parts.length - 1];
+
+	return last && last.length > 0 ? last : path;
 }
 
 async function attachOrHeadless(session: Session, headless: boolean): Promise<number> {
@@ -347,10 +358,15 @@ export async function main(argv = process.argv): Promise<number> {
 			{ processes: createProcessRunner(), scheduler },
 		);
 
-		const created = createSession(sessionFromFlags({ ...request, sessionId: `live-${Date.now()}` }), {
-			source,
-			scheduler,
-		});
+		const created = createSession(
+			sessionFromFlags({
+				...request,
+				sessionId: `live-${Date.now()}`,
+				sourceKind: "live",
+				label: request.serial ?? "adb",
+			}),
+			{ source, scheduler },
+		);
 
 		if (!created.ok) {
 			process.stderr.write(`${created.error.message}\n`);
@@ -372,10 +388,15 @@ export async function main(argv = process.argv): Promise<number> {
 		return 2;
 	}
 
-	const created = createSession(sessionFromFlags({ ...request, sessionId: `replay-${request.path}` }), {
-		source: replay.value,
-		scheduler,
-	});
+	const created = createSession(
+		sessionFromFlags({
+			...request,
+			sessionId: `replay-${request.path}`,
+			sourceKind: "replay",
+			label: recordingLabel(request.path),
+		}),
+		{ source: replay.value, scheduler },
+	);
 
 	if (!created.ok) {
 		process.stderr.write(`${created.error.message}\n`);

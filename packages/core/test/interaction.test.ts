@@ -58,4 +58,22 @@ describe("reduceInteraction", () => {
 		const quit = reduceInteraction(open.state, { kind: "key", key: "c", ctrl: true, shift: false }, EMPTY_FILTER);
 		expect(quit.quit).toBe(true);
 	});
+
+	test("Enter opens inspect and t filters the selected tag", () => {
+		const opened = reduceInteraction(LIST_FOCUS, { kind: "key", key: "enter", ctrl: false, shift: false }, EMPTY_FILTER);
+		expect(opened.state.focus).toBe("inspect");
+
+		const filtered = reduceInteraction(
+			opened.state,
+			{ kind: "key", key: "t", ctrl: false, shift: false },
+			EMPTY_FILTER,
+			{ tag: "Database", pid: 4321 },
+		);
+
+		expect(filtered.state.focus).toBe("list");
+		expect(filtered.command).toEqual({
+			kind: "set-filter",
+			filter: { minLevel: null, tag: "Database", pid: null, text: "" },
+		});
+	});
 });

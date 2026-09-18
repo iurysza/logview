@@ -4,6 +4,7 @@ import {
 	type Session,
 	type SessionSnapshot,
 } from "@logview/engine";
+import type { LogLevel } from "@logview/core";
 import { ManualScheduler } from "./manual-scheduler.ts";
 import { ScriptedSource } from "./scripted-source.ts";
 import { threadtimeLine } from "./log-lines.ts";
@@ -12,7 +13,7 @@ export type Scenario = {
 	session: Session;
 	source: ScriptedSource;
 	scheduler: ManualScheduler;
-	deliver(ids: readonly number[], extra?: (id: number) => { message?: string }): Promise<void>;
+	deliver(ids: readonly number[], extra?: (id: number) => { message?: string; level?: LogLevel }): Promise<void>;
 	finish(): Promise<void>;
 	waitUntil(predicate: (snapshot: SessionSnapshot) => boolean): Promise<SessionSnapshot>;
 };
