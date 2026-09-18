@@ -1,0 +1,24 @@
+name: UI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  terminal-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run test:ui
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-failure-evidence
+          path: generated/ui
+          if-no-files-found: ignore

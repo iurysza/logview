@@ -104,9 +104,19 @@ bun run logview replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --sp
 bun run test:tui
 ```
 
-`test:tui` covers chrome, key decoding, the bounded row pool, and a PTY smoke that paints the session, resizes the terminal, and sends `↑`, Enter, `G`, and `q`.
+`test:tui` covers chrome, key decoding, the bounded row pool, public-`Session` state transitions, and real PTY scenarios. The PTY scenarios start the CLI with the sanitized fixture. They verify replay navigation, inspector layouts at 120 and 119 columns, help, burst filter input, zero matches, 48-column chrome, the minimum-size warning, highlighting, `NO_COLOR`, quit, exit status, and terminal restoration.
 
-The TUI inherits the terminal background and uses **Catppuccin Mocha** for accents. Header/footer stay fixed. Messages get Tailspin-style highlights after control characters are sanitized. Selection uses a `▸` marker and a full-row fill. Enter inspects the selected event. Set `NO_COLOR=1` for a plain dump.
+Use the pinned `@kitlangton/terminal-control@0.4.1` workflow for visual checks:
+
+```sh
+bun run test:ui
+bun run ui:verify --scenario inspect --out generated/ui/inspect
+bun run ui:update --scenario inspect
+```
+
+`ui:verify` reads the committed styled-cell baseline. It always saves the final PNG, visible text, terminal cells, compact styled snapshot, and metadata to `--out`. Missing or changed baselines fail and save expected cells plus a property-level diff. It never changes a baseline. Run `ui:update` only after you review the generated PNGs and snapshot diff. `ui:update` is the only command that writes `packages/tui/test/baselines/`. Generated evidence stays under the ignored `generated/ui/` directory.
+
+The TUI inherits the terminal background and uses **Catppuccin Mocha** for accents. Header and footer stay fixed. Messages get Tailspin-style highlights after control characters are sanitized. Selection uses a `▸` marker and a full-row fill. Enter inspects the selected event. Set `NO_COLOR=1` for a plain dump.
 
 ## Fixtures
 
@@ -144,7 +154,10 @@ Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or
 |---|---|
 | `bun run test:headless` | anti-slop + headless tests |
 | `bun run test:adapters` | process, recording, sanitized fixture, and live-ADB stub tests |
-| `bun run test:tui` | TUI chrome, keys, and PTY smoke |
+| `bun run test:tui` | TUI chrome, state, and real-PTY tests |
+| `bun run test:ui` | Styled-baseline policy, public-`Session` state, and real-PTY UI scenarios |
+| `bun run ui:verify --scenario NAME --out PATH` | Verify one named UI scenario and save review evidence |
+| `bun run ui:update --scenario NAME` | Explicitly replace one scenario's reviewed styled-cell baseline |
 | `bun run typecheck` | `tsc --noEmit` |
 | `bun run check` | lint + typecheck + headless tests |
 | `bun run bench:headless` | fixed-seed ingest, burst, and filter measurement |

@@ -19,6 +19,6 @@
       "@logview/tui": ["./packages/tui/src/app.ts"]
     }
   },
-  "include": ["packages/**/*.ts", "tests/**/*.ts", "bench/**/*.ts"],
+  "include": ["packages/**/*.ts", "tests/**/*.ts", "bench/**/*.ts", "tools/**/*.ts"],
   "exclude": ["node_modules", "tools/oxlint/anti-slop"]
 }

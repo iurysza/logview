@@ -111,23 +111,70 @@ function splitEnds(left: string, right: string, columns: number): string {
 	return `${leftFitted}${" ".repeat(gap)}${right}`;
 }
 
+function paintStatusLeft(
+	fitted: string,
+	snapshot: SessionSnapshot,
+	style: PaintStyle,
+): string {
+	const segments: ReadonlyArray<Readonly<{ text: string; color: Rgb }>> = [
+		{ text: "logview", color: MOCHA.subtext1 },
+		{ text: "   ", color: MOCHA.overlay0 },
+		{ text: modeLabel(snapshot), color: modeColor(snapshot) },
+		{ text: "   ", color: MOCHA.overlay0 },
+		{ text: snapshot.label, color: MOCHA.overlay1 },
+	];
+
+	let offset = 0;
+	let out = "";
+
+	for (const segment of segments) {
+		if (offset >= fitted.length) break;
+
+		const available = fitted.slice(offset);
+
+		if (available.startsWith(segment.text)) {
+			out += paintChrome(segment.text, segment.color, style);
+			offset += segment.text.length;
+			continue;
+		}
+
+		let matched = 0;
+
+		while (
+			matched < segment.text.length &&
+			matched < available.length &&
+			available[matched] === segment.text[matched]
+		) {
+			matched += 1;
+		}
+
+		if (matched > 0) {
+			out += paintChrome(available.slice(0, matched), segment.color, style);
+			offset += matched;
+		}
+
+		break;
+	}
+
+	if (offset < fitted.length) out += paintChrome(fitted.slice(offset), MOCHA.overlay1, style);
+
+	return out;
+}
+
 function paintStatus(snapshot: SessionSnapshot, columns: number, style: PaintStyle): string {
 	const right = `${snapshot.stats.retainedEvents} events`;
-	const plain = splitEnds(formatStatus(snapshot), right, columns);
+	const leftPlain = formatStatus(snapshot);
+	const plain = splitEnds(leftPlain, right, columns);
 
 	if (style === "plain") return plain;
 
-	const mode = modeLabel(snapshot);
-	const title = paintChrome("logview", MOCHA.subtext1, style);
-	const sep = paintChrome("   ", MOCHA.overlay0, style);
-	const modePainted = paintChrome(mode, modeColor(snapshot), style);
-	const label = paintChrome(snapshot.label, MOCHA.overlay1, style);
+	const rightWidth = displayWidth(right);
+	const leftBudget = Math.max(0, columns - rightWidth - 1);
+	const leftFitted = padToWidth(leftPlain, leftBudget);
+	const gap = Math.max(1, columns - displayWidth(leftFitted) - rightWidth);
 	const count = paintChrome(right, MOCHA.overlay1, style);
-	const left = `${title}${sep}${modePainted}${sep}${label}`;
-	const leftPlain = `logview   ${mode}   ${snapshot.label}`;
-	const gap = Math.max(1, columns - displayWidth(leftPlain) - displayWidth(right));
 
-	return `${left}${" ".repeat(gap)}${count}`;
+	return `${paintStatusLeft(leftFitted, snapshot, style)}${" ".repeat(gap)}${count}`;
 }
 
 function paintFilterLine(
@@ -413,44 +460,108 @@ type KeyCommand = Readonly<{
 	shift: boolean;
 }>;
 
-function decodeChunk(chunk: Uint8Array | string): string {
-	if (chunk instanceof Uint8Array) return new TextDecoder().decode(chunk);
+export type DecodedTerminalInput = Readonly<{
+	keys: readonly KeyCommand[];
+	rest: string;
+}>;
 
-	return chunk;
+const PLAIN_KEY = { ctrl: false, shift: false } as const;
+
+const ESCAPE_SEQUENCES: ReadonlyArray<readonly [string, KeyCommand]> = [
+	["\u001b[5~", { key: "pageup", ...PLAIN_KEY }],
+	["\u001b[6~", { key: "pagedown", ...PLAIN_KEY }],
+	["\u001b[1~", { key: "home", ...PLAIN_KEY }],
+	["\u001b[4~", { key: "end", ...PLAIN_KEY }],
+	["\u001b[Z", { key: "tab", ctrl: false, shift: true }],
+	["\u001b[A", { key: "up", ...PLAIN_KEY }],
+	["\u001b[B", { key: "down", ...PLAIN_KEY }],
+	["\u001b[H", { key: "home", ...PLAIN_KEY }],
+	["\u001b[F", { key: "end", ...PLAIN_KEY }],
+];
+
+const ESCAPE_SEQUENCE_DELAY_MS = 25;
+
+function matchNextKey(
+	slice: string,
+	deferStandaloneEscape: boolean,
+): Readonly<{ key: KeyCommand; size: number }> | "incomplete" {
+	if (slice.startsWith("\u0003")) return { key: { key: "c", ctrl: true, shift: false }, size: 1 };
+
+	if (slice.startsWith("\r") || slice.startsWith("\n")) return { key: { key: "enter", ...PLAIN_KEY }, size: 1 };
+
+	if (slice.startsWith("\t")) return { key: { key: "tab", ...PLAIN_KEY }, size: 1 };
+
+	if (slice.startsWith("\u007f") || slice.startsWith("\b")) {
+		return { key: { key: "backspace", ...PLAIN_KEY }, size: 1 };
+	}
+
+	if (slice.startsWith("\u001b")) {
+		if (slice === "\u001b") return deferStandaloneEscape ? "incomplete" : { key: { key: "escape", ...PLAIN_KEY }, size: 1 };
+
+		for (const [sequence, key] of ESCAPE_SEQUENCES) {
+			if (slice.startsWith(sequence)) return { key, size: sequence.length };
+			if (sequence.startsWith(slice)) return "incomplete";
+		}
+
+		return { key: { key: "escape", ...PLAIN_KEY }, size: 1 };
+	}
+
+	return { key: { key: slice[0]!, ...PLAIN_KEY }, size: 1 };
 }
 
-function keyFromText(text: string): KeyCommand | null {
-	if (text === "\u0003") return { key: "c", ctrl: true, shift: false };
+export function decodeTerminalInput(
+	text: string,
+	options: Readonly<{ deferStandaloneEscape?: boolean }> = {},
+): DecodedTerminalInput {
+	const keys: KeyCommand[] = [];
+	let offset = 0;
 
-	if (text === "\u001b") return { key: "escape", ctrl: false, shift: false };
+	while (offset < text.length) {
+		const matched = matchNextKey(text.slice(offset), options.deferStandaloneEscape === true);
 
-	if (text === "\r" || text === "\n") return { key: "enter", ctrl: false, shift: false };
+		if (matched === "incomplete") return { keys, rest: text.slice(offset) };
 
-	if (text === "\t") return { key: "tab", ctrl: false, shift: false };
+		keys.push(matched.key);
+		offset += matched.size;
+	}
 
-	if (text === "\u001b[Z") return { key: "tab", ctrl: false, shift: true };
+	return { keys, rest: "" };
+}
 
-	if (text === "\u007f" || text === "\b") return { key: "backspace", ctrl: false, shift: false };
+export class TerminalInputDecoder {
+	private readonly utf8 = new TextDecoder();
+	private pending = "";
 
-	if (text === "\u001b[A") return { key: "up", ctrl: false, shift: false };
+	push(chunk: Uint8Array | string): DecodedTerminalInput {
+		this.pending += chunk instanceof Uint8Array ? this.utf8.decode(chunk, { stream: true }) : chunk;
+		const decoded = decodeTerminalInput(this.pending, { deferStandaloneEscape: true });
+		this.pending = decoded.rest;
 
-	if (text === "\u001b[B") return { key: "down", ctrl: false, shift: false };
+		return decoded;
+	}
 
-	if (text === "\u001b[5~") return { key: "pageup", ctrl: false, shift: false };
+	hasPending(): boolean {
+		return this.pending.length > 0;
+	}
 
-	if (text === "\u001b[6~") return { key: "pagedown", ctrl: false, shift: false };
+	flush(): readonly KeyCommand[] {
+		const pending = this.pending;
+		this.pending = "";
 
-	if (text === "\u001b[H" || text === "\u001b[1~") return { key: "home", ctrl: false, shift: false };
+		if (!pending.startsWith("\u001b")) return decodeTerminalInput(pending).keys;
 
-	if (text === "\u001b[F" || text === "\u001b[4~") return { key: "end", ctrl: false, shift: false };
+		const tail = decodeTerminalInput(pending.slice(1)).keys;
 
-	if (text.length === 1) return { key: text, ctrl: false, shift: false };
-
-	return null;
+		return [{ key: "escape", ...PLAIN_KEY }, ...tail];
+	}
 }
 
 export function decodeTerminalKey(text: string): KeyCommand | null {
-	return keyFromText(text);
+	const decoded = decodeTerminalInput(text);
+
+	if (decoded.rest.length > 0 || decoded.keys.length !== 1) return null;
+
+	return decoded.keys[0] ?? null;
 }
 
 function selectionOf(snapshot: SessionSnapshot): InteractionSelection {
@@ -475,6 +586,8 @@ export async function attachTui(
 	let lastRows = -1;
 	let resizeQueued = false;
 	let painting = false;
+	let inputTimer: ReturnType<typeof setTimeout> | null = null;
+	const input = new TerminalInputDecoder();
 
 	const done = new Promise<void>((resolve) => {
 		resolveDone = resolve;
@@ -534,26 +647,46 @@ export async function attachTui(
 
 	paint();
 
+	const applyKeys = (keys: readonly KeyCommand[]): void => {
+		for (const mapped of keys) {
+			if (closed) return;
+
+			const snapshot = session.snapshot();
+			const result = reduceInteraction(
+				interaction,
+				{ kind: "key", key: mapped.key, ctrl: mapped.ctrl, shift: mapped.shift },
+				snapshot.activeFilter,
+				selectionOf(snapshot),
+			);
+
+			interaction = result.state;
+
+			if (result.command) session.dispatch(result.command);
+			else paint();
+
+			if (result.quit) {
+				void shutdown();
+				return;
+			}
+		}
+	};
+
+	const flushPendingInput = (): void => {
+		inputTimer = null;
+		applyKeys(input.flush());
+	};
+
 	const onData = (chunk: Uint8Array | string): void => {
-		const mapped = keyFromText(decodeChunk(chunk));
+		if (inputTimer !== null) {
+			clearTimeout(inputTimer);
+			inputTimer = null;
+		}
 
-		if (!mapped) return;
+		applyKeys(input.push(chunk).keys);
 
-		const snapshot = session.snapshot();
-
-		const result = reduceInteraction(
-			interaction,
-			{ kind: "key", key: mapped.key, ctrl: mapped.ctrl, shift: mapped.shift },
-			snapshot.activeFilter,
-			selectionOf(snapshot),
-		);
-
-		interaction = result.state;
-
-		if (result.command) session.dispatch(result.command);
-		else paint();
-
-		if (result.quit) void shutdown();
+		if (input.hasPending() && !closed) {
+			inputTimer = setTimeout(flushPendingInput, ESCAPE_SEQUENCE_DELAY_MS);
+		}
 	};
 
 	const onResize = (): void => {
@@ -576,6 +709,7 @@ export async function attachTui(
 		if (closed) return;
 
 		closed = true;
+		if (inputTimer !== null) clearTimeout(inputTimer);
 		unsubscribe();
 		process.stdin.off("data", onData);
 		process.stdout.off("resize", onResize);

@@ -9,5 +9,8 @@
   "dependencies": {
     "@logview/core": "workspace:*",
     "@logview/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@kitlangton/terminal-control": "0.4.1"
   }
 }

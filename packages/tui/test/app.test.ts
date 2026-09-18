@@ -3,7 +3,9 @@ import { INSPECT_FOCUS, LIST_FOCUS, NONE_CLASSIFICATION, displayWidth, type LogE
 import type { SessionSnapshot } from "@logview/engine";
 import { EMPTY_FILTER, EMPTY_VIEW } from "@logview/core";
 import {
+	decodeTerminalInput,
 	decodeTerminalKey,
+	TerminalInputDecoder,
 	formatFilter,
 	formatFooter,
 	formatHints,
@@ -72,6 +74,10 @@ const inspectSnapshot: SessionSnapshot = {
 	stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 15 },
 };
 
+function visibleText(text: string): string {
+	return text.replace(/\u001b\[[0-9;]*m/g, "");
+}
+
 describe("tui chrome", () => {
 	test("formats status, filters, footer, and hints without a renderer", () => {
 		expect(formatStatus(snapshot)).toContain("REPLAY • END");
@@ -88,6 +94,18 @@ describe("tui chrome", () => {
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(72);
 		}
+	});
+
+	test("ansi status fits 48 columns like the plain branch", () => {
+		const plain = layoutFrame(inspectSnapshot, LIST_FOCUS, 48, 12, "plain");
+		const ansi = layoutFrame(inspectSnapshot, LIST_FOCUS, 48, 12, "ansi");
+		const visible = visibleText(ansi[0]!);
+
+		expect(displayWidth(plain[0]!)).toBe(48);
+		expect(displayWidth(visible)).toBe(48);
+		expect(visible).toBe(plain[0]!);
+		expect(visible.startsWith("logview")).toBe(true);
+		expect(visible).toContain("15 events");
 	});
 
 	test("Enter inspect is a full-viewport overlay on a narrow frame", () => {
@@ -172,5 +190,43 @@ describe("tui chrome", () => {
 		expect(decodeTerminalKey("\u0003")).toEqual({ key: "c", ctrl: true, shift: false });
 		expect(decodeTerminalKey("\t")).toEqual({ key: "tab", ctrl: false, shift: false });
 		expect(decodeTerminalKey("\u001b")).toEqual({ key: "escape", ctrl: false, shift: false });
+	});
+
+	test("decodes a multi-key burst in one chunk", () => {
+		const decoded = decodeTerminalInput("Database");
+
+		expect(decoded.rest).toBe("");
+		expect(decoded.keys.map((key) => key.key).join("")).toBe("Database");
+		expect(decoded.keys.every((key) => key.ctrl === false && key.shift === false)).toBe(true);
+	});
+
+	test("decodes an up-arrow when Escape and CSI bytes arrive separately", () => {
+		const decoder = new TerminalInputDecoder();
+		const first = decoder.push("\u001b");
+
+		expect(first.keys).toEqual([]);
+		expect(first.rest).toBe("\u001b");
+
+		const second = decoder.push("[A");
+		expect(second.keys).toEqual([{ key: "up", ctrl: false, shift: false }]);
+		expect(second.rest).toBe("");
+	});
+
+	test("keeps UTF-8 text split between stdin chunks", () => {
+		const decoder = new TerminalInputDecoder();
+		expect(decoder.push(new Uint8Array([0xc3])).keys).toEqual([]);
+		expect(decoder.push(new Uint8Array([0xa9])).keys).toEqual([
+			{ key: "é", ctrl: false, shift: false },
+		]);
+	});
+
+	test("flushes a standalone Escape after the sequence delay", () => {
+		const decoder = new TerminalInputDecoder();
+		decoder.push("\u001b");
+		expect(decoder.flush()).toEqual([{ key: "escape", ctrl: false, shift: false }]);
+		expect(decodeTerminalInput("\u001b")).toEqual({
+			keys: [{ key: "escape", ctrl: false, shift: false }],
+			rest: "",
+		});
 	});
 });

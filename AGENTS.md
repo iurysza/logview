@@ -20,3 +20,5 @@ Use these for design, implementation, review, and writing in this repo:
 - Drive behavior through the public `Session` API. Headless tests must not start ADB or load OpenTUI.
 - Public contracts stay those in `specs/2026-09-18-logview-technical-design.md`.
 - `bun run check` is the quality path: anti-slop lint, TypeScript, and headless tests.
+- For terminal UI changes, run `bun run test:ui` and `bun run ui:verify --scenario NAME --out generated/ui/NAME`. Inspect the saved PNG, text, cells, and metadata before changing a baseline. Only `bun run ui:update --scenario NAME` may write `packages/tui/test/baselines/`.
+- UI state tests use the public `Session` API with `ManualScheduler`. UI entrypoint, input, resize, quit, and exit checks use the pinned Terminal Control PTY. Do not add sleeps or inspect historical output to assert a visible screen.

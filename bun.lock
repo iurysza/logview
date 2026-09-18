@@ -49,6 +49,9 @@
         "@logview/core": "workspace:*",
         "@logview/engine": "workspace:*",
       },
+      "devDependencies": {
+        "@kitlangton/terminal-control": "0.4.1",
+      },
     },
   },
   "packages": {
@@ -59,6 +62,16 @@
     "@logview/engine": ["@logview/engine@workspace:packages/engine"],
 
     "@logview/tui": ["@logview/tui@workspace:packages/tui"],
+
+    "@kitlangton/terminal-control": ["@kitlangton/terminal-control@0.4.1", "", { "optionalDependencies": { "@kitlangton/terminal-control-darwin-arm64": "0.4.1", "@kitlangton/terminal-control-darwin-x64": "0.4.1", "@kitlangton/terminal-control-linux-arm64-gnu": "0.4.1", "@kitlangton/terminal-control-linux-x64-gnu": "0.4.1" }, "peerDependencies": { "vitest": ">=3.0.0" }, "optionalPeers": ["vitest"] }, "sha512-MffVhgzpei2dER2SJyvj5ZRZZaMabrUpQ9HdISuKkuGC9YaMyYR4wXvXFASZYdWyoMpZ6brhokJs9Mlu1QNEzQ=="],
+
+    "@kitlangton/terminal-control-darwin-arm64": ["@kitlangton/terminal-control-darwin-arm64@0.4.1", "", { "os": "darwin", "cpu": "arm64", "bin": { "termctrl": "bin/termctrl" } }, "sha512-KPvPbUIVaDm6mPT90i3hyaJjWlQaYmcklAUzTII33W7Q9yiMJ2rhtbGTfoQexEyZ+BOCxCKoCTINDxiUnypKIg=="],
+
+    "@kitlangton/terminal-control-darwin-x64": ["@kitlangton/terminal-control-darwin-x64@0.4.1", "", { "os": "darwin", "cpu": "x64", "bin": { "termctrl": "bin/termctrl" } }, "sha512-LsEN0z1VZDMHvVjzgLWyEEOXc1PCBNcInfOmp7u62ZbaqrBYV0ur429Gma0C/5IB+1aWKKSwfJG2OhptjWO+zQ=="],
+
+    "@kitlangton/terminal-control-linux-arm64-gnu": ["@kitlangton/terminal-control-linux-arm64-gnu@0.4.1", "", { "os": "linux", "cpu": "arm64", "bin": { "termctrl": "bin/termctrl" } }, "sha512-maYD0wOEh+qkZjM9jDuFGZPZn+qr6y7huhXhlfF8zDsFRlQSWPP07yv7igUH8hh6Ryp3COqHyLIiHPsu0LTgig=="],
+
+    "@kitlangton/terminal-control-linux-x64-gnu": ["@kitlangton/terminal-control-linux-x64-gnu@0.4.1", "", { "os": "linux", "cpu": "x64", "bin": { "termctrl": "bin/termctrl" } }, "sha512-5qgusRE1jUXYBeLM8xgiJgHxDAOjnF9fewQFb3JYVoANor6sf6hRcKKJQvbpHs72nNrD7R+kcQVd/Tj+Wckkgw=="],
 
     "@oxlint/binding-android-arm-eabi": ["@oxlint/binding-android-arm-eabi@1.83.0", "", { "os": "android", "cpu": "arm" }, "sha512-0yGY24EwsLk5YDe6F+VkmZyRHSwJDALa3nIrPpq7FXmp2lV2d0TzvBCGeZk+wgiULRGr5blhyr4QMp5KCXJUqA=="],
 
