@@ -118,12 +118,30 @@ describe("logview.json", () => {
 		const decoded = decodeConfigJson(JSON.stringify({ semantic: { threshold: 1.2 } }));
 
 		expect(decoded.ok).toBe(false);
+
+		if (decoded.ok) return;
+
+		expect(decoded.error.message).toBe("invalid config: Expected a number between 0 and 1, actual 1.2");
 	});
 
 	test("rejects unknown keys", () => {
 		const decoded = decodeConfigJson(JSON.stringify({ extra: true }));
 
 		expect(decoded.ok).toBe(false);
+
+		if (decoded.ok) return;
+
+		expect(decoded.error.message).toBe("invalid config: unknown key extra");
+	});
+
+	test("rejects invalid JSON", () => {
+		const decoded = decodeConfigJson("{ not json");
+
+		expect(decoded.ok).toBe(false);
+
+		if (decoded.ok) return;
+
+		expect(decoded.error.message).toBe("config is not valid JSON");
 	});
 
 	test("readConfigFile loads an explicit path and skips a missing default", async () => {

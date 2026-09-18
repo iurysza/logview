@@ -80,7 +80,21 @@ function configParseMessage(message: string): string {
 		return "config must not contain an API key; set TYPESAFE_API_KEY in the environment";
 	}
 
-	return `invalid config: ${message}`;
+	if (message.includes("JSON Parse error")) {
+		return "config is not valid JSON";
+	}
+
+	if (message.includes("is unexpected")) {
+		const key = message.match(/\["([^"]+)"\]/);
+
+		return key ? `invalid config: unknown key ${key[1]}` : "invalid config: unknown key";
+	}
+
+	const expected = message.match(/Expected [^\n]+, actual [^\n]+/);
+
+	if (expected) return `invalid config: ${expected[0]}`;
+
+	return "invalid config";
 }
 
 export function decodeConfigJson(text: string): Result<LogviewFile, ConfigError> {

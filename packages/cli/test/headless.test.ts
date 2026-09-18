@@ -118,6 +118,7 @@ describe("headless CLI", () => {
 		await writeFile(path, JSON.stringify({ semantic: { enabled: true } }));
 
 		const fixture = join(process.cwd(), "tests/fixtures/synthetic/hello.lvr.jsonl");
+
 		const code = await main([
 			"bun",
 			"logview",
