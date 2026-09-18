@@ -10,6 +10,7 @@ import {
 	prepareFilter,
 	projectRows,
 	requiresResize,
+	eventScreenRows,
 	materializeNavigation,
 	validateDimensions,
 	MAX_DECODED_SLICE_BYTES,
@@ -310,21 +311,30 @@ class SessionImpl implements Session {
 
 			if (parsed.kind === "control") continue;
 
+			if (parsed.metadata === null) {
+				const attached = this.attachContinuation(admitted, parsed.rawText, line.omittedBytes, parsed.invalidUtf8);
+
+				if (attached) continue;
+			}
+
 			if (!Number.isSafeInteger(this.nextEventId)) {
 				this.failSource("event id space exhausted");
 
 				return false;
 			}
 
+			const continuations: string[] = [];
+
 			const event: LogEvent = {
 				id: this.nextEventId,
 				sourceOffsetMs: this.lastStdoutOffsetMs,
 				rawText: parsed.rawText,
 				metadata: parsed.metadata,
+				continuations,
 				endedWithLf: line.endedWithLf,
 				omittedBytes: line.omittedBytes,
 				invalidUtf8: parsed.invalidUtf8,
-				chargeBytes: eventChargeBytes(parsed.rawText),
+				chargeBytes: eventChargeBytes(parsed.rawText, continuations),
 			};
 
 			this.nextEventId += 1;
@@ -334,6 +344,56 @@ class SessionImpl implements Session {
 		if (admitted.length > 0) this.commit(admitted);
 
 		return drain.lines.length >= this.options.maxLinesPerSlice || (this.eof && !this.queue.empty);
+	}
+
+	private attachContinuation(
+		admitted: LogEvent[],
+		rawText: string,
+		omittedBytes: number,
+		invalidUtf8: boolean,
+	): boolean {
+		const pending = admitted[admitted.length - 1];
+
+		if (pending) {
+			const continuations = [...pending.continuations, rawText];
+			admitted[admitted.length - 1] = {
+				...pending,
+				continuations,
+				omittedBytes: pending.omittedBytes + omittedBytes,
+				invalidUtf8: pending.invalidUtf8 || invalidUtf8,
+				chargeBytes: eventChargeBytes(pending.rawText, continuations),
+			};
+			this.unparsedEvents += 1;
+
+			return true;
+		}
+
+		const lastId = this.history.bounds().lastId;
+
+		if (lastId === null) return false;
+
+		const updated = this.history.appendContinuation(lastId, rawText, { omittedBytes, invalidUtf8 });
+
+		if (!updated) return false;
+
+		this.unparsedEvents += 1;
+		this.refreshMatch(updated);
+		this.bump();
+		this.schedulePublish();
+
+		return true;
+	}
+
+	private refreshMatch(event: LogEvent): void {
+		if (!matches(event, this.preparedActive)) return;
+
+		if (this.activeIndex.locate(event.id).exactRank === null) {
+			this.activeIndex.append([event.id]);
+		}
+
+		if (this.pendingJob) {
+			this.pendingJob.appendArrival(event.id, matches(event, this.pendingJob.prepared));
+		}
 	}
 
 	private commit(events: readonly LogEvent[]): void {
@@ -441,13 +501,22 @@ class SessionImpl implements Session {
 	private buildSnapshot(): SessionSnapshot {
 		const height = visibleLogRows(this.rows);
 		const topRank = this.view.topId === null ? 0 : (this.activeIndex.locate(this.view.topId).exactRank ?? 0);
-		const ids = height <= 0 ? [] : this.activeIndex.window(topRank, height);
 		const events: LogEvent[] = [];
+		let used = 0;
+		let rank = topRank;
 
-		for (const id of ids) {
+		while (rank < this.activeIndex.size && used < height) {
+			const id = this.activeIndex.at(rank);
+			rank += 1;
+
+			if (id === null) break;
+
 			const event = this.history.get(id);
 
-			if (event) events.push(event);
+			if (!event) continue;
+
+			events.push(event);
+			used += eventScreenRows(event);
 		}
 
 		const bounds = this.history.bounds();
@@ -457,6 +526,9 @@ class SessionImpl implements Session {
 		if (requiresResize(this.columns, this.rows)) notice = "resize-required";
 		else if (pending) notice = "applying-filter";
 		else if (this.historyExpired) notice = "history-expired";
+
+		const selectedEvent =
+			this.view.selectedId === null ? null : (this.history.get(this.view.selectedId) ?? null);
 
 		const stats: SessionStats = {
 			receivedBytes: this.receivedBytes,
@@ -475,6 +547,8 @@ class SessionImpl implements Session {
 
 		return {
 			sessionId: this.options.sessionId,
+			sourceKind: this.options.sourceKind,
+			label: this.options.label,
 			revision: this.revision,
 			source: this.sourceStatus,
 			sourceNotices: this.notices.slice(),
@@ -482,7 +556,8 @@ class SessionImpl implements Session {
 			activeFilterRevision: this.activeFilterRevision,
 			pendingFilter: pending ? pending.prepared.spec : null,
 			view: this.view,
-			rows: projectRows(events, this.view.selectedId, this.columns),
+			rows: projectRows(events, this.view.selectedId, this.columns, height),
+			selectedEvent,
 			stats,
 			notice,
 		};

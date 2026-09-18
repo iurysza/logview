@@ -17,9 +17,11 @@ import {
 	type ConfigurationError,
 	type FilterRevision,
 	type FilterSpec,
+	type LogEvent,
 	type Result,
 	type SessionCommand,
 	type SessionId,
+	type SourceKind,
 	type StartError,
 	type ViewRow,
 	type ViewState,
@@ -43,6 +45,8 @@ export type SessionStats = Readonly<{
 
 export type SessionSnapshot = Readonly<{
 	sessionId: SessionId;
+	sourceKind: SourceKind;
+	label: string;
 	revision: number;
 	source: SourceStatus;
 	sourceNotices: readonly SourceNotice[];
@@ -51,12 +55,15 @@ export type SessionSnapshot = Readonly<{
 	pendingFilter: FilterSpec | null;
 	view: ViewState;
 	rows: readonly ViewRow[];
+	selectedEvent: LogEvent | null;
 	stats: SessionStats;
 	notice: "history-expired" | "applying-filter" | "resize-required" | null;
 }>;
 
 export type SessionOptions = Readonly<{
 	sessionId: SessionId;
+	sourceKind: SourceKind;
+	label: string;
 	maxEvents: number;
 	maxHistoryChargeBytes: number;
 	maxQueuedBytes: number;
@@ -108,6 +115,8 @@ export function defaultSessionOptions(
 		columns: 80,
 		rows: 24,
 		initialFilter: EMPTY_FILTER,
+		sourceKind: "live",
+		label: overrides.sessionId,
 		...overrides,
 	};
 }

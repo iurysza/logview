@@ -16,6 +16,7 @@ function parsedEvent(raw: string) {
 		sourceOffsetMs: 0,
 		rawText: parsed.rawText,
 		metadata: parsed.metadata,
+		continuations: [],
 		endedWithLf: true,
 		omittedBytes: 0,
 		invalidUtf8: parsed.invalidUtf8,
@@ -72,5 +73,23 @@ describe("filters and interaction", () => {
 		expect(q.quit).toBe(false);
 
 		if (q.state.focus === "filters") expect(q.state.draft.text.endsWith("q")).toBe(true);
+	});
+
+	test("text filter matches continuation lines of a grouped event", () => {
+		const prepared = prepareFilter({ minLevel: null, tag: null, pid: null, text: "Store.lock" });
+		expect(prepared.ok).toBe(true);
+
+		if (!prepared.ok) return;
+
+		const parent = parsedEvent("1760000000.000001    12    12 W Database: Retry after lock timeout");
+
+		const grouped = {
+			...parent,
+			continuations: ["\tat com.example.db.Store.lock(Store.java:88)"],
+			chargeBytes: eventChargeBytes(parent.rawText, ["\tat com.example.db.Store.lock(Store.java:88)"]),
+		};
+
+		expect(matches(grouped, prepared.value)).toBe(true);
+		expect(matches(parent, prepared.value)).toBe(false);
 	});
 });

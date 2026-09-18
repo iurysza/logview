@@ -34,7 +34,7 @@ export const SANITIZED_LOGCAT = [
 
 export const SANITIZED_STDERR = "fake-adb: capture profile threadtime-epoch-usec-v1\n";
 
-export const SANITIZED_ADMITTED_EVENTS = 18;
+export const SANITIZED_ADMITTED_EVENTS = 15;
 
 export const SANITIZED_UNPARSED_EVENTS = 3;
 

@@ -79,9 +79,9 @@ bun run logview replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --sp
 bun run test:tui
 ```
 
-`test:tui` covers chrome, key decoding, the bounded row pool, and a PTY smoke that paints the session and sends `↑`, `G`, and `q`.
+`test:tui` covers chrome, key decoding, the bounded row pool, and a PTY smoke that paints the session, resizes the terminal, and sends `↑`, Enter, `G`, and `q`.
 
-The TUI uses **Catppuccin Mocha** for chrome and log rows. Message text gets Tailspin-style highlights (dates, numbers, keywords, URLs, IPs, UUIDs, paths, quotes, HTTP methods) mapped onto that palette. Selection still uses the `›` marker so it works without color. Set `NO_COLOR=1` for a plain dump.
+The TUI inherits the terminal background and uses **Catppuccin Mocha** for accents. Header/footer stay fixed. Messages get Tailspin-style highlights after control characters are sanitized. Selection uses a `▸` marker and a full-row fill. Enter inspects the selected event. Set `NO_COLOR=1` for a plain dump.
 
 ## Fixtures
 

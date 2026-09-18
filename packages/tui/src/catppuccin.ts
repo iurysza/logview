@@ -82,6 +82,12 @@ export function fgOn(fg: Rgb, bg: Rgb): CellStyle {
 	return { fg, bg, italic: false, bold: true };
 }
 
+export function styleOn(style: CellStyle, bg: Rgb | null): CellStyle {
+	if (bg === null || style.bg !== null) return style;
+
+	return { fg: style.fg, bg, italic: style.italic, bold: style.bold };
+}
+
 export const RESET = "\u001b[0m";
 
 export function rgbSgr(color: Rgb, kind: "fg" | "bg"): string {

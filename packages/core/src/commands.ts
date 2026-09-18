@@ -57,13 +57,16 @@ export const FILTER_FIELDS: readonly FilterField[] = ["minLevel", "tag", "pid", 
 
 export type RowSpan = Readonly<{
 	text: string;
-	role: "timestamp" | "level" | "tag" | "message" | "warning";
+	role: "timestamp" | "level" | "pid" | "tag" | "message" | "warning" | "gutter";
 }>;
+
+export type RowKind = "header" | "continuation" | "more";
 
 export type ViewRow = Readonly<{
 	id: EventId;
 	selected: boolean;
 	level: LogLevel | null;
+	kind: RowKind;
 	spans: readonly RowSpan[];
 	clipped: boolean;
 }>;

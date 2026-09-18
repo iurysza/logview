@@ -3,6 +3,7 @@ export type {
 	CommandError,
 	FilterField,
 	NavigationCause,
+	RowKind,
 	RowSpan,
 	SessionCommand,
 	StartError,
@@ -17,6 +18,9 @@ export {
 	displayWidth,
 	escapeCodePoint,
 	escapeDisplayText,
+	padToWidth,
+	sanitizeDisplay,
+	TAB_STOP,
 } from "./display-text.ts";
 
 export type { ClippedText, EscapedUnit } from "./display-text.ts";
@@ -43,6 +47,7 @@ export type {
 	PreparedFilter,
 	Result,
 	SessionId,
+	SourceKind,
 	TextSlice,
 	ViewState,
 } from "./types.ts";
@@ -74,9 +79,9 @@ export type { FrameStep, FramedLine, FramerState } from "./framing.ts";
 
 export { foldText, matches, parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
 
-export { LIST_FOCUS, reduceInteraction } from "./interaction.ts";
+export { LIST_FOCUS, INSPECT_FOCUS, HELP_FOCUS, EMPTY_SELECTION, reduceInteraction } from "./interaction.ts";
 
-export type { InteractionInput, InteractionResult, InteractionState } from "./interaction.ts";
+export type { InteractionInput, InteractionResult, InteractionSelection, InteractionState } from "./interaction.ts";
 
 export { parseLogcatLine, messageText, tagText } from "./logcat.ts";
 
@@ -92,4 +97,22 @@ export {
 
 export type { Location, NavigationFacts, NavigationPlan } from "./navigation.ts";
 
-export { formatTimestamp, logViewportHeight, projectRows, requiresResize, rowText } from "./projection.ts";
+export {
+	eventScreenRows,
+	fitRow,
+	formatTimestamp,
+	layoutColumns,
+	logViewportHeight,
+	markerFor,
+	MARKER_IDLE,
+	MARKER_SELECTED,
+	MARKER_WIDTH,
+	MAX_LIST_CONTINUATIONS,
+	projectEventRows,
+	projectRows,
+	requiresResize,
+	rowDisplayText,
+	rowText,
+} from "./projection.ts";
+
+export type { ColumnLayout } from "./projection.ts";

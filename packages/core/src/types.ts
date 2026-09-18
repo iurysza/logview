@@ -52,11 +52,14 @@ export type LogMetadata = Readonly<{
 	message: TextSlice;
 }>;
 
+export type SourceKind = "live" | "replay";
+
 export type LogEvent = Readonly<{
 	id: EventId;
 	sourceOffsetMs: number;
 	rawText: string;
 	metadata: LogMetadata | null;
+	continuations: readonly string[];
 	endedWithLf: boolean;
 	omittedBytes: number;
 	invalidUtf8: boolean;
@@ -128,8 +131,12 @@ export const MIN_TERMINAL_ROWS = 8;
 
 export const CHROME_ROWS = 3;
 
-export function eventChargeBytes(rawText: string): number {
-	return EVENT_CHARGE_OVERHEAD + 2 * rawText.length;
+export function eventChargeBytes(rawText: string, continuations: readonly string[] = []): number {
+	let chars = rawText.length;
+
+	for (const line of continuations) chars += line.length;
+
+	return EVENT_CHARGE_OVERHEAD + 2 * chars;
 }
 
 export function codePointCount(value: string): number {

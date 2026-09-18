@@ -5,12 +5,21 @@ import type { FilterSpec } from "./types.ts";
 
 export type InteractionState =
 	| { focus: "list" }
+	| { focus: "inspect" }
+	| { focus: "help" }
 	| {
 			focus: "filters";
 			field: FilterField;
 			draft: { minLevel: string; tag: string; pid: string; text: string };
 			error: CommandError | null;
 	  };
+
+export type InteractionSelection = Readonly<{
+	tag: string | null;
+	pid: number | null;
+}>;
+
+export const EMPTY_SELECTION: InteractionSelection = { tag: null, pid: null };
 
 export type InteractionInput =
 	| { kind: "key"; key: string; ctrl: boolean; shift: boolean }
@@ -23,6 +32,10 @@ export type InteractionResult = Readonly<{
 }>;
 
 export const LIST_FOCUS: InteractionState = { focus: "list" };
+
+export const INSPECT_FOCUS: InteractionState = { focus: "inspect" };
+
+export const HELP_FOCUS: InteractionState = { focus: "help" };
 
 type FilterDraft = Readonly<{
 	minLevel: string;
@@ -119,6 +132,7 @@ export function reduceInteraction(
 	state: InteractionState,
 	input: InteractionInput,
 	activeFilter: FilterSpec,
+	selection: InteractionSelection = EMPTY_SELECTION,
 ): InteractionResult {
 	if (input.kind === "edit-field") {
 		if (state.focus !== "filters") {
@@ -179,8 +193,58 @@ export function reduceInteraction(
 		return { state, command: null, quit: false };
 	}
 
+	if (state.focus === "inspect" || state.focus === "help") {
+		if (key === "escape" || key === "enter") {
+			return { state: LIST_FOCUS, command: null, quit: false };
+		}
+
+		if (state.focus === "inspect" && key === "t" && selection.tag) {
+			const spec: FilterSpec = { ...activeFilter, tag: selection.tag };
+			const prepared = prepareFilter(spec);
+
+			if (!prepared.ok) return { state, command: null, quit: false };
+
+			return { state: LIST_FOCUS, command: { kind: "set-filter", filter: prepared.value.spec }, quit: false };
+		}
+
+		if (state.focus === "inspect" && key === "p" && selection.pid !== null) {
+			const spec: FilterSpec = { ...activeFilter, pid: selection.pid };
+			const prepared = prepareFilter(spec);
+
+			if (!prepared.ok) return { state, command: null, quit: false };
+
+			return { state: LIST_FOCUS, command: { kind: "set-filter", filter: prepared.value.spec }, quit: false };
+		}
+
+		if (key === "q") {
+			return { state, command: null, quit: true };
+		}
+
+		if (key === "up" || key === "k") {
+			return { state, command: { kind: "move", delta: -1 }, quit: false };
+		}
+
+		if (key === "down" || key === "j") {
+			return { state, command: { kind: "move", delta: 1 }, quit: false };
+		}
+
+		if (key === "?") {
+			return { state: state.focus === "help" ? LIST_FOCUS : HELP_FOCUS, command: null, quit: false };
+		}
+
+		return { state, command: null, quit: false };
+	}
+
 	if (key === "q") {
 		return { state, command: null, quit: true };
+	}
+
+	if (key === "enter") {
+		return { state: INSPECT_FOCUS, command: null, quit: false };
+	}
+
+	if (key === "?") {
+		return { state: HELP_FOCUS, command: null, quit: false };
 	}
 
 	if (key === "up" || key === "k") {

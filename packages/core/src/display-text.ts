@@ -14,6 +14,12 @@ const CJK_RANGES: readonly [number, number][] = [
 	[0x20000, 0x3fffd],
 ];
 
+export const TAB_STOP = 4;
+
+const ELLIPSIS = "…";
+
+const ELLIPSIS_WIDTH = 1;
+
 function isWide(codePoint: number): boolean {
 	for (const [start, end] of CJK_RANGES) {
 		if (codePoint >= start && codePoint <= end) return true;
@@ -38,9 +44,16 @@ export type EscapedUnit = Readonly<{
 	width: number;
 }>;
 
+function tabUnit(column: number): EscapedUnit {
+	const spaces = TAB_STOP - (column % TAB_STOP);
+	const display = " ".repeat(spaces);
+
+	return { source: "\t", display, width: spaces };
+}
+
 export function escapeCodePoint(codePoint: number): EscapedUnit {
 	if (codePoint === 0x09) {
-		return { source: "\t", display: "^I", width: 2 };
+		return { source: "\t", display: "    ", width: TAB_STOP };
 	}
 
 	if (codePoint === 0x1b) {
@@ -76,12 +89,24 @@ export function escapeCodePoint(codePoint: number): EscapedUnit {
 
 export function escapeDisplayText(text: string): EscapedUnit[] {
 	const units: EscapedUnit[] = [];
+	let column = 0;
 
 	for (const char of text) {
-		units.push(escapeCodePoint(char.codePointAt(0)!));
+		const codePoint = char.codePointAt(0)!;
+		const unit = codePoint === 0x09 ? tabUnit(column) : escapeCodePoint(codePoint);
+		units.push(unit);
+		column += unit.width;
 	}
 
 	return units;
+}
+
+export function sanitizeDisplay(text: string): string {
+	let out = "";
+
+	for (const unit of escapeDisplayText(text)) out += unit.display;
+
+	return out;
 }
 
 export function displayWidth(text: string): number {
@@ -95,30 +120,54 @@ export function displayWidth(text: string): number {
 export type ClippedText = Readonly<{
 	text: string;
 	clipped: boolean;
+	width: number;
 }>;
 
 export function clipToWidth(text: string, width: number): ClippedText {
-	if (width <= 0) return { text: "", clipped: displayWidth(text) > 0 };
+	if (width <= 0) {
+		return { text: "", clipped: displayWidth(text) > 0, width: 0 };
+	}
+
 	const units = escapeDisplayText(text);
+	let total = 0;
+
+	for (const unit of units) total += unit.width;
+
+	if (total <= width) {
+		let out = "";
+
+		for (const unit of units) out += unit.display;
+
+		return { text: out, clipped: false, width: total };
+	}
+
+	if (width < ELLIPSIS_WIDTH) {
+		return { text: "", clipped: true, width: 0 };
+	}
+
+	const budget = width - ELLIPSIS_WIDTH;
 	let used = 0;
 	let out = "";
 
 	for (const unit of units) {
-		if (used + unit.width > width) {
-			if (width >= 1 && used < width) {
-				out += "…";
-			} else if (width >= 1) {
-				out = `${out.slice(0, Math.max(0, out.length - 1))}…`;
-			}
-
-			return { text: out, clipped: true };
-		}
+		if (used + unit.width > budget) break;
 
 		out += unit.display;
 		used += unit.width;
 	}
 
-	return { text: out, clipped: false };
+	return { text: `${out}${ELLIPSIS}`, clipped: true, width: used + ELLIPSIS_WIDTH };
+}
+
+export function padToWidth(text: string, width: number): string {
+	if (width <= 0) return "";
+
+	const clipped = clipToWidth(text, width);
+	const pad = Math.max(0, width - clipped.width);
+
+	if (pad === 0) return clipped.text;
+
+	return `${clipped.text}${" ".repeat(pad)}`;
 }
 
 export function containsControlBytes(text: string): boolean {

@@ -1,4 +1,5 @@
 import type { EventId, LogEvent } from "@logview/core";
+import { eventChargeBytes } from "@logview/core";
 
 export type HistoryBounds = Readonly<{
 	firstId: EventId | null;
@@ -13,8 +14,14 @@ export type AppendOutcome = Readonly<{
 	evictedThrough: EventId | null;
 }>;
 
+export type ContinuationExtras = Readonly<{
+	omittedBytes: number;
+	invalidUtf8: boolean;
+}>;
+
 export interface History {
 	append(events: readonly LogEvent[]): AppendOutcome;
+	appendContinuation(id: EventId, line: string, extras: ContinuationExtras): LogEvent | undefined;
 	get(id: EventId): LogEvent | undefined;
 	bounds(): HistoryBounds;
 	readAfter(after: EventId | null, through: EventId, limit: number): readonly LogEvent[];
@@ -62,6 +69,46 @@ export class HistoryStore implements History {
 		}
 
 		return { retainedNewIds, evictedCount, evictedThrough };
+	}
+
+	appendContinuation(id: EventId, line: string, extras: ContinuationExtras): LogEvent | undefined {
+		const event = this.byId.get(id);
+
+		if (!event) return undefined;
+
+		const continuations = [...event.continuations, line];
+
+		const next: LogEvent = {
+			...event,
+			continuations,
+			omittedBytes: event.omittedBytes + extras.omittedBytes,
+			invalidUtf8: event.invalidUtf8 || extras.invalidUtf8,
+			chargeBytes: eventChargeBytes(event.rawText, continuations),
+		};
+
+		this.charged += next.chargeBytes - event.chargeBytes;
+		this.byId.set(id, next);
+
+		for (let i = this.start; i < this.events.length; i += 1) {
+			if (this.events[i]?.id === id) {
+				this.events[i] = next;
+				break;
+			}
+		}
+
+		while (this.liveCount() > 0 && this.overCapacity()) {
+			const evicted = this.events[this.start];
+
+			if (!evicted) break;
+
+			this.start += 1;
+			this.charged -= evicted.chargeBytes;
+			this.byId.delete(evicted.id);
+		}
+
+		this.compact();
+
+		return this.byId.get(id);
 	}
 
 	get(id: EventId): LogEvent | undefined {

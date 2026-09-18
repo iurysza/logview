@@ -1,13 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { LIST_FOCUS } from "@logview/core";
+import { INSPECT_FOCUS, LIST_FOCUS, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
 import type { SessionSnapshot } from "@logview/engine";
-import { EMPTY_FILTER, EMPTY_VIEW, type ViewRow } from "@logview/core";
+import { EMPTY_FILTER, EMPTY_VIEW } from "@logview/core";
 import {
 	decodeTerminalKey,
 	formatFilter,
 	formatFooter,
 	formatHints,
 	formatStatus,
+	layoutFrame,
 	layoutSession,
 	renderRowText,
 } from "../src/app.ts";
@@ -17,19 +18,22 @@ import { paintLogList, visiblePoolSize } from "../src/log-list.ts";
 
 const snapshot: SessionSnapshot = {
 	sessionId: "demo",
+	sourceKind: "replay",
+	label: "sanitized-aosp-pattern.lvr.jsonl",
 	revision: 1,
-	source: { kind: "running" },
+	source: { kind: "ended", reason: "eof" },
 	sourceNotices: [],
 	activeFilter: EMPTY_FILTER,
 	activeFilterRevision: 0,
 	pendingFilter: null,
 	view: EMPTY_VIEW,
 	rows: [],
+	selectedEvent: null,
 	stats: {
 		receivedBytes: 0,
 		admittedEvents: 0,
-		retainedEvents: 0,
-		matchedEvents: 0,
+		retainedEvents: 18,
+		matchedEvents: 14,
 		evictedEvents: 0,
 		unparsedEvents: 0,
 		truncatedEvents: 0,
@@ -42,13 +46,74 @@ const snapshot: SessionSnapshot = {
 	notice: null,
 };
 
+const selectedEvent: LogEvent = {
+	id: 7,
+	sourceOffsetMs: 0,
+	rawText: "1760000000.002800  4321  4321 W Database: Retry after lock timeout",
+	metadata: {
+		epochMicros: 1760000000002800,
+		pid: 4321,
+		tid: 4321,
+		level: "W",
+		tag: { start: 32, end: 40 },
+		message: { start: 42, end: 66 },
+	},
+	continuations: ["\tat com.example.logview.demo.db.Store.lock(Store.java:88)"],
+	endedWithLf: true,
+	omittedBytes: 0,
+	invalidUtf8: false,
+	chargeBytes: 120,
+};
+
+const inspectSnapshot: SessionSnapshot = {
+	...snapshot,
+	selectedEvent,
+	stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 15 },
+};
+
 describe("tui chrome", () => {
 	test("formats status, filters, footer, and hints without a renderer", () => {
-		expect(formatStatus(snapshot)).toContain("SOURCE RUNNING");
-		expect(formatFilter(snapshot)).toContain("Level: ALL");
-		expect(formatFooter(snapshot)).toContain("TAIL");
+		expect(formatStatus(snapshot)).toContain("REPLAY • END");
+		expect(formatFilter(snapshot)).toContain("tag:*");
+		expect(formatFooter(snapshot)).toContain("REPLAY");
 		expect(formatHints()).toContain("q quit");
 		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("q quit");
+	});
+
+	test("layoutFrame paints exactly rows by columns in plain mode", () => {
+		const frame = layoutFrame(snapshot, LIST_FOCUS, 72, 16, "plain");
+		expect(frame).toHaveLength(16);
+
+		for (const line of frame) {
+			expect(displayWidth(line)).toBe(72);
+		}
+	});
+
+	test("Enter inspect is a full-viewport overlay on a narrow frame", () => {
+		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 72, 16, "plain");
+		expect(frame).toHaveLength(16);
+		expect(frame.join("\n")).toContain("Event");
+		expect(frame.join("\n")).toContain("t filter tag");
+		expect(frame.join("\n")).toContain("p filter pid");
+		expect(frame.join("\n")).toContain("Esc close");
+		expect(frame.join("\n")).toContain("Retry after lock timeout");
+		expect(frame.join("\n")).toContain("Store.lock");
+
+		for (const line of frame) {
+			expect(displayWidth(line)).toBe(72);
+		}
+	});
+
+	test("wide inspect splits the log list and the pane", () => {
+		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 120, 18, "plain");
+		expect(frame).toHaveLength(18);
+		expect(frame.join("\n")).toContain("│");
+		expect(frame.join("\n")).toContain("Event");
+		expect(frame.join("\n")).toContain("t filter tag");
+
+		for (const line of frame) {
+			expect(displayWidth(line)).toBe(120);
+		}
 	});
 
 	test("row pool size stays bounded to the viewport plus overscan", () => {
@@ -60,6 +125,7 @@ describe("tui chrome", () => {
 				id: 1,
 				selected: true,
 				level: "I",
+				kind: "header",
 				spans: [{ text: "hello", role: "message" }],
 				clipped: false,
 			},
@@ -73,9 +139,10 @@ describe("tui chrome", () => {
 			id: 1,
 			selected: true,
 			level: "E",
+			kind: "header",
 			spans: [
 				{ text: "12:00:00.000", role: "timestamp" },
-				{ text: "  ", role: "message" },
+				{ text: "  ", role: "gutter" },
 				{ text: "E", role: "level" },
 				{ text: "  boom", role: "message" },
 			],
@@ -83,8 +150,9 @@ describe("tui chrome", () => {
 		};
 
 		const ansi = renderRowText(row, "ansi");
-		expect(ansi).toContain("›");
-		expect(ansi).toContain(`\u001b[38;2;${MOCHA.red[0]};${MOCHA.red[1]};${MOCHA.red[2]}mE`);
+		expect(ansi).toContain("▸");
+		expect(ansi).toContain(`38;2;${MOCHA.red[0]};${MOCHA.red[1]};${MOCHA.red[2]}m`);
+		expect(ansi).toContain("E");
 		expect(renderRowText(row, "plain")).not.toContain("\u001b");
 		expect(paintStyleFromEnv("1", undefined)).toBe("plain");
 		expect(paintStyleFromEnv(undefined, undefined)).toBe("ansi");
