@@ -81,6 +81,8 @@ bun run test:tui
 
 `test:tui` covers chrome, key decoding, the bounded row pool, and a PTY smoke that paints the session and sends `↑`, `G`, and `q`.
 
+The TUI uses **Catppuccin Mocha** for chrome and log rows. Message text gets Tailspin-style highlights (dates, numbers, keywords, URLs, IPs, UUIDs, paths, quotes, HTTP methods) mapped onto that palette. Selection still uses the `›` marker so it works without color. Set `NO_COLOR=1` for a plain dump.
+
 ## Fixtures
 
 - `tests/fixtures/synthetic/` — tiny recordings for schema and CLI tests.

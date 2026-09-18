@@ -1,12 +1,13 @@
 import {
 	LIST_FOCUS,
 	reduceInteraction,
-	rowText,
 	type InteractionState,
 	type ViewRow,
 } from "@logview/core";
 import { err, ok, type Result } from "@logview/core";
 import type { Session, SessionSnapshot, TerminalAttachment, UiError } from "@logview/engine";
+import { MOCHA, type Rgb } from "./catppuccin.ts";
+import { paintChrome, paintRow, paintStyleFromEnv, screenPrelude, type PaintStyle } from "./color.ts";
 
 export const ROW_POOL_OVERSCAN = 2;
 
@@ -19,7 +20,33 @@ export function formatStatus(snapshot: SessionSnapshot): string {
 	else if (snapshot.source.kind === "ended") source = "SOURCE STOPPED";
 	else if (snapshot.source.kind === "failed") source = "SOURCE FAILED";
 
-	return `logview · ${snapshot.sessionId} · ${source}`;
+	const line = `logview · ${snapshot.sessionId} · ${source}`;
+
+	return line;
+}
+
+function statusColor(snapshot: SessionSnapshot): Rgb {
+	if (snapshot.source.kind === "failed") return MOCHA.red;
+
+	if (snapshot.source.kind === "running") return MOCHA.green;
+
+	if (snapshot.source.kind === "ended") return MOCHA.overlay1;
+
+	return MOCHA.overlay1;
+}
+
+function paintStatus(snapshot: SessionSnapshot, style: PaintStyle): string {
+	const raw = formatStatus(snapshot);
+
+	if (style === "plain") return raw;
+
+	const parts = raw.split(" · ");
+	const title = paintChrome(parts[0] ?? "logview", MOCHA.lavender, style);
+	const session = paintChrome(parts[1] ?? "", MOCHA.subtext0, style);
+	const source = paintChrome(parts[2] ?? "", statusColor(snapshot), style);
+	const dot = paintChrome(" · ", MOCHA.overlay0, style);
+
+	return `${title}${dot}${session}${dot}${source}`;
 }
 
 export function formatFilter(snapshot: SessionSnapshot): string {
@@ -36,40 +63,81 @@ export function formatFooter(snapshot: SessionSnapshot): string {
 	else if (snapshot.notice === "resize-required") extra = " · Resize terminal";
 	else if (snapshot.stats.lagging) extra = " · Catching up";
 
-	return `${snapshot.view.mode.toUpperCase()} · ${snapshot.view.newSincePause} new since pause · ${snapshot.stats.matchedEvents} matches · ${snapshot.stats.retainedEvents} retained${extra}`;
+	const mode = snapshot.view.mode.toUpperCase();
+	const rest = ` · ${snapshot.view.newSincePause} new since pause · ${snapshot.stats.matchedEvents} matches · ${snapshot.stats.retainedEvents} retained${extra}`;
+
+	return `${mode}${rest}`;
+}
+
+function modeColor(snapshot: SessionSnapshot): Rgb {
+	if (snapshot.view.mode === "browse") return MOCHA.yellow;
+
+	return MOCHA.green;
+}
+
+function paintFilterLine(snapshot: SessionSnapshot, style: PaintStyle): string {
+	if (style === "plain") return formatFilter(snapshot);
+
+	const filter = snapshot.activeFilter;
+	const all = filter.minLevel ?? "ALL";
+	const tagValue = filter.tag ?? "—";
+	const pidValue = filter.pid === null ? "—" : String(filter.pid);
+	const textValue = filter.text || "—";
+	const level = paintChrome("Level: ", MOCHA.overlay1, style) + paintChrome(all, filter.minLevel ? MOCHA.yellow : MOCHA.overlay2, style);
+	const tag = paintChrome("Tag: ", MOCHA.overlay1, style) + paintChrome(tagValue, filter.tag ? MOCHA.green : MOCHA.overlay2, style);
+	const pid = paintChrome("PID: ", MOCHA.overlay1, style) + paintChrome(pidValue, filter.pid === null ? MOCHA.overlay2 : MOCHA.teal, style);
+	const text = paintChrome("Text: ", MOCHA.overlay1, style) + paintChrome(textValue, filter.text ? MOCHA.peach : MOCHA.overlay2, style);
+
+	return `${level}   ${tag}   ${pid}   ${text}`;
 }
 
 export function formatHints(): string {
 	return "↑↓ move   PgUp/PgDn page   G tail   / text   f filters   q quit";
 }
 
-export function renderRowText(row: ViewRow): string {
-	const marker = row.selected ? "›" : " ";
-
-	return `${marker}${rowText(row)}`;
+export function renderRowText(row: ViewRow, style: PaintStyle = "plain"): string {
+	return paintRow(row, style);
 }
 
-function layoutLines(snapshot: SessionSnapshot, interaction: InteractionState): readonly string[] {
+function layoutLines(
+	snapshot: SessionSnapshot,
+	interaction: InteractionState,
+	style: PaintStyle,
+): readonly string[] {
 	if (snapshot.notice === "resize-required") {
 		return ["Terminal too small. Resize to at least 40x8. Ingestion continues."];
 	}
 
-	const lines = [formatStatus(snapshot), formatFilter(snapshot)];
+	const status = paintStatus(snapshot, style);
+	const lines = [status, paintFilterLine(snapshot, style)];
 
 	if (interaction.focus === "filters") {
 		const error = interaction.error ? `  ! ${interaction.error.message}` : "";
-		lines.push(`Edit ${interaction.field}: ${interaction.draft[interaction.field]}${error}`);
+		const editor = `Edit ${interaction.field}: ${interaction.draft[interaction.field]}${error}`;
+		lines.push(interaction.error ? paintChrome(editor, MOCHA.red, style) : paintChrome(editor, MOCHA.peach, style));
 	}
 
-	for (const row of snapshot.rows) lines.push(renderRowText(row));
-	lines.push(formatFooter(snapshot));
-	lines.push(formatHints());
+	for (const row of snapshot.rows) lines.push(paintRow(row, style));
+
+	const footer = formatFooter(snapshot);
+	const mode = snapshot.view.mode.toUpperCase();
+
+	const paintedFooter = footer.startsWith(mode)
+		? `${paintChrome(mode, modeColor(snapshot), style)}${paintChrome(footer.slice(mode.length), MOCHA.subtext0, style)}`
+		: paintChrome(footer, MOCHA.subtext0, style);
+
+	lines.push(paintedFooter);
+	lines.push(paintChrome(formatHints(), MOCHA.overlay0, style));
 
 	return lines;
 }
 
-export function layoutSession(snapshot: SessionSnapshot, interaction: InteractionState): readonly string[] {
-	return layoutLines(snapshot, interaction);
+export function layoutSession(
+	snapshot: SessionSnapshot,
+	interaction: InteractionState,
+	style: PaintStyle = "plain",
+): readonly string[] {
+	return layoutLines(snapshot, interaction, style);
 }
 
 type KeyCommand = Readonly<{
@@ -134,13 +202,18 @@ export async function attachTui(
 	});
 
 	const wasRaw = process.stdin.isRaw;
+	const style = paintStyleFromEnv(process.env.NO_COLOR, process.env.FORCE_COLOR);
 	process.stdin.setRawMode?.(true);
 	process.stdin.resume();
-	process.stdout.write("\x1b[?1049h\x1b[?25l");
+	process.stdout.write(`\x1b[?1049h\x1b[?25l${screenPrelude()}\x1b[2J`);
 
 	const paint = (snapshot: SessionSnapshot): void => {
-		const lines = layoutLines(snapshot, interaction);
-		process.stdout.write(`\x1b[H\x1b[J${lines.join("\r\n")}`);
+		const lines = layoutLines(snapshot, interaction, style);
+		let frame = `\x1b[H${screenPrelude()}`;
+
+		for (const line of lines) frame += `${line}\x1b[K\r\n`;
+
+		process.stdout.write(frame);
 	};
 
 	const unsubscribe = session.subscribe(paint);
@@ -184,7 +257,7 @@ export async function attachTui(
 		process.stdin.off("data", onData);
 		process.stdout.off("resize", onResize);
 		process.stdin.setRawMode?.(wasRaw ?? false);
-		process.stdout.write("\x1b[?25h\x1b[?1049l");
+		process.stdout.write("\x1b[0m\x1b[?25h\x1b[?1049l");
 		resolveDone();
 	}
 

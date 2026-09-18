@@ -11,6 +11,8 @@ import {
 	layoutSession,
 	renderRowText,
 } from "../src/app.ts";
+import { paintStyleFromEnv } from "../src/color.ts";
+import { MOCHA } from "../src/catppuccin.ts";
 import { paintLogList, visiblePoolSize } from "../src/log-list.ts";
 
 const snapshot: SessionSnapshot = {
@@ -64,6 +66,28 @@ describe("tui chrome", () => {
 		];
 
 		expect(paintLogList(rows)).toEqual([renderRowText(rows[0]!)]);
+	});
+
+	test("ansi paint colors the level letter and keeps the selection marker", () => {
+		const row: ViewRow = {
+			id: 1,
+			selected: true,
+			level: "E",
+			spans: [
+				{ text: "12:00:00.000", role: "timestamp" },
+				{ text: "  ", role: "message" },
+				{ text: "E", role: "level" },
+				{ text: "  boom", role: "message" },
+			],
+			clipped: false,
+		};
+
+		const ansi = renderRowText(row, "ansi");
+		expect(ansi).toContain("›");
+		expect(ansi).toContain(`\u001b[38;2;${MOCHA.red[0]};${MOCHA.red[1]};${MOCHA.red[2]}mE`);
+		expect(renderRowText(row, "plain")).not.toContain("\u001b");
+		expect(paintStyleFromEnv("1", undefined)).toBe("plain");
+		expect(paintStyleFromEnv(undefined, undefined)).toBe("ansi");
 	});
 
 	test("decodes terminal keys used by the list and filter editor", () => {
