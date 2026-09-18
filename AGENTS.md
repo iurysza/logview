@@ -20,3 +20,4 @@ Use these for design, implementation, review, and writing in this repo:
 - Drive behavior through the public `Session` API. Headless tests must not start ADB or load OpenTUI.
 - Public contracts stay those in `specs/2026-09-18-logview-technical-design.md`.
 - `bun run check` is the quality path: anti-slop lint, TypeScript, and headless tests.
+- Commits never name Cursor as author or committer and never include `Co-authored-by` trailers. Use the invoking human's name and email. Commit with `git -c core.hooksPath=.githooks` so Cursor cannot inject co-author lines. `bun run check` fails if any commit since `main` breaks this.
