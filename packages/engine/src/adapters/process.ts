@@ -45,6 +45,7 @@ function spawnHandle(spec: ProcessSpec): ChildProcessHandle {
 		exit: subprocess.exited.then((code): ProcessExit => ({ code, signal: null })),
 		terminate: async (graceMs: number) => {
 			subprocess.kill("SIGTERM");
+
 			const force = setTimeout(() => {
 				subprocess.kill("SIGKILL");
 			}, graceMs);
@@ -86,8 +87,6 @@ function spawnFailure(error: Error): SourceError {
 	return { kind: "io", message: "failed to spawn process" };
 }
 
-function hasErrno(cause: unknown): cause is { code: string } {
-	if (!(cause instanceof Error)) return false;
-
+function hasErrno(cause: Error): cause is Error & { code: string } {
 	return "code" in cause;
 }

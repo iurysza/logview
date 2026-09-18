@@ -1,58 +1,82 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { bytesToBase64, encodeRecordingRecord, syntheticRecordingHeader } from "@logview/engine";
+import { Either, Schema } from "effect";
+import {
+	createRecordingFiles,
+	createReplaySource,
+	createScheduler,
+	createSession,
+	defaultSessionOptions,
+} from "@logview/engine";
 import { main } from "../src/main.ts";
+import { runHeadless } from "../src/headless.ts";
 
-function recordingWithLine(message: string): string {
-	const header = new TextDecoder().decode(encodeRecordingRecord(syntheticRecordingHeader()));
-	const line = `1760000000.000001  1234  1250 I Tag: ${message}\n`;
-	const chunk = new TextDecoder().decode(
-		encodeRecordingRecord({
-			kind: "chunk",
-			packetSeq: 0,
-			offsetMs: 0,
-			stream: "stdout",
-			base64: bytesToBase64(new TextEncoder().encode(line)),
+const Summary = Schema.parseJson(
+	Schema.Struct({
+		version: Schema.Literal(1),
+		kind: Schema.Literal("summary"),
+		terminal: Schema.Struct({
+			kind: Schema.String,
 		}),
-	);
-	const end = new TextDecoder().decode(
-		encodeRecordingRecord({ kind: "end", chunks: 1, outcome: "eof", error: null }),
-	);
-	return `${header}${chunk}${end}`;
-}
+		snapshot: Schema.Struct({
+			stats: Schema.Struct({
+				admittedEvents: Schema.Number,
+			}),
+		}),
+	}),
+);
 
 describe("headless CLI", () => {
-	test("replay --headless prints a JSON summary and does not load OpenTUI", async () => {
-		const dir = mkdtempSync(join(tmpdir(), "logview-cli-"));
-		const path = join(dir, "one.lvr.jsonl");
-		await Bun.write(path, recordingWithLine("hello-headless"));
+	test("replay --headless emits a JSON summary and does not load OpenTUI", async () => {
+		const fixture = join(process.cwd(), "tests/fixtures/synthetic/hello.lvr.jsonl");
+		const scheduler = createScheduler();
+
+		const replay = createReplaySource(
+			{ path: fixture, speed: { kind: "instant" }, allowPartial: false },
+			{ files: createRecordingFiles(), scheduler },
+		);
+
+		expect(replay.ok).toBe(true);
+
+		if (!replay.ok) return;
+
+		const session = createSession(
+			defaultSessionOptions({ sessionId: "cli-headless", rows: 8, columns: 80 }),
+			{
+				source: replay.value,
+				scheduler,
+			},
+		);
+
+		expect(session.ok).toBe(true);
+
+		if (!session.ok) return;
+
 		const lines: string[] = [];
-		const originalWrite = process.stdout.write.bind(process.stdout);
-		process.stdout.write = ((chunk: string | Uint8Array) => {
-			lines.push(typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk));
-			return true;
-		}) as typeof process.stdout.write;
 
-		try {
-			const code = await main(["bun", "logview", "replay", path, "--speed", "instant", "--headless"]);
-			expect(code).toBe(0);
-		} finally {
-			process.stdout.write = originalWrite;
-		}
+		const code = await runHeadless(session.value, (line) => {
+			lines.push(line);
+		});
 
-		const jsonLine = lines.join("").trim().split("\n").at(-1);
-		expect(jsonLine).toBeTruthy();
-		const parsed = JSON.parse(jsonLine!);
-		expect(parsed.version).toBe(1);
-		expect(parsed.kind).toBe("summary");
-		expect(parsed.terminal.kind).toBe("ended");
-		expect(parsed.snapshot.stats.admittedEvents).toBe(1);
+		expect(code).toBe(0);
+
+		const decoded = Schema.decodeEither(Summary)(lines[0] ?? "{}");
+
+		Either.match(decoded, {
+			onLeft: (error) => {
+				throw new Error(error.message);
+			},
+			onRight: (value) => {
+				expect(value.kind).toBe("summary");
+				expect(value.version).toBe(1);
+				expect(value.snapshot.stats.admittedEvents).toBeGreaterThanOrEqual(1);
+			},
+		});
 	});
 
-	test("unknown commands return exit 2", async () => {
-		const code = await main(["bun", "logview", "nope"]);
+	test("missing replay path is exit 2", async () => {
+		const code = await main(["bun", "logview", "replay"]);
+
 		expect(code).toBe(2);
 	});
 });

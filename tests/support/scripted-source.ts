@@ -14,6 +14,7 @@ export class ScriptedSource implements LogSource {
 
 	pushLine(text: string, offsetMs: number): void {
 		const body = text.endsWith("\n") ? text : `${text}\n`;
+
 		const packet: SourcePacket = {
 			kind: "chunk",
 			packetSeq: this.seq,
@@ -21,6 +22,7 @@ export class ScriptedSource implements LogSource {
 			stream: "stdout",
 			bytes: new TextEncoder().encode(body),
 		};
+
 		this.seq += 1;
 		this.push(packet);
 	}
@@ -38,34 +40,34 @@ export class ScriptedSource implements LogSource {
 		this.wake();
 	}
 
-	open(signal: AbortSignal): AsyncIterable<SourceEvent> {
-		const source = this;
-		return {
-			async *[Symbol.asyncIterator](): AsyncIterator<SourceEvent> {
-				yield { kind: "ready" };
-				while (!source.closed && !signal.aborted) {
-					if (source.queued.length === 0) {
-						await new Promise<void>((resolve) => {
-							source.waiters.push(resolve);
-							signal.addEventListener("abort", () => resolve(), { once: true });
-						});
-						continue;
-					}
+	async *open(signal: AbortSignal): AsyncIterable<SourceEvent> {
+		yield { kind: "ready" };
 
-					const event = source.queued[0];
-					if (!event) continue;
-					source.queued.splice(0, 1);
-					yield event;
-					if (event.kind === "ended" || event.kind === "failed") return;
-				}
+		while (!this.closed && !signal.aborted) {
+			if (this.queued.length === 0) {
+				await new Promise<void>((resolve) => {
+					this.waiters.push(resolve);
+					signal.addEventListener("abort", () => resolve(), { once: true });
+				});
+				continue;
+			}
 
-				yield { kind: "ended", reason: "stopped" };
-			},
-		};
+			const event = this.queued[0];
+
+			if (!event) continue;
+
+			this.queued.splice(0, 1);
+			yield event;
+
+			if (event.kind === "ended" || event.kind === "failed") return;
+		}
+
+		yield { kind: "ended", reason: "stopped" };
 	}
 
 	private wake(): void {
 		const waiters = sourceWaiters(this.waiters);
+
 		for (const waiter of waiters) waiter();
 	}
 }
@@ -76,11 +78,13 @@ function sourceWaiters(waiters: Array<() => void>): Array<() => void> {
 
 export function logcatLine(id: number, message: string): string {
 	const micros = String(id).padStart(6, "0");
+
 	return `1760000000.${micros}  1234  1250 I Tag: ${message}`;
 }
 
 export function stdoutPacket(seq: number, offsetMs: number, line: string): SourcePacket {
 	const body = line.endsWith("\n") ? line : `${line}\n`;
+
 	return {
 		kind: "chunk",
 		packetSeq: seq,

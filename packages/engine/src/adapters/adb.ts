@@ -41,7 +41,7 @@ class AdbSource implements LogSource {
 	readonly maxBufferedBytes = MAX_PACKET_BYTES * 2;
 	private opened = false;
 	private closed = false;
-	private child: Awaited<ReturnType<ProcessRunner["spawn"]>>["value"] | null = null;
+	private child: import("../ports.ts").ChildProcessHandle | null = null;
 
 	constructor(
 		private readonly options: AdbSourceOptions,
@@ -51,6 +51,7 @@ class AdbSource implements LogSource {
 	async *open(signal: AbortSignal): AsyncIterable<SourceEvent> {
 		if (this.opened) {
 			yield { kind: "failed", error: { kind: "io", message: "source already opened" } };
+
 			return;
 		}
 
@@ -59,6 +60,7 @@ class AdbSource implements LogSource {
 
 		if (!devices.ok) {
 			yield { kind: "failed", error: devices.error };
+
 			return;
 		}
 
@@ -66,6 +68,7 @@ class AdbSource implements LogSource {
 
 		if (!serial.ok) {
 			yield { kind: "failed", error: serial.error };
+
 			return;
 		}
 
@@ -77,6 +80,7 @@ class AdbSource implements LogSource {
 
 		if (!spawned.ok) {
 			yield { kind: "failed", error: spawned.error };
+
 			return;
 		}
 
@@ -94,11 +98,13 @@ class AdbSource implements LogSource {
 
 		if (this.closed || signal.aborted) {
 			yield { kind: "ended", reason: "stopped" };
+
 			return;
 		}
 
 		if (exit.code === 0) {
 			yield { kind: "ended", reason: "eof" };
+
 			return;
 		}
 
@@ -129,6 +135,7 @@ class AdbSource implements LogSource {
 
 		const text = await readAllText(spawned.value.stdout);
 		await spawned.value.exit;
+
 		return ok(parseDevices(text));
 	}
 }
@@ -184,19 +191,17 @@ function parseDevices(text: string): DeviceRow[] {
 	return rows;
 }
 
-function cleanAdbEnv(): Readonly<Record<string, string>> {
-	const env: Record<string, string> = {};
+function cleanAdbEnv(): AdbProcessEnv {
+	const path = process.env.PATH ?? "/usr/bin:/bin";
+	const home = process.env.HOME ?? "";
 
-	for (const key of Object.keys(process.env)) {
-		if (key === "ANDROID_LOG_TAGS" || key === "ANDROID_PRINTF_LOG") continue;
-
-		const value = process.env[key];
-
-		if (value !== undefined) env[key] = value;
-	}
-
-	return env;
+	return { PATH: path, HOME: home };
 }
+
+type AdbProcessEnv = Readonly<{
+	PATH: string;
+	HOME: string;
+}>;
 
 async function readAllText(stream: AsyncIterable<Uint8Array>): Promise<string> {
 	const chunks: Uint8Array[] = [];
@@ -218,6 +223,10 @@ async function readAllText(stream: AsyncIterable<Uint8Array>): Promise<string> {
 	return new TextDecoder().decode(merged);
 }
 
+type StreamWaiter = {
+	current: (() => void) | null;
+};
+
 async function* mergeStreams(
 	stdout: AsyncIterable<Uint8Array>,
 	stderr: AsyncIterable<Uint8Array>,
@@ -227,9 +236,16 @@ async function* mergeStreams(
 	const start = scheduler.nowMs();
 	const queue: SourcePacket[] = [];
 	let seq = 0;
-	let wait: (() => void) | null = null;
+	const waiter: StreamWaiter = { current: null };
 	let stdoutDone = false;
 	let stderrDone = false;
+
+	const wake = (): void => {
+		const current = waiter.current;
+		waiter.current = null;
+
+		if (current) current();
+	};
 
 	const push = (stream: "stdout" | "stderr", bytes: Uint8Array): void => {
 		queue.push({
@@ -240,22 +256,19 @@ async function* mergeStreams(
 			bytes,
 		});
 		seq += 1;
-		wait?.();
-		wait = null;
+		wake();
 	};
 
 	const stdoutTask = (async () => {
 		for await (const bytes of stdout) push("stdout", bytes);
 		stdoutDone = true;
-		wait?.();
-		wait = null;
+		wake();
 	})();
 
 	const stderrTask = (async () => {
 		for await (const bytes of stderr) push("stderr", bytes);
 		stderrDone = true;
-		wait?.();
-		wait = null;
+		wake();
 	})();
 
 	while (!stdoutDone || !stderrDone || queue.length > 0) {
@@ -263,7 +276,7 @@ async function* mergeStreams(
 
 		if (queue.length === 0) {
 			await new Promise<void>((resolve) => {
-				wait = resolve;
+				waiter.current = resolve;
 			});
 			continue;
 		}
@@ -276,4 +289,3 @@ async function* mergeStreams(
 	await Promise.allSettled([stdoutTask, stderrTask]);
 }
 
-export type { ConfigurationError };

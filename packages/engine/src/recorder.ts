@@ -14,6 +14,7 @@ import { isSourcePacket, isSourceTerminal } from "./ports.ts";
 import { encodeRecordingRecord } from "./recording-schema.ts";
 
 export const DEFAULT_MAX_RECORDING_BYTES = 256 * 1024 * 1024;
+
 export const FOOTER_RESERVE_BYTES = 512;
 
 export type RecordOptions = Readonly<{
@@ -146,6 +147,7 @@ async function runRecorder(
 
 			if (handled.kind === "write-error") {
 				await writer.abort();
+
 				return err(handled.error);
 			}
 		}
@@ -160,6 +162,7 @@ async function runRecorder(
 			outcome,
 			error: outcome === "source-failure" ? sourceError : null,
 		};
+
 		const finalized = await writer.finalize(end);
 
 		if (!finalized.ok) return finalized;
@@ -172,6 +175,7 @@ async function runRecorder(
 		signal.removeEventListener("abort", onAbort);
 		await writer.abort();
 		await source.close().catch(() => undefined);
+
 		return err(mapCause(cause instanceof Error ? cause : new Error("recording failed")));
 	}
 }

@@ -34,6 +34,7 @@ export class VisibleIndexStore implements VisibleIndex {
 		if (firstRetainedId === null) {
 			this.start = this.ids.length;
 			this.compact();
+
 			return;
 		}
 

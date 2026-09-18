@@ -18,10 +18,12 @@ export type RecordCommand = Readonly<{
 
 export async function runRecord(command: RecordCommand, signal: AbortSignal): Promise<number> {
 	const scheduler = createScheduler();
+
 	const source = createAdbSource(
 		{ adbPath: command.adbPath, serial: command.serial },
 		{ processes: createProcessRunner(), scheduler },
 	);
+
 	const result = await recordSession(
 		source,
 		{
@@ -33,16 +35,20 @@ export async function runRecord(command: RecordCommand, signal: AbortSignal): Pr
 		{ files: createRecordingFiles(), scheduler },
 		signal,
 	);
+
 	if (!result.ok) {
 		const error = result.error;
-		const message = "message" in error ? error.message : error.kind;
-		process.stderr.write(`${message}\n`);
-		if ("kind" in error && (error.kind === "invalid-options" || error.kind === "exists")) return error.kind === "invalid-options" ? 2 : 1;
+		process.stderr.write(`${error.message}\n`);
+
+		if (error.kind === "invalid-options") return 2;
+
 		return 1;
 	}
+
 	if (result.value.end.outcome === "size-limit") {
 		process.stderr.write("recording stopped at the capture size limit\n");
 	}
+
 	return 0;
 }
 

@@ -28,14 +28,18 @@ function copySlice(bytes: Uint8Array, start: number, end: number): Uint8Array {
 
 function concatParts(parts: readonly Uint8Array[], extra?: Uint8Array): Uint8Array {
 	let total = extra?.byteLength ?? 0;
+
 	for (const part of parts) total += part.byteLength;
 	const out = new Uint8Array(total);
 	let offset = 0;
+
 	for (const part of parts) {
 		out.set(part, offset);
 		offset += part.byteLength;
 	}
+
 	if (extra) out.set(extra, offset);
+
 	return out;
 }
 
@@ -43,19 +47,23 @@ function stripTrailingCr(bytes: Uint8Array): Uint8Array {
 	if (bytes.byteLength > 0 && bytes[bytes.byteLength - 1] === 0x0d) {
 		return bytes.subarray(0, bytes.byteLength - 1);
 	}
+
 	return bytes;
 }
 
 function pushPart(parts: Uint8Array[], incoming: Uint8Array): void {
 	if (incoming.byteLength === 0) return;
 	const last = parts[parts.length - 1];
+
 	if (last && last.byteLength <= 64 && incoming.byteLength <= 64) {
 		const merged = new Uint8Array(last.byteLength + incoming.byteLength);
 		merged.set(last, 0);
 		merged.set(incoming, last.byteLength);
 		parts[parts.length - 1] = merged;
+
 		return;
 	}
+
 	parts.push(incoming);
 }
 
@@ -82,9 +90,11 @@ export function frameBytes(
 
 	while (consumed < bytes.byteLength && lines.length < maxLines) {
 		const nextNl = bytes.indexOf(0x0a, consumed);
+
 		if (nextNl === -1) break;
 
 		const incoming = bytes.subarray(consumed, nextNl);
+
 		if (omittedBytes > 0) {
 			omittedBytes += incoming.byteLength;
 			emit(concatParts(parts), true, omittedBytes);
@@ -96,6 +106,7 @@ export function frameBytes(
 		}
 
 		const room = maxLineBytes - retainedBytes;
+
 		if (incoming.byteLength <= room) {
 			emit(concatParts(parts, incoming.byteLength === 0 ? undefined : copySlice(incoming, 0, incoming.byteLength)), true, 0);
 			parts.length = 0;
@@ -112,6 +123,7 @@ export function frameBytes(
 		} else {
 			omittedBytes += incoming.byteLength;
 		}
+
 		emit(concatParts(parts), true, omittedBytes);
 		parts.length = 0;
 		retainedBytes = 0;
@@ -133,11 +145,13 @@ export function frameBytes(
 
 	if (consumed < bytes.byteLength) {
 		const rest = bytes.subarray(consumed);
+
 		if (omittedBytes > 0) {
 			omittedBytes += rest.byteLength;
 			consumed = bytes.byteLength;
 		} else {
 			const room = maxLineBytes - retainedBytes;
+
 			if (rest.byteLength <= room) {
 				pushPart(parts, copySlice(rest, 0, rest.byteLength));
 				retainedBytes += rest.byteLength;
@@ -150,6 +164,7 @@ export function frameBytes(
 				} else {
 					omittedBytes += rest.byteLength;
 				}
+
 				consumed = bytes.byteLength;
 			}
 		}

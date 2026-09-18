@@ -25,6 +25,7 @@ export class IngestQueue {
 			cursor: 0,
 		});
 		this.queuedBytes += packet.bytes.byteLength;
+
 		return true;
 	}
 
@@ -101,6 +102,7 @@ export function drainFrameSlice(
 		}
 
 		const remaining = packet.bytes.subarray(packet.cursor);
+
 		const step = frameBytes(current, remaining, {
 			eof: false,
 			maxLineBytes: limits.maxLineBytes,

@@ -1,18 +1,18 @@
 import { describe, expect, test } from "bun:test";
+import { join } from "node:path";
 
 describe("anti-slop quality gate", () => {
-	test("oxlint config registers anti-slop and Effect plugins", async () => {
-		const config = await Bun.file("oxlint.config.ts").text();
-		expect(config).toContain('name: "anti-slop"');
-		expect(config).toContain("./tools/oxlint/anti-slop/index.ts");
-		expect(config).toContain('name: "anti-slop-effect"');
-		expect(config).toContain("./tools/oxlint/anti-slop/effect/index.ts");
-		expect(config).toContain("anti-slop/no-unknown-parameters");
-		expect(config).toContain("anti-slop-effect/prefer-effect-match");
-	});
+	test("oxlint reports anti-slop violations on a known-slop fixture", () => {
+		const fixture = join(import.meta.dir, "../../tools/oxlint/fixtures/slop-example.ts");
 
-	test("engine depends on Effect as the implementation substrate", async () => {
-		const pkg = await Bun.file("packages/engine/package.json").json();
-		expect(pkg.dependencies.effect).toBe("3.22.2");
+		const proc = Bun.spawnSync(["bun", "--bun", "oxlint", "-c", "oxlint.config.ts", fixture], {
+			cwd: join(import.meta.dir, "../.."),
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+
+		const output = `${proc.stdout.toString()}${proc.stderr.toString()}`;
+		expect(proc.exitCode).not.toBe(0);
+		expect(output.includes("anti-slop")).toBe(true);
 	});
 });

@@ -25,6 +25,7 @@ export async function openScenario(options?: {
 }): Promise<Scenario> {
 	const source = new ScriptedSource();
 	const scheduler = new ManualScheduler();
+
 	const created = createSession(
 		defaultSessionOptions({
 			sessionId: options?.sessionId ?? "scenario",
@@ -39,6 +40,7 @@ export async function openScenario(options?: {
 
 	const session = created.value;
 	const started = session.start();
+
 	if (!started.ok) throw new Error(started.error.kind);
 	await tick(scheduler);
 
@@ -62,6 +64,7 @@ export async function openScenario(options?: {
 		async waitUntil(predicate) {
 			for (let i = 0; i < 5_000; i += 1) {
 				const snapshot = session.snapshot();
+
 				if (predicate(snapshot)) return snapshot;
 				await tick(scheduler);
 			}

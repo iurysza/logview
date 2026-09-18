@@ -7,10 +7,8 @@ import type {
 	RecordingRecord,
 	Scheduler,
 	SourceEvent,
-	SourcePacket,
 } from "../ports.ts";
 import {
-	decodeRecordingLine,
 	emptyRecordingSequence,
 	packetFromChunk,
 	validateRecordingSequence,
@@ -60,6 +58,7 @@ class ReplaySource implements LogSource {
 	async *open(signal: AbortSignal): AsyncIterable<SourceEvent> {
 		if (this.opened) {
 			yield { kind: "failed", error: { kind: "io", message: "source already opened" } };
+
 			return;
 		}
 
@@ -86,6 +85,7 @@ class ReplaySource implements LogSource {
 						kind: "failed",
 						error: { kind: "recording-invalid", message: record.error.message },
 					};
+
 					return;
 				}
 
@@ -96,6 +96,7 @@ class ReplaySource implements LogSource {
 						kind: "failed",
 						error: { kind: "recording-invalid", message: next.error.message },
 					};
+
 					return;
 				}
 
@@ -119,6 +120,7 @@ class ReplaySource implements LogSource {
 				kind: "failed",
 				error: { kind: "io", message: cause instanceof Error ? cause.message : "replay failed" },
 			};
+
 			return;
 		}
 
@@ -131,6 +133,7 @@ class ReplaySource implements LogSource {
 				message: "replay used a valid prefix of an unfinalized recording",
 			};
 			yield { kind: "ended", reason: "eof" };
+
 			return;
 		}
 
@@ -139,6 +142,7 @@ class ReplaySource implements LogSource {
 				kind: "failed",
 				error: { kind: "recording-invalid", message: "recording is missing a footer" },
 			};
+
 			return;
 		}
 
@@ -163,9 +167,9 @@ class ReplaySource implements LogSource {
 		signal: AbortSignal,
 	): Promise<SourceEvent | null> {
 		return Match.value(record).pipe(
-			Match.when({ kind: "header" }, () => Effect.runPromise(Effect.succeed(null as SourceEvent | null))),
+			Match.when({ kind: "header" }, () => Effect.runPromise(Effect.succeed<SourceEvent | null>(null))),
 			Match.when({ kind: "chunk" }, (chunk) => this.emitChunk(chunk, start, signal)),
-			Match.when({ kind: "end" }, (end) => Effect.runPromise(Effect.succeed(this.endEvent(end)))),
+			Match.when({ kind: "end" }, (end) => Effect.runPromise(Effect.succeed<SourceEvent | null>(this.endEvent(end)))),
 			Match.exhaustive,
 		);
 	}

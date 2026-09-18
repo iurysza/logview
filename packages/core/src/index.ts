@@ -8,7 +8,9 @@ export type {
 	StartError,
 	ViewRow,
 } from "./commands.ts";
+
 export { FILTER_FIELDS, validateDimensions } from "./commands.ts";
+
 export {
 	clipToWidth,
 	containsControlBytes,
@@ -16,7 +18,9 @@ export {
 	escapeCodePoint,
 	escapeDisplayText,
 } from "./display-text.ts";
-export type { EscapedUnit } from "./display-text.ts";
+
+export type { ClippedText, EscapedUnit } from "./display-text.ts";
+
 export {
 	EMPTY_FILTER,
 	EMPTY_VIEW,
@@ -28,6 +32,7 @@ export {
 	ok,
 	resultToEither,
 } from "./types.ts";
+
 export type {
 	EventId,
 	FilterRevision,
@@ -41,6 +46,7 @@ export type {
 	TextSlice,
 	ViewState,
 } from "./types.ts";
+
 export {
 	CHROME_ROWS,
 	DEFAULT_MAX_EVENTS,
@@ -61,13 +67,21 @@ export {
 	MIN_TERMINAL_ROWS,
 	codePointCount,
 } from "./types.ts";
+
 export { emptyFramerState, frameBytes } from "./framing.ts";
+
 export type { FrameStep, FramedLine, FramerState } from "./framing.ts";
+
 export { foldText, matches, parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
+
 export { LIST_FOCUS, reduceInteraction } from "./interaction.ts";
+
 export type { InteractionInput, InteractionResult, InteractionState } from "./interaction.ts";
+
 export { parseLogcatLine, messageText, tagText } from "./logcat.ts";
+
 export type { ParsedLine } from "./logcat.ts";
+
 export {
 	EMPTY_LOCATION,
 	keepSelectedVisible,
@@ -75,5 +89,7 @@ export {
 	planNavigation,
 	resolveLocation,
 } from "./navigation.ts";
+
 export type { Location, NavigationFacts, NavigationPlan } from "./navigation.ts";
+
 export { formatTimestamp, logViewportHeight, projectRows, requiresResize, rowText } from "./projection.ts";

@@ -38,6 +38,7 @@ async function* once(text: string): AsyncIterable<Uint8Array> {
 describe("adb source contract", () => {
 	test("emits packets from a controlled subprocess then ends", async () => {
 		const scheduler = new ManualScheduler();
+
 		const source = createAdbSource(
 			{ adbPath: "adb", serial: "ABC" },
 			{
@@ -47,6 +48,7 @@ describe("adb source contract", () => {
 				scheduler,
 			},
 		);
+
 		const events = [];
 
 		for await (const event of source.open(new AbortController().signal)) {
@@ -66,6 +68,7 @@ describe("adb source contract", () => {
 				scheduler: new ManualScheduler(),
 			},
 		);
+
 		const events = [];
 
 		for await (const event of source.open(new AbortController().signal)) {

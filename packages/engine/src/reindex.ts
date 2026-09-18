@@ -19,6 +19,7 @@ export class FilterJob {
 
 		if (this.highWater === null) {
 			this.done = true;
+
 			return true;
 		}
 
@@ -26,6 +27,7 @@ export class FilterJob {
 
 		if (batch.length === 0) {
 			this.done = true;
+
 			return true;
 		}
 
@@ -36,6 +38,7 @@ export class FilterJob {
 
 		if (this.scanAfter === this.highWater) {
 			this.done = true;
+
 			return true;
 		}
 
@@ -44,6 +47,7 @@ export class FilterJob {
 
 	appendArrival(id: EventId, matchesPending: boolean): void {
 		if (this.highWater !== null && id <= this.highWater) return;
+
 		if (matchesPending) this.tail.append([id]);
 	}
 
@@ -53,6 +57,7 @@ export class FilterJob {
 		const next = new VisibleIndexStore();
 		next.append(this.prefix.snapshotIds());
 		next.append(this.tail.snapshotIds());
+
 		return next;
 	}
 }

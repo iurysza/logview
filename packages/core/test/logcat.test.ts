@@ -13,6 +13,7 @@ describe("parseLogcatLine", () => {
 	test("parses the canonical threadtime epoch usec profile", () => {
 		const parsed = parseLogcatLine(line("1760000000.123456  1234  1250 I Database: BEGIN TRANSACTION"));
 		expect(parsed.kind).toBe("event");
+
 		if (parsed.kind !== "event") return;
 		expect(parsed.invalidUtf8).toBe(false);
 		expect(parsed.metadata).not.toBeNull();
@@ -37,6 +38,7 @@ describe("parseLogcatLine", () => {
 	test("preserves unmatched continuation lines as unparsed events", () => {
 		const parsed = parseLogcatLine(line("    at com.example.App.crash(App.java:32)"));
 		expect(parsed.kind).toBe("event");
+
 		if (parsed.kind !== "event") return;
 		expect(parsed.metadata).toBeNull();
 		expect(parsed.rawText).toContain("App.java");
@@ -48,7 +50,9 @@ describe("parseLogcatLine", () => {
 			endedWithLf: true,
 			omittedBytes: 0,
 		});
+
 		expect(parsed.kind).toBe("event");
+
 		if (parsed.kind !== "event") return;
 		expect(parsed.invalidUtf8).toBe(true);
 		expect(parsed.rawText.includes("\uFFFD") || parsed.rawText.includes("b")).toBe(true);

@@ -10,6 +10,7 @@ describe("navigation", () => {
 			selected: EMPTY_LOCATION,
 			newMatchingArrivals: 8,
 		});
+
 		expect(plan.mode).toBe("tail");
 		expect(plan.selectedRank).toBe(7);
 		expect(plan.topRank).toBe(3);
@@ -27,6 +28,7 @@ describe("navigation", () => {
 				newMatchingArrivals: 0,
 			},
 		);
+
 		expect(afterMove.mode).toBe("browse");
 		expect(afterMove.selectedRank).toBe(6);
 	});

@@ -18,6 +18,7 @@ function isWide(codePoint: number): boolean {
 	for (const [start, end] of CJK_RANGES) {
 		if (codePoint >= start && codePoint <= end) return true;
 	}
+
 	return false;
 }
 
@@ -41,17 +42,21 @@ export function escapeCodePoint(codePoint: number): EscapedUnit {
 	if (codePoint === 0x09) {
 		return { source: "\t", display: "^I", width: 2 };
 	}
+
 	if (codePoint === 0x1b) {
 		return { source: "\u001b", display: "^[", width: 2 };
 	}
+
 	if (codePoint < 0x20 || codePoint === 0x7f) {
 		const caret = codePoint === 0x7f ? "?" : String.fromCharCode(codePoint + 64);
+
 		return {
 			source: String.fromCodePoint(codePoint),
 			display: `^${caret}`,
 			width: 2,
 		};
 	}
+
 	if (codePoint >= 0x80 && codePoint <= 0x9f) {
 		return {
 			source: String.fromCodePoint(codePoint),
@@ -59,32 +64,45 @@ export function escapeCodePoint(codePoint: number): EscapedUnit {
 			width: 6,
 		};
 	}
+
 	const source = String.fromCodePoint(codePoint);
+
 	if (isCombining(codePoint)) {
 		return { source, display: source, width: 0 };
 	}
+
 	return { source, display: source, width: isWide(codePoint) ? 2 : 1 };
 }
 
 export function escapeDisplayText(text: string): EscapedUnit[] {
 	const units: EscapedUnit[] = [];
+
 	for (const char of text) {
 		units.push(escapeCodePoint(char.codePointAt(0)!));
 	}
+
 	return units;
 }
 
 export function displayWidth(text: string): number {
 	let width = 0;
+
 	for (const unit of escapeDisplayText(text)) width += unit.width;
+
 	return width;
 }
 
-export function clipToWidth(text: string, width: number): { text: string; clipped: boolean } {
+export type ClippedText = Readonly<{
+	text: string;
+	clipped: boolean;
+}>;
+
+export function clipToWidth(text: string, width: number): ClippedText {
 	if (width <= 0) return { text: "", clipped: displayWidth(text) > 0 };
 	const units = escapeDisplayText(text);
 	let used = 0;
 	let out = "";
+
 	for (const unit of units) {
 		if (used + unit.width > width) {
 			if (width >= 1 && used < width) {
@@ -92,18 +110,23 @@ export function clipToWidth(text: string, width: number): { text: string; clippe
 			} else if (width >= 1) {
 				out = `${out.slice(0, Math.max(0, out.length - 1))}…`;
 			}
+
 			return { text: out, clipped: true };
 		}
+
 		out += unit.display;
 		used += unit.width;
 	}
+
 	return { text: out, clipped: false };
 }
 
 export function containsControlBytes(text: string): boolean {
 	for (const char of text) {
 		const cp = char.codePointAt(0)!;
+
 		if (cp < 0x20 || cp === 0x7f || (cp >= 0x80 && cp <= 0x9f)) return true;
 	}
+
 	return false;
 }

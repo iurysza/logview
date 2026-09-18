@@ -28,7 +28,9 @@ export function parsePidField(raw: string): Result<number | null, CommandError> 
 	return eitherToResult(
 		Either.gen(function* () {
 			const trimmed = raw.trim();
+
 			if (trimmed.length === 0) return null;
+
 			if (!/^[0-9]+$/.test(trimmed)) {
 				return yield* Either.left({
 					kind: "invalid-filter" as const,
@@ -38,6 +40,7 @@ export function parsePidField(raw: string): Result<number | null, CommandError> 
 			}
 
 			const pid = Number(trimmed);
+
 			if (!Number.isSafeInteger(pid) || pid < 1) {
 				return yield* Either.left({
 					kind: "invalid-filter" as const,
@@ -55,9 +58,12 @@ export function parseLevelField(raw: string): Result<FilterSpec["minLevel"], Com
 	return eitherToResult(
 		Either.gen(function* () {
 			const trimmed = raw.trim();
+
 			if (trimmed.length === 0 || trimmed.toUpperCase() === "ALL") return null;
 			const upper = trimmed.toUpperCase();
+
 			if (trimmed.length === 1 && isLogLevel(upper)) return upper;
+
 			if (isLogLevel(trimmed)) return trimmed;
 
 			return yield* Either.left({
@@ -74,8 +80,10 @@ export function prepareFilter(spec: FilterSpec): Result<PreparedFilter, CommandE
 		Either.gen(function* () {
 			const tag = spec.tag === null || spec.tag.trim() === "" ? null : spec.tag.trim();
 			const text = spec.text;
+
 			if (tag !== null) yield* validateFieldLength("tag", tag);
 			yield* validateFieldLength("text", text);
+
 			if (spec.pid !== null && (!Number.isSafeInteger(spec.pid) || spec.pid < 1)) {
 				return yield* Either.left({
 					kind: "invalid-filter" as const,
@@ -107,18 +115,22 @@ export function prepareFilter(spec: FilterSpec): Result<PreparedFilter, CommandE
 
 export function matches(event: LogEvent, filter: PreparedFilter): boolean {
 	const { spec, foldedText } = filter;
+
 	if (spec.minLevel !== null) {
 		if (!event.metadata) return false;
+
 		if (levelRank(event.metadata.level) < levelRank(spec.minLevel)) return false;
 	}
 
 	if (spec.tag !== null) {
 		if (!event.metadata) return false;
+
 		if (tagText(event.rawText, event.metadata.tag) !== spec.tag) return false;
 	}
 
 	if (spec.pid !== null) {
 		if (!event.metadata) return false;
+
 		if (event.metadata.pid !== spec.pid) return false;
 	}
 

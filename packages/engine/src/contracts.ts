@@ -123,6 +123,7 @@ export function validateSessionOptions(
 			message: "sessionId must be a non-empty string",
 		});
 	}
+
 	if (!Number.isSafeInteger(options.maxEvents) || options.maxEvents < 1) {
 		return err({
 			kind: "invalid-options",
@@ -130,6 +131,7 @@ export function validateSessionOptions(
 			message: "maxEvents must be a positive safe integer",
 		});
 	}
+
 	if (!Number.isSafeInteger(options.maxLineBytes) || options.maxLineBytes < 1) {
 		return err({
 			kind: "invalid-options",
@@ -137,6 +139,7 @@ export function validateSessionOptions(
 			message: "maxLineBytes must be a positive safe integer",
 		});
 	}
+
 	if (options.maxLineBytes > MAX_LINE_BYTES) {
 		return err({
 			kind: "invalid-options",
@@ -144,7 +147,9 @@ export function validateSessionOptions(
 			message: `maxLineBytes cannot exceed ${MAX_LINE_BYTES}`,
 		});
 	}
+
 	const minCharge = EVENT_CHARGE_OVERHEAD + 2 * options.maxLineBytes;
+
 	if (
 		!Number.isFinite(options.maxHistoryChargeBytes) ||
 		options.maxHistoryChargeBytes < minCharge ||
@@ -156,6 +161,7 @@ export function validateSessionOptions(
 			message: `maxHistoryChargeBytes must hold at least one maximum-size line (${minCharge} bytes)`,
 		});
 	}
+
 	if (!Number.isFinite(options.maxQueuedBytes) || options.maxQueuedBytes < 1) {
 		return err({
 			kind: "invalid-options",
@@ -163,6 +169,7 @@ export function validateSessionOptions(
 			message: "maxQueuedBytes must be a positive finite number",
 		});
 	}
+
 	if (!Number.isFinite(source.maxBufferedBytes) || source.maxBufferedBytes < 0) {
 		return err({
 			kind: "invalid-options",
@@ -170,7 +177,9 @@ export function validateSessionOptions(
 			message: "source reservation must be a non-negative finite number",
 		});
 	}
+
 	const queueCapacity = options.maxQueuedBytes - source.maxBufferedBytes;
+
 	if (queueCapacity < MAX_PACKET_BYTES) {
 		return err({
 			kind: "invalid-options",
@@ -178,6 +187,7 @@ export function validateSessionOptions(
 			message: "source reservation leaves no room for one maximum-size packet",
 		});
 	}
+
 	if (!Number.isFinite(options.workSliceMs) || options.workSliceMs <= 0) {
 		return err({
 			kind: "invalid-options",
@@ -185,6 +195,7 @@ export function validateSessionOptions(
 			message: "workSliceMs must be a positive finite number",
 		});
 	}
+
 	if (!Number.isSafeInteger(options.maxLinesPerSlice) || options.maxLinesPerSlice < 1) {
 		return err({
 			kind: "invalid-options",
@@ -192,7 +203,9 @@ export function validateSessionOptions(
 			message: "maxLinesPerSlice must be a positive safe integer",
 		});
 	}
+
 	const dims = validateDimensions(options.columns, options.rows);
+
 	if (!dims.ok) {
 		return err({
 			kind: "invalid-options",
@@ -200,7 +213,9 @@ export function validateSessionOptions(
 			message: dims.error.message,
 		});
 	}
+
 	const filter = prepareFilter(options.initialFilter);
+
 	if (!filter.ok) {
 		return err({
 			kind: "invalid-options",
@@ -208,6 +223,7 @@ export function validateSessionOptions(
 			message: filter.error.message,
 		});
 	}
+
 	return ok({
 		...options,
 		initialFilter: filter.value.spec,

@@ -25,6 +25,7 @@ export class BunRecordingFiles implements RecordingFiles {
 
 			const partialPath = `${path}.partial`;
 			await Bun.write(partialPath, encodeRecordingRecord(header));
+
 			return ok(new BunRecordingWriter(path, partialPath));
 		} catch (cause) {
 			return err(
@@ -38,6 +39,7 @@ export class BunRecordingFiles implements RecordingFiles {
 
 		if (!(await file.exists())) {
 			yield err({ kind: "io", message: `recording not found: ${path}` });
+
 			return;
 		}
 
@@ -56,6 +58,7 @@ export class BunRecordingFiles implements RecordingFiles {
 
 			if (line.length === 0) {
 				yield err(invalidRecording("empty recording line", lineNumber));
+
 				return;
 			}
 
@@ -65,6 +68,7 @@ export class BunRecordingFiles implements RecordingFiles {
 					message: "final JSON line is incomplete",
 					line: lineNumber,
 				});
+
 				return;
 			}
 
@@ -85,6 +89,7 @@ class BunRecordingWriter implements RecordingWriter {
 	async append(packet: SourcePacket): Promise<Result<void, RecordingError>> {
 		try {
 			await appendFile(this.partialPath, encodeRecordingRecord(chunkFromPacket(packet)));
+
 			return ok(undefined);
 		} catch (cause) {
 			return err(
@@ -99,11 +104,13 @@ class BunRecordingWriter implements RecordingWriter {
 
 			if (await Bun.file(this.dest).exists()) {
 				await unlink(this.partialPath).catch(() => undefined);
+
 				return err({ kind: "exists", message: "destination exists" });
 			}
 
 			await link(this.partialPath, this.dest);
 			await unlink(this.partialPath);
+
 			return ok(undefined);
 		} catch (cause) {
 			return err(
@@ -129,9 +136,7 @@ function mapFsError(error: Error): RecordingError {
 	return { kind: "io", message: error.message };
 }
 
-function hasErrno(cause: unknown): cause is Error & { code: string } {
-	if (!(cause instanceof Error)) return false;
-
+function hasErrno(cause: Error): cause is Error & { code: string } {
 	return "code" in cause;
 }
 

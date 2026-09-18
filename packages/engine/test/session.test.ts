@@ -46,6 +46,7 @@ describe("headless session", () => {
 			kind: "set-filter",
 			filter: { minLevel: null, tag: null, pid: null, text: "KEEP" },
 		});
+
 		expect(filtered.ok).toBe(true);
 		snap = await scenario.waitUntil((current) => current.pendingFilter === null && current.stats.matchedEvents === 3);
 		expect(snap.rows.map((row) => row.id)).toEqual([8, 10, 14]);

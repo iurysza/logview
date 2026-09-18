@@ -7,6 +7,7 @@ describe("reduceInteraction", () => {
 		const slash = reduceInteraction(state, { kind: "key", key: "/", ctrl: false, shift: false }, EMPTY_FILTER);
 		state = slash.state;
 		expect(state.focus).toBe("filters");
+
 		if (state.focus !== "filters") return;
 		expect(state.field).toBe("text");
 		const typed = reduceInteraction(state, { kind: "edit-field", value: "database" }, EMPTY_FILTER);
@@ -31,6 +32,7 @@ describe("reduceInteraction", () => {
 		const q = reduceInteraction(open.state, { kind: "key", key: "q", ctrl: false, shift: false }, EMPTY_FILTER);
 		expect(q.quit).toBe(false);
 		expect(q.command).toBeNull();
+
 		if (q.state.focus !== "filters") throw new Error("expected editor");
 		expect(q.state.draft.text).toBe("q");
 		const up = reduceInteraction(q.state, { kind: "key", key: "up", ctrl: false, shift: false }, EMPTY_FILTER);
@@ -45,6 +47,7 @@ describe("reduceInteraction", () => {
 		const enter = reduceInteraction(edited.state, { kind: "key", key: "enter", ctrl: false, shift: false }, EMPTY_FILTER);
 		expect(enter.command).toBeNull();
 		expect(enter.state.focus).toBe("filters");
+
 		if (enter.state.focus !== "filters") return;
 		expect(enter.state.error?.field).toBe("pid");
 		expect(enter.state.draft.pid).toBe("abc");

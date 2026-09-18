@@ -23,6 +23,7 @@ describe("replay", () => {
 		recordedSource.pushLine(threadtimeLine(1), 0);
 		recordedSource.pushLine(threadtimeLine(2), 5);
 		recordedSource.end();
+
 		const recorded = await recordSession(
 			recordedSource,
 			{
@@ -34,21 +35,27 @@ describe("replay", () => {
 			{ files: createRecordingFiles(), scheduler: new ManualScheduler() },
 			new AbortController().signal,
 		);
+
 		expect(recorded.ok).toBe(true);
 
 		const scheduler = new ManualScheduler();
+
 		const replay = createReplaySource(
 			{ path: outPath, speed: { kind: "instant" }, allowPartial: false },
 			{ files: createRecordingFiles(), scheduler },
 		);
+
 		expect(replay.ok).toBe(true);
+
 		if (!replay.ok) return;
 
 		const session = createSession(defaultSessionOptions({ sessionId: "replay", maxEvents: 16, rows: 8 }), {
 			source: replay.value,
 			scheduler,
 		});
+
 		expect(session.ok).toBe(true);
+
 		if (!session.ok) return;
 		expect(session.value.start().ok).toBe(true);
 		await session.value.sourceDone;

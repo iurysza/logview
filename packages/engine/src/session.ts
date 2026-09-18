@@ -122,17 +122,19 @@ class SessionImpl implements Session {
 
 	start(): Result<void, StartError> {
 		if (this.closed) return err({ kind: "stopped" });
+
 		if (this.started) return err({ kind: "already-started" });
 
 		this.started = true;
 		this.sourceStatus = { kind: "starting" };
 		this.bump();
 		this.consumeTask = this.consume();
+
 		return ok(undefined);
 	}
 
 	dispatch(command: SessionCommand): Result<void, CommandError> {
-		if (this.closed) return err({ kind: "stopped" });
+		if (this.closed) return err({ kind: "stopped", message: "session is stopped" });
 
 		return Match.value(command).pipe(
 			Match.when({ kind: "move" }, (move) => this.commandNavigate(move)),
@@ -140,6 +142,7 @@ class SessionImpl implements Session {
 			Match.when({ kind: "oldest" }, (oldest) => this.commandNavigate(oldest)),
 			Match.when({ kind: "tail" }, (tail) => {
 				this.historyExpired = false;
+
 				return this.commandNavigate(tail);
 			}),
 			Match.when({ kind: "set-filter" }, (set) => this.commandFilter(set.filter)),
@@ -154,6 +157,7 @@ class SessionImpl implements Session {
 
 	subscribe(listener: (snapshot: SessionSnapshot) => void): () => void {
 		this.listeners.add(listener);
+
 		return () => {
 			this.listeners.delete(listener);
 		};
@@ -162,6 +166,7 @@ class SessionImpl implements Session {
 	async stop(): Promise<void> {
 		if (this.closed && this.consumeTask) {
 			await this.consumeTask;
+
 			return;
 		}
 
@@ -180,6 +185,7 @@ class SessionImpl implements Session {
 		this.applyNavigation(cause, 0);
 		this.bump();
 		this.publishImmediate();
+
 		return ok(undefined);
 	}
 
@@ -198,6 +204,7 @@ class SessionImpl implements Session {
 		this.runFilterSlice();
 		this.bump();
 		this.publishImmediate();
+
 		return ok(undefined);
 	}
 
@@ -211,6 +218,7 @@ class SessionImpl implements Session {
 		this.applyNavigation({ kind: "resize" }, 0);
 		this.bump();
 		this.publishImmediate();
+
 		return ok(undefined);
 	}
 
@@ -304,6 +312,7 @@ class SessionImpl implements Session {
 
 			if (!Number.isSafeInteger(this.nextEventId)) {
 				this.failSource("event id space exhausted");
+
 				return false;
 			}
 
@@ -324,7 +333,7 @@ class SessionImpl implements Session {
 
 		if (admitted.length > 0) this.commit(admitted);
 
-		return drain.consumed;
+		return drain.lines.length >= this.options.maxLinesPerSlice || (this.eof && !this.queue.empty);
 	}
 
 	private commit(events: readonly LogEvent[]): void {
@@ -332,6 +341,7 @@ class SessionImpl implements Session {
 
 		for (const event of events) {
 			if (event.metadata === null) this.unparsedEvents += 1;
+
 			if (event.omittedBytes > 0) {
 				this.truncatedEvents += 1;
 				this.omittedBytes += event.omittedBytes;
@@ -366,6 +376,7 @@ class SessionImpl implements Session {
 			this.view.mode === "browse" &&
 			this.view.selectedId !== null &&
 			this.activeIndex.locate(this.view.selectedId).exactRank === null;
+
 		const topGone =
 			this.view.mode === "browse" &&
 			this.view.topId !== null &&
@@ -384,6 +395,7 @@ class SessionImpl implements Session {
 
 		if (!job || job.revision !== this.requestedRevision) {
 			this.pendingJob = null;
+
 			return;
 		}
 
@@ -391,6 +403,7 @@ class SessionImpl implements Session {
 
 		if (!done) {
 			this.filterCancel = this.deps.scheduler.after(0, () => this.runFilterSlice());
+
 			return;
 		}
 
@@ -410,6 +423,7 @@ class SessionImpl implements Session {
 		newMatchingArrivals: number,
 	): void {
 		const visibleHeight = Math.max(1, logViewportHeight(this.rows));
+
 		const plan = planNavigation(this.view, cause, {
 			count: this.activeIndex.size,
 			visibleHeight,
@@ -417,6 +431,7 @@ class SessionImpl implements Session {
 			selected: this.activeIndex.locate(this.view.selectedId),
 			newMatchingArrivals,
 		});
+
 		const selectedId = plan.selectedRank === null ? null : this.activeIndex.at(plan.selectedRank);
 		const topId = plan.topRank === null ? null : this.activeIndex.at(plan.topRank);
 
@@ -520,6 +535,7 @@ class SessionImpl implements Session {
 
 	private schedulePublish(): void {
 		if (this.listeners.size === 0) return;
+
 		if (this.publishCancel) return;
 
 		this.publishCancel = this.deps.scheduler.after(DATA_PUBLISH_MS, () => {

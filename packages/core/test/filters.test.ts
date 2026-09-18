@@ -8,7 +8,9 @@ function parsedEvent(raw: string) {
 		endedWithLf: true,
 		omittedBytes: 0,
 	});
+
 	if (parsed.kind !== "event") throw new Error("expected event");
+
 	return {
 		id: 1,
 		sourceOffsetMs: 0,
@@ -25,6 +27,7 @@ describe("filters and interaction", () => {
 	test("prepares level, tag, pid, and literal text restrictions", () => {
 		const prepared = prepareFilter({ minLevel: "W", tag: "Database", pid: 12, text: "LOCK" });
 		expect(prepared.ok).toBe(true);
+
 		if (!prepared.ok) return;
 
 		const matching = parsedEvent("1760000000.000001    12    12 W Database: LOCK timeout");
@@ -39,11 +42,13 @@ describe("filters and interaction", () => {
 		expect(opened.state.focus).toBe("filters");
 
 		const typed = reduceInteraction(opened.state, { kind: "edit-field", value: "database" }, EMPTY_FILTER);
+
 		const committed = reduceInteraction(
 			typed.state,
 			{ kind: "key", key: "enter", ctrl: false, shift: false },
 			EMPTY_FILTER,
 		);
+
 		expect(committed.command).toEqual({
 			kind: "set-filter",
 			filter: { minLevel: null, tag: null, pid: null, text: "database" },
@@ -53,16 +58,19 @@ describe("filters and interaction", () => {
 
 	test("escape discards a draft and q is text inside the editor", () => {
 		const opened = reduceInteraction(LIST_FOCUS, { kind: "key", key: "/", ctrl: false, shift: false }, EMPTY_FILTER);
+
 		const escaped = reduceInteraction(
 			opened.state,
 			{ kind: "key", key: "escape", ctrl: false, shift: false },
 			EMPTY_FILTER,
 		);
+
 		expect(escaped.command).toBeNull();
 		expect(escaped.state).toEqual(LIST_FOCUS);
 
 		const q = reduceInteraction(opened.state, { kind: "key", key: "q", ctrl: false, shift: false }, EMPTY_FILTER);
 		expect(q.quit).toBe(false);
+
 		if (q.state.focus === "filters") expect(q.state.draft.text.endsWith("q")).toBe(true);
 	});
 });

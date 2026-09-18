@@ -7,6 +7,7 @@ export async function runHeadless(
 	},
 ): Promise<number> {
 	const started = session.start();
+
 	if (!started.ok) {
 		write(
 			JSON.stringify({
@@ -17,17 +18,23 @@ export async function runHeadless(
 			} satisfies HeadlessOutput),
 		);
 		await session.stop();
+
 		return 1;
 	}
+
 	const terminal = await session.sourceDone;
+
 	const output: HeadlessOutput = {
 		version: 1,
 		kind: "summary",
 		terminal,
 		snapshot: session.snapshot(),
 	};
+
 	write(JSON.stringify(output));
 	await session.stop();
+
 	if (terminal.kind === "failed") return 1;
+
 	return 0;
 }

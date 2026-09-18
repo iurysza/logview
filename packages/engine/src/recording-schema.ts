@@ -59,6 +59,7 @@ const EndSchema = Schema.Struct({
 });
 
 const RecordingRecordSchema = Schema.Union(HeaderSchema, ChunkSchema, EndSchema);
+
 const RecordingLineSchema = Schema.parseJson(RecordingRecordSchema);
 
 const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
@@ -115,21 +116,8 @@ export function decodeRecordingLine(line: string, lineNumber: number): Result<Re
 	});
 }
 
-export function decodeRecordingRecord(input: unknown): Result<RecordingRecord, RecordingError> {
-	const decoded = Schema.decodeUnknownEither(RecordingRecordSchema)(input);
-
-	return Either.match(decoded, {
-		onLeft: (error) => err(invalidRecording(error.message)),
-		onRight: (record) => {
-			if (record.kind !== "chunk") return ok(record);
-
-			const bytes = decodeBase64Strict(record.base64);
-
-			if (!bytes.ok) return bytes;
-
-			return ok(record);
-		},
-	});
+export function decodeRecordingRecord(jsonLine: string): Result<RecordingRecord, RecordingError> {
+	return decodeRecordingLine(jsonLine, 1);
 }
 
 export function packetFromChunk(record: Extract<RecordingRecord, { kind: "chunk" }>): Result<SourcePacket, RecordingError> {
@@ -224,9 +212,11 @@ function validateChunk(
 	chunk: Extract<RecordingRecord, { kind: "chunk" }>,
 ): Result<RecordingSequenceState, RecordingError> {
 	if (!state.headerSeen) return err(invalidRecording("chunk before header"));
+
 	if (chunk.packetSeq !== state.expectedPacketSeq) {
 		return err(invalidRecording(`expected packetSeq ${state.expectedPacketSeq}`));
 	}
+
 	if (chunk.offsetMs < state.lastOffsetMs) {
 		return err(invalidRecording("offsets must be nondecreasing"));
 	}
@@ -247,12 +237,15 @@ function validateEnd(
 	end: Extract<RecordingRecord, { kind: "end" }>,
 ): Result<RecordingSequenceState, RecordingError> {
 	if (!state.headerSeen) return err(invalidRecording("footer before header"));
+
 	if (end.chunks !== state.expectedPacketSeq) {
 		return err(invalidRecording("footer chunk count does not match"));
 	}
+
 	if (end.outcome === "source-failure" && end.error === null) {
 		return err(invalidRecording("source-failure footer requires an error"));
 	}
+
 	if (end.outcome !== "source-failure" && end.error !== null) {
 		return err(invalidRecording("only source-failure carries an error"));
 	}
@@ -268,7 +261,9 @@ export function sourceErrorMessage(error: SourceError): string {
 }
 
 export const bytesToBase64 = encodeBase64;
+
 export const base64ToBytes = decodeBase64Strict;
+
 export const RECORDING_PROFILE = "threadtime-epoch-usec-v1" as const;
 
 export function syntheticRecordingHeader(): RecordingHeader {

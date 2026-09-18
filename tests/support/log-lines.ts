@@ -11,5 +11,6 @@ export function threadtimeLine(
 	const level = options?.level ?? "I";
 	const tag = options?.tag ?? "App";
 	const message = options?.message ?? `event-${id}`;
+
 	return `${epoch}.${micros}${pid}${tid} ${level} ${tag}: ${message}`;
 }

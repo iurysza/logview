@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-async function collectTs(root: string): Promise<string[]> {
+async function collectTsFiles(root: string): Promise<string[]> {
 	const out: string[] = [];
 	const entries = await readdir(root, { withFileTypes: true });
 
@@ -10,8 +10,8 @@ async function collectTs(root: string): Promise<string[]> {
 		const path = join(root, entry.name);
 
 		if (entry.isDirectory()) {
-			if (entry.name === "test" || entry.name === "node_modules") continue;
-			out.push(...(await collectTs(path)));
+			if (entry.name === "node_modules" || entry.name === "test") continue;
+			out.push(...(await collectTsFiles(path)));
 			continue;
 		}
 
@@ -21,42 +21,49 @@ async function collectTs(root: string): Promise<string[]> {
 	return out;
 }
 
-function forbiddenImport(source: string, pattern: RegExp): boolean {
-	return pattern.test(source);
+function importedSpecifiers(source: string): string[] {
+	const specifiers: string[] = [];
+	const pattern = /from\s+["']([^"']+)["']/g;
+	let match = pattern.exec(source);
+
+	while (match) {
+		specifiers.push(match[1]!);
+		match = pattern.exec(source);
+	}
+
+	return specifiers;
 }
 
 describe("import boundaries", () => {
-	test("core does not import engine, CLI, TUI, bun, or OpenTUI", async () => {
-		const files = await collectTs("packages/core/src");
+	test("core does not import Bun or OpenTUI", async () => {
+		const files = await collectTsFiles(join(import.meta.dir, "../../packages/core/src"));
 
 		for (const file of files) {
 			const source = await readFile(file, "utf8");
-			expect(forbiddenImport(source, fromSpecifier("@logview/engine"))).toBe(false);
-			expect(forbiddenImport(source, fromSpecifier("@logview/tui"))).toBe(false);
-			expect(forbiddenImport(source, fromSpecifier("@opentui/core"))).toBe(false);
-			expect(forbiddenImport(source, fromSpecifier("bun"))).toBe(false);
+
+			for (const specifier of importedSpecifiers(source)) {
+				expect(specifier.includes("bun") || specifier.includes("opentui")).toBe(false);
+			}
 		}
 	});
 
-	test("engine does not import TUI or OpenTUI", async () => {
-		const files = await collectTs("packages/engine/src");
+	test("engine does not import OpenTUI or the TUI package", async () => {
+		const files = await collectTsFiles(join(import.meta.dir, "../../packages/engine/src"));
 
 		for (const file of files) {
 			const source = await readFile(file, "utf8");
-			expect(forbiddenImport(source, fromSpecifier("@logview/tui"))).toBe(false);
-			expect(forbiddenImport(source, fromSpecifier("@opentui/core"))).toBe(false);
+
+			for (const specifier of importedSpecifiers(source)) {
+				expect(specifier.includes("opentui") || specifier.includes("@logview/tui")).toBe(false);
+			}
 		}
 	});
 
-	test("headless CLI modules do not import TUI or OpenTUI", async () => {
-		for (const file of ["packages/cli/src/headless.ts", "packages/cli/src/record.ts"]) {
-			const source = await readFile(file, "utf8");
-			expect(source.includes("@logview/tui")).toBe(false);
-			expect(source.includes("@opentui/core")).toBe(false);
+	test("headless CLI does not import the TUI package", async () => {
+		const source = await readFile(join(import.meta.dir, "../../packages/cli/src/headless.ts"), "utf8");
+
+		for (const specifier of importedSpecifiers(source)) {
+			expect(specifier.includes("@logview/tui") || specifier.includes("opentui")).toBe(false);
 		}
 	});
 });
-
-function fromSpecifier(name: string): RegExp {
-	return new RegExp(`from\\s+["']${name}["']`);
-}

@@ -94,7 +94,9 @@ export class HistoryStore implements History {
 			const event = this.events[this.start + i];
 
 			if (!event) break;
+
 			if (after !== null && event.id <= after) continue;
+
 			if (event.id > through) break;
 
 			out.push(event);

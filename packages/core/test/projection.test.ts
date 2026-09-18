@@ -34,6 +34,7 @@ describe("projection", () => {
 
 	test("projects parsed rows with a selection marker and clips long messages", () => {
 		const raw = "1760000000.123456     1     1 I Database: " + "x".repeat(400);
+
 		const rows = projectRows(
 			[
 				event(1, raw, {
@@ -48,6 +49,7 @@ describe("projection", () => {
 			1,
 			80,
 		);
+
 		expect(rows).toHaveLength(1);
 		expect(rows[0]!.selected).toBe(true);
 		expect(rows[0]!.level).toBe("I");

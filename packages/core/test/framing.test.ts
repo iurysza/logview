@@ -13,6 +13,7 @@ describe("framing and logcat", () => {
 			maxLineBytes: 64 * 1024,
 			maxLines: 16,
 		});
+
 		expect(first.lines).toHaveLength(0);
 
 		const second = frameBytes(first.state, bytes.subarray(splitAt), {
@@ -20,9 +21,11 @@ describe("framing and logcat", () => {
 			maxLineBytes: 64 * 1024,
 			maxLines: 16,
 		});
+
 		expect(second.lines).toHaveLength(1);
 		const parsed = parseLogcatLine(second.lines[0]!);
 		expect(parsed.kind).toBe("event");
+
 		if (parsed.kind !== "event") return;
 		expect(parsed.rawText).toBe(line.trimEnd());
 		expect(parsed.metadata?.level).toBe("I");
@@ -35,6 +38,7 @@ describe("framing and logcat", () => {
 			maxLineBytes: 64 * 1024,
 			maxLines: 8,
 		});
+
 		expect(parseLogcatLine(crlf.lines[0]!).kind).toBe("event");
 
 		const eof = frameBytes(emptyFramerState(), new TextEncoder().encode("1760000000.000002  1  1 I T: unterminated"), {
@@ -42,6 +46,7 @@ describe("framing and logcat", () => {
 			maxLineBytes: 64 * 1024,
 			maxLines: 8,
 		});
+
 		expect(eof.lines[0]?.endedWithLf).toBe(false);
 
 		const invalid = parseLogcatLine({
@@ -49,7 +54,9 @@ describe("framing and logcat", () => {
 			endedWithLf: true,
 			omittedBytes: 0,
 		});
+
 		expect(invalid.kind).toBe("event");
+
 		if (invalid.kind === "event") expect(invalid.invalidUtf8).toBe(true);
 
 		const blank = parseLogcatLine({ bytes: new Uint8Array(), endedWithLf: true, omittedBytes: 0 });
@@ -60,6 +67,7 @@ describe("framing and logcat", () => {
 			endedWithLf: true,
 			omittedBytes: 0,
 		});
+
 		expect(marker).toEqual({ kind: "control", control: "buffer-marker" });
 
 		const long = new Uint8Array(20);

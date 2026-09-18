@@ -11,6 +11,7 @@ export class ManualScheduler implements Scheduler {
 	after(delayMs: number, task: () => void): Cancel {
 		const item = { at: this.now + delayMs, run: task, cancelled: false };
 		this.tasks.push(item);
+
 		return () => {
 			item.cancelled = true;
 		};
@@ -31,6 +32,7 @@ export class ManualScheduler implements Scheduler {
 	async flush(): Promise<void> {
 		for (let guard = 0; guard < 10_000; guard += 1) {
 			const due: Array<() => void> = [];
+
 			for (const task of this.tasks) {
 				if (!task.cancelled && task.at <= this.now) due.push(task.run);
 			}
@@ -42,6 +44,7 @@ export class ManualScheduler implements Scheduler {
 			);
 
 			if (due.length === 0) return;
+
 			for (const run of due) run();
 			await Promise.resolve();
 		}

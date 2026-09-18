@@ -40,12 +40,14 @@ export function validateDimensions(
 			message: "columns must be a positive safe integer",
 		});
 	}
+
 	if (!Number.isSafeInteger(rows) || rows < 1) {
 		return err({
 			kind: "invalid-size",
 			message: "rows must be a positive safe integer",
 		});
 	}
+
 	return ok({ columns, rows });
 }
 
