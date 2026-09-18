@@ -57,6 +57,8 @@ export {
 	packetFromChunk,
 	RECORDING_PROFILE,
 	syntheticRecordingHeader,
+	sanitizedRecordingHeader,
+	SANITIZED_REDACTION_VERSION,
 	validateRecordingSequence,
 } from "./recording-schema.ts";
 

@@ -34,7 +34,7 @@ bun run test:headless
 bun run check
 ```
 
-`test:headless` runs **anti-slop** (Oxlint) then core, engine, CLI, architecture, and quality tests. It does not load OpenTUI, start ADB, or sleep on wall-clock timers. Tests drive the public `Session` API with a scripted source and a manual scheduler.
+`test:headless` runs **anti-slop** (Oxlint) then core, engine, CLI, architecture, and quality tests. It does not load OpenTUI, start a physical ADB server, or sleep on wall-clock timers. Tests drive the public `Session` API with a scripted source and a manual scheduler.
 
 `bun run check` is the default quality path: anti-slop + TypeScript + the same headless tests.
 
@@ -52,6 +52,53 @@ bun run lint
 bun run lint:fix   # readable-spacing autofix, then re-lint
 ```
 
+## Live ADB smoke
+
+CI uses a fake `adb` at `tests/support/adb-stubs/` so live capture can be exercised without a phone:
+
+```sh
+bun run test:adapters
+bun run logview live --headless --adb tests/support/adb-stubs/one-device --serial emulator-5554
+```
+
+On a real authorized device:
+
+```sh
+bun run logview live --serial DEVICE
+bun run logview record --serial DEVICE --out sessions/device.lvr.jsonl --duration 10
+```
+
+With no device, several devices and no `--serial`, or an unauthorized/offline serial, the command explains the problem and exits `1`.
+
+## Terminal UI
+
+Interactive live/replay loads the TUI only when stdout is a TTY. Replay the sanitized fixture:
+
+```sh
+bun run logview replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --speed instant
+bun run test:tui
+```
+
+`test:tui` covers chrome, key decoding, the bounded row pool, and a PTY smoke that paints the session and sends `↑`, `G`, and `q`.
+
+The TUI uses **Catppuccin Mocha** for chrome and log rows. Message text gets Tailspin-style highlights (dates, numbers, keywords, URLs, IPs, UUIDs, paths, quotes, HTTP methods) mapped onto that palette. Selection still uses the `›` marker so it works without color. Set `NO_COLOR=1` for a plain dump.
+
+## Fixtures
+
+- `tests/fixtures/synthetic/` — tiny recordings for schema and CLI tests.
+- `tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl` — reviewed sanitized real-pattern capture (`provenance: sanitized-real`). See `tests/fixtures/real/MANIFEST.md`.
+
+## Benchmarks
+
+PRD timings stay **advisory** on shared runners. Structural bounds (visible row count, history charge, drained queue, filter publication) run in `bun run check`.
+
+```sh
+bun run bench:headless
+bun run bench:full          # 100k-event filter with a 128 MiB history-charge cap
+```
+
+Each JSON report records Bun version, OS, CPU, memory, seed, line-size plan, RSS/heap, filter time, and navigation p95. Do not treat a single FPS number as proof of responsiveness.
+
 ## Architecture
 
 Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). Core has no Bun or OpenTUI imports. Effect is internal:
@@ -64,15 +111,18 @@ Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). 
 
 Public contracts stay those in `specs/2026-09-18-logview-technical-design.md` (`Session`, snapshots, commands, `LogEvent`).
 
+Natural-language filtering (Jev) remains specified as a post-storage classifier port. V1 does not add a runtime classifier module.
+
 ## Scripts
 
 | Script | What it does |
 |---|---|
 | `bun run test:headless` | anti-slop + headless tests |
-| `bun run test:adapters` | process and recording file tests |
+| `bun run test:adapters` | process, recording, sanitized fixture, and live-ADB stub tests |
+| `bun run test:tui` | TUI chrome, keys, and PTY smoke |
 | `bun run typecheck` | `tsc --noEmit` |
 | `bun run check` | lint + typecheck + headless tests |
-| `bun run bench:headless` | fixed-seed headless ingest measurement |
-| `bun run bench:tui` | same engine workload labeled as TUI mode |
+| `bun run bench:headless` | fixed-seed ingest, burst, and filter measurement |
+| `bun run bench:full` | PRD-scale filter measurement (advisory timings) |
 
 Recordings under `sessions/` are gitignored. Keep synthetic fixtures in `tests/fixtures/synthetic/`.

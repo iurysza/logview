@@ -1,26 +1,19 @@
-import { createSession, defaultSessionOptions } from "@logview/engine";
-import { ManualScheduler } from "../tests/support/manual-scheduler.ts";
-import { ScriptedSource } from "../tests/support/scripted-source.ts";
-import { generateLines } from "./generate.ts";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
+import { DEFAULT_MAX_EVENTS, DEFAULT_MAX_HISTORY_CHARGE_BYTES } from "@logview/core";
+import { benchEnvironment, measureSession, type BenchMode, type BenchMeasurement } from "./session-bench.ts";
 
-const DEFAULT_COUNT = 1_000;
+const DEFAULT_COUNT = 2_000;
 
-const SEED = 20260918;
+const FULL_COUNT = 100_000;
 
-type BenchMode = "headless" | "tui";
+const FILTER_CHARGE_BYTES = 128 * 1024 * 1024;
 
-type BenchResult = Readonly<{
-	ok: true;
-	mode: BenchMode;
-	seed: number;
-	count: number;
-	elapsedMs: number;
-	admitted: number;
-	retained: number;
-	chargedHistoryBytes: number;
-	rowObjects: number;
-	matchedEvents: number;
-	queuedBytes: number;
+type BenchReport = Readonly<{
+	advisoryTimings: true;
+	fullScale: boolean;
+	environment: ReturnType<typeof benchEnvironment>;
+	measurements: readonly BenchMeasurement[];
 }>;
 
 function readFlag(argv: readonly string[], flag: string): string | null {
@@ -39,9 +32,9 @@ function readMode(argv: readonly string[]): BenchMode {
 	return "headless";
 }
 
-function readCount(argv: readonly string[]): number {
+function readCount(argv: readonly string[], fullScale: boolean): number {
 	const fromArg = readFlag(argv, "--count");
-	const raw = fromArg ?? process.env.BENCH_COUNT ?? String(DEFAULT_COUNT);
+	const raw = fromArg ?? process.env.BENCH_COUNT ?? String(fullScale ? FULL_COUNT : DEFAULT_COUNT);
 	const count = Number(raw);
 
 	if (!Number.isSafeInteger(count) || count < 1) return DEFAULT_COUNT;
@@ -51,69 +44,65 @@ function readCount(argv: readonly string[]): number {
 
 async function main(): Promise<void> {
 	const mode = readMode(process.argv);
-	const count = readCount(process.argv);
-	const source = new ScriptedSource();
-	const scheduler = new ManualScheduler();
+	const fullScale = process.argv.includes("--full");
+	const count = readCount(process.argv, fullScale);
+	const columns = 80;
+	const rows = 24;
+	const outPath = readFlag(process.argv, "--out");
+	const ingestCount = count;
+	const filterCount = fullScale ? FULL_COUNT : Math.min(count, 8_000);
+	const filterCharge = fullScale ? FILTER_CHARGE_BYTES : DEFAULT_MAX_HISTORY_CHARGE_BYTES;
 
-	const created = createSession(
-		defaultSessionOptions({
-			sessionId: "bench",
-			maxEvents: count,
-			rows: 24,
-			columns: 80,
-		}),
-		{
-			source,
-			scheduler,
-		},
-	);
-
-	if (!created.ok) {
-		process.stderr.write(`${created.error.message}\n`);
-		process.exitCode = 2;
-
-		return;
-	}
-
-	const session = created.value;
-	const startedAt = performance.now();
-	const started = session.start();
-
-	if (!started.ok) {
-		process.stderr.write(`failed to start: ${started.error.kind}\n`);
-		process.exitCode = 1;
-
-		return;
-	}
-
-	const lines = generateLines(count, SEED);
-
-	for (let index = 0; index < lines.length; index += 1) {
-		source.pushLine(lines[index]!, index);
-	}
-
-	source.end();
-	await scheduler.runUntilIdle();
-	await session.sourceDone;
-	const elapsedMs = performance.now() - startedAt;
-	const snapshot = session.snapshot();
-	await session.stop();
-
-	const result: BenchResult = {
-		ok: true,
+	const ingest = await measureSession({
 		mode,
-		seed: SEED,
-		count,
-		elapsedMs,
-		admitted: snapshot.stats.admittedEvents,
-		retained: snapshot.stats.retainedEvents,
-		chargedHistoryBytes: snapshot.stats.chargedHistoryBytes,
-		rowObjects: snapshot.rows.length,
-		matchedEvents: snapshot.stats.matchedEvents,
-		queuedBytes: snapshot.stats.queuedBytes,
+		workload: "ingest",
+		count: ingestCount,
+		maxEvents: Math.max(ingestCount, DEFAULT_MAX_EVENTS),
+		maxHistoryChargeBytes: DEFAULT_MAX_HISTORY_CHARGE_BYTES,
+		columns,
+		rows,
+		filterText: null,
+		moves: 0,
+	});
+
+	const burst = await measureSession({
+		mode,
+		workload: "burst",
+		count: fullScale ? 50_000 : Math.min(count, 5_000),
+		maxEvents: fullScale ? 50_000 : Math.min(count, 5_000),
+		maxHistoryChargeBytes: DEFAULT_MAX_HISTORY_CHARGE_BYTES,
+		columns,
+		rows,
+		filterText: null,
+		moves: 0,
+	});
+
+	const filter = await measureSession({
+		mode,
+		workload: "filter-replace",
+		count: filterCount,
+		maxEvents: filterCount,
+		maxHistoryChargeBytes: filterCharge,
+		columns,
+		rows,
+		filterText: "KEEP",
+		moves: 32,
+	});
+
+	const report: BenchReport = {
+		advisoryTimings: true,
+		fullScale,
+		environment: benchEnvironment(columns, rows),
+		measurements: [ingest, burst, filter],
 	};
 
-	process.stdout.write(`${JSON.stringify(result)}\n`);
+	const json = `${JSON.stringify(report)}\n`;
+	process.stdout.write(json);
+
+	if (outPath !== null) {
+		mkdirSync(dirname(outPath), { recursive: true });
+		writeFileSync(outPath, json);
+	}
 }
 
 await main();
