@@ -1,0 +1,13 @@
+{
+  "name": "@logview/engine",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@logview/core": "workspace:*",
+    "effect": "3.22.2"
+  }
+}

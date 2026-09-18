@@ -1,0 +1,3 @@
+{"kind":"header","format":"logview-recording","version":1,"profile":"threadtime-epoch-usec-v1","provenance":"synthetic","redactionVersion":null}
+{"kind":"chunk","packetSeq":0,"offsetMs":0,"stream":"stdout","base64":"MTc2MDAwMDAwMC4wMDAwMDEgICAgIDEgICAgIDEgSSBUZXN0OiBoZWxsbwo="}
+{"kind":"end","chunks":1,"outcome":"eof","error":null}

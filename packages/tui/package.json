@@ -1,0 +1,13 @@
+{
+  "name": "@logview/tui",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/app.ts"
+  },
+  "dependencies": {
+    "@logview/core": "workspace:*",
+    "@logview/engine": "workspace:*"
+  }
+}

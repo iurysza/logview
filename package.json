@@ -1,0 +1,29 @@
+{
+  "name": "logview",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "logview": "bun packages/cli/src/main.ts",
+    "lint": "oxlint -c oxlint.config.ts packages tests bench",
+    "lint:fix": "oxlint -c oxlint.config.ts --fix packages tests bench",
+    "test": "bun test packages/core packages/engine packages/cli tests",
+    "test:headless": "bun run lint && bun test packages/core packages/engine packages/cli tests/architecture tests/quality",
+    "test:adapters": "bun test packages/engine/test/adb-contract.test.ts packages/engine/test/recording.test.ts",
+    "test:tui": "bun test packages/tui",
+    "typecheck": "bunx tsc --noEmit -p tsconfig.json",
+    "check": "bun run lint && bun run typecheck && bun test packages/core packages/engine packages/cli tests/architecture tests/quality",
+    "bench:headless": "bun bench/run.ts --mode headless",
+    "bench:tui": "bun bench/run.ts --mode tui"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "1.83.0",
+    "bun-types": "1.4.2",
+    "oxlint": "1.83.0",
+    "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "effect": "3.22.2"
+  }
+}
