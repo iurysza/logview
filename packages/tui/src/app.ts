@@ -166,42 +166,49 @@ function inspectWidth(columns: number): number {
 	return Math.min(48, Math.max(32, Math.floor(columns * 0.36)));
 }
 
-function inspectLines(event: LogEvent | null, width: number): string[] {
-	if (!event) return [padToWidth("No event selected", width)];
+function inspectLines(event: LogEvent | null, width: number, height: number): string[] {
+	const actions = ["t filter tag", "p filter pid", "Esc close"];
+	const content: string[] = [];
 
-	const lines: string[] = ["Event", ""];
-
-	if (event.metadata) {
-		lines.push(formatTimestamp(event.metadata.epochMicros));
-		lines.push(event.metadata.level);
-		lines.push(`PID ${event.metadata.pid}  TID ${event.metadata.tid}`);
-		lines.push(`tag ${tagText(event.rawText, event.metadata.tag)}`);
-		lines.push("");
-		lines.push(sanitizeDisplay(messageText(event.rawText, event.metadata.message)));
+	if (!event) {
+		content.push("No event selected");
 	} else {
-		lines.push(sanitizeDisplay(event.rawText));
+		content.push("Event", "");
+
+		if (event.metadata) {
+			content.push(formatTimestamp(event.metadata.epochMicros));
+			content.push(event.metadata.level);
+			content.push(`PID ${event.metadata.pid}  TID ${event.metadata.tid}`);
+			content.push(`tag ${tagText(event.rawText, event.metadata.tag)}`);
+			content.push("");
+			content.push(sanitizeDisplay(messageText(event.rawText, event.metadata.message)));
+		} else {
+			content.push(sanitizeDisplay(event.rawText));
+		}
+
+		if (event.continuations.length > 0) {
+			content.push("");
+
+			for (const line of event.continuations) content.push(sanitizeDisplay(line));
+		}
+
+		content.push("");
+		content.push("Raw");
+		content.push(sanitizeDisplay(event.rawText));
+
+		for (const line of event.continuations) content.push(sanitizeDisplay(line));
 	}
-
-	if (event.continuations.length > 0) {
-		lines.push("");
-
-		for (const line of event.continuations) lines.push(sanitizeDisplay(line));
-	}
-
-	lines.push("");
-	lines.push("Raw");
-	lines.push(sanitizeDisplay(event.rawText));
-
-	for (const line of event.continuations) lines.push(sanitizeDisplay(line));
-
-	lines.push("");
-	lines.push("t filter tag");
-	lines.push("p filter pid");
-	lines.push("Esc close");
 
 	const fitted: string[] = [];
+	const rows = Math.max(1, height);
+	const actionRows = Math.min(actions.length, rows);
+	const contentRows = Math.max(0, rows - actionRows);
 
-	for (const line of lines) fitted.push(padToWidth(line, width));
+	for (let i = 0; i < contentRows; i += 1) fitted.push(padToWidth(content[i] ?? "", width));
+
+	for (let i = actions.length - actionRows; i < actions.length; i += 1) {
+		fitted.push(padToWidth(actions[i]!, width));
+	}
 
 	return fitted;
 }
@@ -320,9 +327,14 @@ function layoutLines(
 	if (helpOpen) {
 		body = fillPane(helpLines(columns), viewport, columns, style);
 	} else if (inspectOpen && !wideInspect) {
-		body = fillPane(inspectLines(snapshot.selectedEvent, columns), viewport, columns, style);
+		body = fillPane(inspectLines(snapshot.selectedEvent, columns, viewport), viewport, columns, style);
 	} else if (wideInspect) {
-		body = splitPane(body, inspectLines(snapshot.selectedEvent, inspectWidth(columns)), columns, style);
+		body = splitPane(
+			body,
+			inspectLines(snapshot.selectedEvent, inspectWidth(columns), viewport),
+			columns,
+			style,
+		);
 	}
 
 	const lines = [...header, ...body, footer];

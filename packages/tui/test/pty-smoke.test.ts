@@ -34,6 +34,8 @@ describe("tui pty smoke", () => {
 		expect(stdout.includes("logview")).toBe(true);
 		expect(stdout.includes("q quit") || stdout.includes("REPLAY")).toBe(true);
 		expect(stdout.includes("日本語")).toBe(true);
+		expect(stdout.includes("t filter tag")).toBe(true);
+		expect(stdout.includes("^[[31m")).toBe(true);
 		expect(stdout.includes("\u001b[31m")).toBe(false);
 		expect(stdout.includes("\n.M") || stdout.includes("\r.M")).toBe(false);
 		expect(stderr).not.toContain("Traceback");

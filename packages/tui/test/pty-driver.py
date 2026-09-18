@@ -94,10 +94,10 @@ def main() -> int:
     captured += drain(fd, time.monotonic() + 0.6)
 
     os.write(fd, b"\x1b[A")
-    time.sleep(0.05)
+    time.sleep(0.08)
     os.write(fd, b"\r")
     time.sleep(0.08)
-    captured += drain(fd, time.monotonic() + 0.5)
+    captured += drain(fd, time.monotonic() + 1.2, b"t filter tag")
     os.write(fd, b"\x1b")
     time.sleep(0.05)
     os.write(fd, b"G")

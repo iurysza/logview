@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { LIST_FOCUS, displayWidth, type ViewRow } from "@logview/core";
+import { INSPECT_FOCUS, LIST_FOCUS, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
 import type { SessionSnapshot } from "@logview/engine";
 import { EMPTY_FILTER, EMPTY_VIEW } from "@logview/core";
 import {
@@ -46,6 +46,31 @@ const snapshot: SessionSnapshot = {
 	notice: null,
 };
 
+const selectedEvent: LogEvent = {
+	id: 7,
+	sourceOffsetMs: 0,
+	rawText: "1760000000.002800  4321  4321 W Database: Retry after lock timeout",
+	metadata: {
+		epochMicros: 1760000000002800,
+		pid: 4321,
+		tid: 4321,
+		level: "W",
+		tag: { start: 32, end: 40 },
+		message: { start: 42, end: 66 },
+	},
+	continuations: ["\tat com.example.logview.demo.db.Store.lock(Store.java:88)"],
+	endedWithLf: true,
+	omittedBytes: 0,
+	invalidUtf8: false,
+	chargeBytes: 120,
+};
+
+const inspectSnapshot: SessionSnapshot = {
+	...snapshot,
+	selectedEvent,
+	stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 15 },
+};
+
 describe("tui chrome", () => {
 	test("formats status, filters, footer, and hints without a renderer", () => {
 		expect(formatStatus(snapshot)).toContain("REPLAY • END");
@@ -61,6 +86,33 @@ describe("tui chrome", () => {
 
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(72);
+		}
+	});
+
+	test("Enter inspect is a full-viewport overlay on a narrow frame", () => {
+		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 72, 16, "plain");
+		expect(frame).toHaveLength(16);
+		expect(frame.join("\n")).toContain("Event");
+		expect(frame.join("\n")).toContain("t filter tag");
+		expect(frame.join("\n")).toContain("p filter pid");
+		expect(frame.join("\n")).toContain("Esc close");
+		expect(frame.join("\n")).toContain("Retry after lock timeout");
+		expect(frame.join("\n")).toContain("Store.lock");
+
+		for (const line of frame) {
+			expect(displayWidth(line)).toBe(72);
+		}
+	});
+
+	test("wide inspect splits the log list and the pane", () => {
+		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 120, 18, "plain");
+		expect(frame).toHaveLength(18);
+		expect(frame.join("\n")).toContain("│");
+		expect(frame.join("\n")).toContain("Event");
+		expect(frame.join("\n")).toContain("t filter tag");
+
+		for (const line of frame) {
+			expect(displayWidth(line)).toBe(120);
 		}
 	});
 
