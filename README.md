@@ -4,8 +4,27 @@ Keyboard-driven Android log viewer. V1 is a **headless engine**: live capture, r
 
 ## Requirements
 
-- [Bun](https://bun.sh) 1.4+
+- A [release binary](#install-a-release-binary) or [Bun](https://bun.sh) 1.4+
 - An authorized Android device only for live capture (`adb`)
+
+## Install a release binary
+
+Each GitHub release includes standalone binaries for macOS and Linux on ARM64 and x64. Download the archive for your platform from the [latest release](https://github.com/iurysza/logview/releases/latest), verify it against `SHA256SUMS`, then install it on your `PATH`.
+
+```sh
+VERSION=vX.Y.Z
+PLATFORM=darwin-arm64 # darwin-x64, linux-arm64, or linux-x64
+BASE_URL="https://github.com/iurysza/logview/releases/download/${VERSION}"
+
+curl -fLO "${BASE_URL}/logview-${PLATFORM}.tar.gz"
+curl -fLO "${BASE_URL}/SHA256SUMS"
+grep " logview-${PLATFORM}.tar.gz$" SHA256SUMS | shasum -a 256 -c -
+tar -xzf "logview-${PLATFORM}.tar.gz"
+mkdir -p "$HOME/.local/bin"
+install -m 755 logview "$HOME/.local/bin/logview"
+```
+
+Replace `vX.Y.Z` with the release tag. If `$HOME/.local/bin` is not on your `PATH`, install the binary in another directory on your `PATH`.
 
 ## Commands
 
@@ -55,6 +74,7 @@ adb -s <serial> logcat -b main -b system -b crash -v threadtime -v epoch -v usec
 ## Headless development
 
 ```sh
+bun install --frozen-lockfile
 bun run test:headless
 bun run check
 ```
@@ -164,3 +184,9 @@ Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or
 | `bun run bench:full` | PRD-scale filter measurement (advisory timings) |
 
 Recordings under `sessions/` are gitignored. Keep synthetic fixtures in `tests/fixtures/synthetic/`.
+
+## Releases
+
+Use Conventional Commits on `main`. Release Please opens a release pull request that updates the root version and changelog. Merging that pull request creates the GitHub Release. The release workflow reruns all checks, builds the four standalone binaries, attaches them with `SHA256SUMS`, and fails before publishing assets if verification fails.
+
+Set `RELEASE_PLEASE_TOKEN` as a repository secret. The token needs read and write access to repository contents and pull requests. A personal access token is required because releases created with `GITHUB_TOKEN` do not trigger the separate release-assets workflow.

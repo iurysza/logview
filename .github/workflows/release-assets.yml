@@ -1,0 +1,89 @@
+name: Release assets
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: Verify release source
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run test:adapters
+      - run: bun run test:tui
+      - run: bun run test:ui
+
+  build:
+    name: Build ${{ matrix.asset }}
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: bun-darwin-arm64
+            asset: logview-darwin-arm64
+            smoke-test: false
+          - target: bun-darwin-x64
+            asset: logview-darwin-x64
+            smoke-test: false
+          - target: bun-linux-arm64
+            asset: logview-linux-arm64
+            smoke-test: false
+          - target: bun-linux-x64
+            asset: logview-linux-x64
+            smoke-test: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - name: Compile the standalone binary
+        run: |
+          mkdir -p "dist/${{ matrix.asset }}"
+          bun build --compile --target "${{ matrix.target }}" packages/cli/src/main.ts --outfile "dist/${{ matrix.asset }}/logview"
+          tar -C "dist/${{ matrix.asset }}" -czf "dist/${{ matrix.asset }}.tar.gz" logview
+          tar -tzf "dist/${{ matrix.asset }}.tar.gz"
+      - name: Smoke test the Linux x64 binary
+        if: matrix.smoke-test
+        run: "dist/${{ matrix.asset }}/logview --help"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/${{ matrix.asset }}.tar.gz
+          if-no-files-found: error
+
+  publish:
+    name: Publish release assets
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: logview-*
+          merge-multiple: true
+          path: release
+      - name: Write release checksums
+        working-directory: release
+        run: shasum -a 256 *.tar.gz > SHA256SUMS
+      - name: Attach binaries and checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" release/*.tar.gz release/SHA256SUMS --clobber

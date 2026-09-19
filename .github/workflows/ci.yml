@@ -1,4 +1,4 @@
-name: UI
+name: CI
 
 on:
   pull_request:
@@ -13,19 +13,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  terminal-ui:
+  quality:
+    name: Check, adapters, and TUI
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
-      - run: bun run test:ui
-      - if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ui-failure-evidence
-          path: generated/ui
-          if-no-files-found: ignore
+      - run: bun run check
+      - run: bun run test:adapters
+      - run: bun run test:tui
