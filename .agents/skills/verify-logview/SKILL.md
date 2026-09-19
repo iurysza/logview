@@ -56,6 +56,8 @@ bun .agents/skills/verify-logview/doctor.ts
 
 It answers whether this checkout is worth driving. It checks Bun 1.4+, the pinned Terminal Control `0.4.1` binary, and the sanitized replay fixture. It does not start the TUI.
 
+If doctor cannot resolve `termctrl`, the optional platform package is missing. On GNU/Linux x64 that package is `@kitlangton/terminal-control-linux-x64-gnu@0.4.1`. Run `bun install` again. Do not add the native package as a required dependency. Do not use a `termctrl` from `PATH`.
+
 A session you launched is healthy when:
 
 - the current visible screen contains `logview` and a mode label such as `REPLAY • END` or `REPLAY • BROWSE`
