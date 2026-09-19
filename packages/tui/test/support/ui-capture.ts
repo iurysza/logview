@@ -106,7 +106,12 @@ export async function withTerminalSession<T>(
 	}
 
 	if (workError && cleanupErrors.length > 0) {
-		throw new AggregateError([workError, ...cleanupErrors], "UI scenario and terminal cleanup failed");
+		const workMessage = workError instanceof Error ? workError.message : "UI scenario failed";
+
+		throw new AggregateError(
+			[workError, ...cleanupErrors],
+			`${workMessage}; terminal cleanup also failed`,
+		);
 	}
 
 	if (workError) throw workError;
