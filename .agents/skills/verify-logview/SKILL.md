@@ -56,7 +56,7 @@ bun .agents/skills/verify-logview/doctor.ts
 
 It answers whether this checkout is worth driving. It checks Bun 1.4+, the pinned Terminal Control `0.4.1` binary, and the sanitized replay fixture. It does not start the TUI.
 
-If doctor cannot resolve `termctrl`, the optional platform package is missing. On GNU/Linux x64 that package is `@kitlangton/terminal-control-linux-x64-gnu@0.4.1`. Run `bun install` again. Do not add the native package as a required dependency. Do not use a `termctrl` from `PATH`.
+`@logview/tui` lists the four Terminal Control platform packages as optional dependencies. `bun install` should install the one that matches this OS and CPU. If doctor still cannot resolve `termctrl`, rerun `bun install` from the repository root. Do not add the native package as a required dependency. Do not use a `termctrl` from `PATH`.
 
 A session you launched is healthy when:
 
@@ -150,6 +150,6 @@ bun run test:ui
 bun run logview replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --speed instant --headless
 ```
 
-`ui:verify` is the TUI harness. `test:ui` is the same scenarios plus capture-policy and public-`Session` state tests. Headless CLI is the non-TUI harness.
+`ui:verify` is the TUI harness. `test:ui` runs capture-policy tests, public-`Session` state tests, and every named scenario that already has a reviewed baseline under `packages/tui/test/baselines/`. Headless CLI is the non-TUI harness.
 
 Keep the map honest with `maintain-verification-skill` after user-facing behavior changes.
