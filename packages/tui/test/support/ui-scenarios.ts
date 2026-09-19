@@ -20,8 +20,11 @@ import {
 } from "./ui-capture.ts";
 
 const REPLAY_FIXTURE = "tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl";
+
 const REPLAY_DONE = "REPLAY • END";
+
 const REPLAY_BROWSE = "REPLAY • BROWSE";
+
 const DEFAULT_VIEWPORT: Viewport = { cols: 72, rows: 16 };
 
 export const UI_SCENARIO_NAMES = [
@@ -105,6 +108,7 @@ export async function runUiScenario(options: {
 							viewport,
 						},
 					});
+
 					captures.push({ checkpoint, capture: saved });
 
 					return saved;
@@ -117,7 +121,7 @@ export async function runUiScenario(options: {
 }
 
 export function isUiScenarioName(value: string): value is UiScenarioName {
-	return UI_SCENARIO_NAMES.includes(value as UiScenarioName);
+	return UI_SCENARIO_NAMES.some((name) => name === value);
 }
 
 const SCENARIOS: readonly UiScenario[] = [
@@ -204,6 +208,7 @@ const SCENARIOS: readonly UiScenario[] = [
 		async run(context) {
 			const narrow = await context.capture("columns-48", { cols: 48, rows: 12 });
 			const header = firstLine(narrow);
+
 			if (!header.includes("logview") || !header.endsWith("15 events") || displayWidth(header) !== 48) {
 				throw new Error(`48-column ANSI header is not fitted: ${JSON.stringify(header)}`);
 			}
@@ -224,6 +229,7 @@ const SCENARIOS: readonly UiScenario[] = [
 			if (!errorCell || !samePaletteColor(errorCell.foreground, MOCHA.red)) {
 				throw new Error("highlighted error severity is missing its Catppuccin red foreground");
 			}
+
 			expectText(final, "token=REDACTED", "highlighted replay");
 		},
 	},
@@ -233,6 +239,7 @@ const SCENARIOS: readonly UiScenario[] = [
 		color: "never",
 		async run(context) {
 			const final = await context.capture("final", DEFAULT_VIEWPORT);
+
 			const colored = final.snapshot.spans.some(
 				(span) =>
 					!sameTerminalColor(span.foreground, final.snapshot.foreground) ||
@@ -311,6 +318,7 @@ function sameTerminalColor(
 
 async function gitRevision(cwd: string): Promise<string> {
 	const process = Bun.spawn(["git", "rev-parse", "HEAD"], { cwd, stdin: "ignore", stdout: "pipe", stderr: "pipe" });
+
 	const [stdout, stderr, code] = await Promise.all([
 		new Response(process.stdout).text(),
 		new Response(process.stderr).text(),

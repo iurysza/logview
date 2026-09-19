@@ -82,6 +82,7 @@ export async function writeFailureEvidence(options: {
 		await writeFile(join(directory, "expected.snapshot.json"), serializeSnapshot(expectedSnapshot), "utf8");
 		await writeFile(join(directory, "expected.txt"), textFromSnapshot(expectedSnapshot), "utf8");
 		await writeFile(join(directory, "cells.diff.txt"), `${formatSnapshotDiff(comparison.diff)}\n`, "utf8");
+
 		return;
 	}
 

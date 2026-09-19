@@ -64,6 +64,7 @@ describe("UI state scenarios", () => {
 		const frame = layoutFrame(scenario.session.snapshot(), LIST_FOCUS, 39, 7, "plain");
 
 		expect(frame[0]).toContain("Terminal too small");
+
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(39);
 			expect(line.includes("\u001b")).toBe(false);
