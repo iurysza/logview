@@ -303,6 +303,7 @@ function pinnedBinaryPath(): string {
 		const terminalControlPackage = fileURLToPath(
 			import.meta.resolve("@kitlangton/terminal-control/package.json"),
 		);
+
 		return createRequire(terminalControlPackage).resolve(`${packageName}/bin/termctrl`);
 	} catch {
 		throw new Error(
