@@ -146,7 +146,7 @@ describe("semantic classification", () => {
 		expect(missing.ok).toBe(false);
 	});
 
-	test("a shuffled batch keeps source order and hides low-relevance rows", async () => {
+	test("a shuffled batch admits only confirmed high-relevance rows in source order", async () => {
 		const ids = Array.from({ length: 20 }, (_, i) => i + 1);
 		const keep = new Set([3, 8, 15]);
 		const classifier = scoringClassifier((eventId) => (keep.has(eventId) ? 0.91 : 0.05));
@@ -172,10 +172,113 @@ describe("semantic classification", () => {
 		expect(snap.rows.map((row) => row.id)).toEqual([3, 8, 15]);
 		expect(snap.stats.matchedEvents).toBe(3);
 		expect(snap.stats.retainedEvents).toBe(20);
-		expect(snap.semantic?.classifiedEvents).toBe(3);
+		expect(snap.semantic?.classifiedEvents).toBe(20);
 
 		await scenario.finish();
 		await scenario.session.stop();
+	});
+
+	test("a retained candidate stays hidden until classification", async () => {
+		const classifier = new ScriptedClassifier();
+
+		const scenario = await openScenario({
+			maxEvents: 20,
+			rows: 12,
+			columns: 80,
+			classifier,
+			semantic: { flushDelayMs: 0, maxBatchItems: 100, threshold: 0.5 },
+		});
+
+		try {
+			await scenario.deliver([1, 2]);
+			scenario.session.dispatch({
+				kind: "set-filter",
+				filter: { minLevel: null, tag: null, pid: null, text: "database locks" },
+			});
+			await tick(scenario.scheduler);
+
+			let snapshot = scenario.session.snapshot();
+			expect(snapshot.rows).toEqual([]);
+			expect(snapshot.stats.matchedEvents).toBe(0);
+			expect(snapshot.semantic?.pendingEvents).toBe(2);
+
+			classifier.resolveShuffled((eventId) => (eventId === 1 ? 0.9 : 0.1));
+			snapshot = await scenario.waitUntil((current) => current.stats.matchedEvents === 1);
+
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1]);
+			expect(snapshot.rows[0]?.classification).toEqual({ kind: "scored", relevance: 0.9 });
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
+	test("a low-scored live arrival stays hidden and a high-scored arrival appears once", async () => {
+		const classifier = new ScriptedClassifier();
+
+		const scenario = await openScenario({
+			maxEvents: 20,
+			rows: 12,
+			columns: 80,
+			classifier,
+			semantic: { flushDelayMs: 0, maxBatchItems: 100, threshold: 0.5 },
+		});
+
+		try {
+			await scenario.deliver([1, 2]);
+			scenario.session.dispatch({
+				kind: "set-filter",
+				filter: { minLevel: null, tag: null, pid: null, text: "database locks" },
+			});
+			await tick(scenario.scheduler);
+			classifier.resolveShuffled(() => 0.9);
+			await scenario.waitUntil((current) => current.stats.matchedEvents === 2);
+
+			await scenario.deliver([3, 4]);
+			await tick(scenario.scheduler);
+
+			let snapshot = scenario.session.snapshot();
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1, 2]);
+			expect(snapshot.semantic?.pendingEvents).toBe(2);
+
+			classifier.resolveShuffled((eventId) => (eventId === 4 ? 0.9 : 0.1));
+			snapshot = await scenario.waitUntil((current) => current.stats.matchedEvents === 3);
+
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1, 2, 4]);
+			expect(snapshot.rows.filter((row) => row.id === 4)).toHaveLength(1);
+			expect(snapshot.rows.some((row) => row.id === 3)).toBe(false);
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
+	test("a failed batch records failure without admitting its candidates", async () => {
+		const classifier = new ScriptedClassifier();
+
+		const scenario = await openScenario({
+			maxEvents: 10,
+			rows: 12,
+			columns: 80,
+			classifier,
+			semantic: { flushDelayMs: 0, maxBatchItems: 1, threshold: 0.5 },
+		});
+
+		try {
+			await scenario.deliver([1]);
+			scenario.session.dispatch({
+				kind: "set-filter",
+				filter: { minLevel: null, tag: null, pid: null, text: "database locks" },
+			});
+			await tick(scenario.scheduler);
+			classifier.pending[0]?.resolve(err({ kind: "auth" }));
+
+			const snapshot = await scenario.waitUntil((current) => current.semantic?.failedEvents === 1);
+
+			expect(snapshot.rows).toEqual([]);
+			expect(snapshot.stats.matchedEvents).toBe(0);
+			expect(snapshot.semantic?.pendingEvents).toBe(0);
+		} finally {
+			await scenario.session.stop();
+		}
 	});
 
 	test("a later query ignores a late response from the previous query", async () => {
@@ -256,7 +359,7 @@ describe("semantic classification", () => {
 		expect(snap.stats.admittedEvents).toBe(6);
 		expect(snap.stats.retainedEvents).toBe(6);
 		expect(snap.semantic?.skippedEvents ?? 0).toBeGreaterThan(0);
-		expect(snap.stats.matchedEvents).toBe(6);
+		expect(snap.stats.matchedEvents).toBe(0);
 
 		await scenario.session.stop();
 	});

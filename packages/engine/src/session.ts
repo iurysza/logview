@@ -52,7 +52,6 @@ import { classifierItemFromEvent } from "./semantic/items.ts";
 import { SemanticCoordinator } from "./semantic/coordinator.ts";
 import {
 	defaultSemanticOptions,
-	queryIdentity,
 	type SemanticOptions,
 	type SemanticQuery,
 	type SemanticStats,
@@ -233,13 +232,16 @@ class SessionImpl implements Session {
 
 		this.requestedRevision += 1;
 		this.filterCancel?.();
+		this.syncSemanticQuery(prepared.value.spec);
+
+		if (this.semanticQueryActive(prepared.value.spec)) this.activeIndex = new VisibleIndexStore();
+
 		this.pendingJob = new FilterJob(
 			this.requestedRevision,
 			prepared.value,
 			this.history.bounds().lastId,
 			this.matcherFor(prepared.value),
 		);
-		this.syncSemanticQuery(prepared.value.spec);
 		this.runFilterSlice();
 		this.bump();
 		this.publishImmediate();
@@ -430,9 +432,12 @@ class SessionImpl implements Session {
 	private refreshMatch(event: LogEvent): void {
 		this.coordinator?.forget(event.id);
 
-		if (!this.eventMatches(event, this.preparedActive)) return;
+		const matchesActive = this.eventMatches(event, this.preparedActive);
+		const semanticActive = this.semanticQueryActive();
 
-		if (this.activeIndex.locate(event.id).exactRank === null) {
+		if (semanticActive) {
+			this.activeIndex.remove(event.id);
+		} else if (matchesActive && this.activeIndex.locate(event.id).exactRank === null) {
 			this.activeIndex.append([event.id]);
 		}
 
@@ -440,7 +445,7 @@ class SessionImpl implements Session {
 			this.pendingJob.appendArrival(event.id, this.eventMatches(event, this.pendingJob.prepared));
 		}
 
-		this.enqueueSemantic([event.id], "arrival");
+		if (semanticActive && matchesActive) this.enqueueSemantic([event.id], "arrival");
 	}
 
 	private commit(events: readonly LogEvent[]): void {
@@ -466,6 +471,7 @@ class SessionImpl implements Session {
 
 		const matchingNew: number[] = [];
 		const newestPrepared = this.pendingJob?.prepared ?? this.preparedActive;
+		const semanticActive = this.semanticQueryActive(newestPrepared.spec);
 		const semanticNew: number[] = [];
 
 		for (const id of outcome.retainedNewIds) {
@@ -473,13 +479,13 @@ class SessionImpl implements Session {
 
 			if (!event) continue;
 
-			if (this.eventMatches(event, this.preparedActive)) matchingNew.push(id);
+			if (!semanticActive && this.eventMatches(event, this.preparedActive)) matchingNew.push(id);
 
 			if (this.pendingJob) {
 				this.pendingJob.appendArrival(id, this.eventMatches(event, this.pendingJob.prepared));
 			}
 
-			if (this.eventMatches(event, newestPrepared)) semanticNew.push(id);
+			if (semanticActive && this.eventMatches(event, newestPrepared)) semanticNew.push(id);
 		}
 
 		this.activeIndex.append(matchingNew);
@@ -522,13 +528,17 @@ class SessionImpl implements Session {
 			return;
 		}
 
-		this.activeIndex = job.publish(this.history.bounds().firstId);
+		const semanticActive = this.semanticQueryActive(job.prepared.spec);
+
+		this.activeIndex = semanticActive ? new VisibleIndexStore() : job.publish(this.history.bounds().firstId);
 		this.preparedActive = job.prepared;
 		this.activeFilter = job.prepared.spec;
 		this.activeFilterRevision = job.revision;
 		this.pendingJob = null;
 		this.historyExpired = false;
-		this.applySemanticHides();
+
+		if (semanticActive) this.reconcileSemanticMatches();
+
 		this.applyNavigation({ kind: "filter-committed" }, 0);
 		this.bump();
 		this.schedulePublish();
@@ -571,12 +581,6 @@ class SessionImpl implements Session {
 			redactionVersion: this.semanticOptions.redactionVersion,
 		};
 
-		const current = this.coordinator.activeQuery();
-
-		if (current && queryIdentity({ ...current, revision: 0 }) === queryIdentity({ ...next, revision: 0 })) {
-			return;
-		}
-
 		this.queryRevision = next.revision;
 		this.coordinator.setQuery({ ...next, revision: this.queryRevision });
 	}
@@ -589,22 +593,43 @@ class SessionImpl implements Session {
 		this.coordinator.enqueue(ids, priority);
 	}
 
-	private applySemanticHides(): void {
-		if (!this.coordinator || !this.semanticQueryActive()) return;
+	private reconcileSemanticMatches(): number {
+		const coordinator = this.coordinator;
+		const query = coordinator?.activeQuery();
 
-		this.coordinator.hideRejected(this.activeIndex);
+		if (!coordinator || !query) return 0;
 
-		if (this.pendingJob && this.semanticQueryActive(this.pendingJob.prepared.spec)) {
-			this.coordinator.hideRejected(this.pendingJob.prefix);
-			this.coordinator.hideRejected(this.pendingJob.tail);
+		const previous = new Set(this.activeIndex.snapshotIds());
+		const bounds = this.history.bounds();
+		const accepted: number[] = [];
+
+		if (bounds.lastId !== null) {
+			for (const event of this.history.readAfter(null, bounds.lastId, bounds.count)) {
+				if (!matchesLocal(event, this.preparedActive)) continue;
+
+				const mark = coordinator.markFor(event.id);
+
+				if (mark.kind === "scored" && mark.relevance >= query.threshold) accepted.push(event.id);
+			}
 		}
+
+		this.activeIndex = new VisibleIndexStore();
+		this.activeIndex.append(accepted);
+
+		let newlyVisible = 0;
+
+		for (const id of accepted) {
+			if (!previous.has(id)) newlyVisible += 1;
+		}
+
+		return newlyVisible;
 	}
 
 	private onSemanticApplied(): void {
-		if (this.closed || this.stopRequested) return;
+		if (this.closed || this.stopRequested || this.pendingJob) return;
 
-		this.applySemanticHides();
-		this.applyNavigation({ kind: "retention" }, 0);
+		const newlyVisible = this.reconcileSemanticMatches();
+		this.applyNavigation(newlyVisible > 0 ? { kind: "arrivals" } : { kind: "retention" }, newlyVisible);
 		this.bump();
 		this.schedulePublish();
 	}
@@ -637,35 +662,13 @@ class SessionImpl implements Session {
 		if (!this.coordinator) return null;
 
 		const query = this.coordinator.activeQuery();
-		let classifiedEvents = 0;
-		let pendingEvents = 0;
-		let skippedEvents = 0;
-		let failedEvents = 0;
-
-		for (let rank = 0; rank < this.activeIndex.size; rank += 1) {
-			const id = this.activeIndex.at(rank);
-
-			if (id === null) continue;
-
-			const mark = this.classificationMark(id);
-
-			if (mark.kind === "scored") classifiedEvents += 1;
-			else if (mark.kind === "pending") pendingEvents += 1;
-			else if (mark.kind === "unknown" && mark.reason === "skipped") skippedEvents += 1;
-			else if (mark.kind !== "none") failedEvents += 1;
-		}
-
-		const queue = this.coordinator.stats();
+		const stats = this.coordinator.stats();
 
 		return {
+			...stats,
 			queryText: query?.text ?? this.activeFilter.text,
 			queryRevision: query?.revision ?? this.queryRevision,
 			threshold: query?.threshold ?? this.semanticOptions.threshold,
-			classifiedEvents,
-			pendingEvents,
-			skippedEvents,
-			failedEvents,
-			inFlight: queue.inFlight,
 		};
 	}
 

@@ -12,7 +12,6 @@ import type {
 } from "./contracts.ts";
 import { encodedItemBytes, encodedRequestBytes, validateClassifyResponse } from "./validate.ts";
 import { Match } from "effect";
-import type { VisibleIndexStore } from "../visible-index.ts";
 
 export type ItemLookup = (id: EventId) => ClassifierItem | null;
 
@@ -31,6 +30,7 @@ export class SemanticCoordinator {
 	private readonly queued = new Set<EventId>();
 	private readonly retried = new Set<string>();
 	private readonly idleWaiters: Array<() => void> = [];
+	private readonly inFlightRequests = new Map<string, Set<EventId>>();
 
 	constructor(
 		private readonly sessionId: SessionId,
@@ -54,6 +54,7 @@ export class SemanticCoordinator {
 		this.backfill.length = 0;
 		this.queued.clear();
 		this.retried.clear();
+		this.inFlightRequests.clear();
 		this.annotations.clear();
 		this.skipped = 0;
 		this.failed = 0;
@@ -102,29 +103,16 @@ export class SemanticCoordinator {
 		for (const id of this.queued.keys()) {
 			if (id < firstRetainedId) this.queued.delete(id);
 		}
+
+		for (const ids of this.inFlightRequests.values()) {
+			for (const id of ids) {
+				if (id < firstRetainedId) ids.delete(id);
+			}
+		}
 	}
 
 	forget(id: EventId): void {
 		this.annotations.delete(id);
-	}
-
-	hideRejected(index: VisibleIndexStore): number {
-		const query = this.query;
-
-		if (query === null) return 0;
-
-		let removed = 0;
-		const ids = index.snapshotIds();
-
-		for (const id of ids) {
-			const mark = this.annotations.get(id);
-
-			if (!mark || mark.kind !== "scored" || mark.relevance >= query.threshold) continue;
-
-			if (index.remove(id)) removed += 1;
-		}
-
-		return removed;
 	}
 
 	markFor(id: EventId): Annotation | { eventId: EventId; kind: "pending" } {
@@ -143,12 +131,16 @@ export class SemanticCoordinator {
 			if (mark.kind === "scored") classifiedEvents += 1;
 		}
 
+		let pendingEvents = this.queued.size;
+
+		for (const ids of this.inFlightRequests.values()) pendingEvents += ids.size;
+
 		return {
 			queryText: query?.text ?? "",
 			queryRevision: query?.revision ?? 0,
 			threshold: query?.threshold ?? this.options.threshold,
 			classifiedEvents,
-			pendingEvents: this.queued.size,
+			pendingEvents,
 			skippedEvents: this.skipped,
 			failedEvents: this.failed,
 			inFlight: this.inFlight,
@@ -274,8 +266,10 @@ export class SemanticCoordinator {
 		const signal = this.generation.signal;
 
 		this.inFlight += 1;
+		this.inFlightRequests.set(request.requestId, new Set(request.items.map((item) => item.eventId)));
 		void this.runBatch(request, signal).finally(() => {
 			this.inFlight -= 1;
+			this.inFlightRequests.delete(request.requestId);
 			this.flushNow();
 		});
 	}
