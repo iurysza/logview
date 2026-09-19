@@ -10,7 +10,7 @@ Use these for design, implementation, review, and writing in this repo:
 
 - `brainstorming`, `setup-goal`, `goal`, `tech-spec`, `domain-modeling`
 - `coding-standards`, `type-breakdown`, `tool-install`
-- `create-verification-skill`, `maintain-verification-skill`
+- `create-verification-skill`, `maintain-verification-skill`, `verify-logview`
 - `better-ui`
 - `readback`, `technical-writing`, `deslopify`, `strunk-writing-quality`, `rephrase`, `bro`
 
