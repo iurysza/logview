@@ -68,6 +68,7 @@ describe("styled UI baselines", () => {
 				index === 0 ? { ...span, foreground: { r: 13, g: 188, b: 121 } } : span,
 			),
 		};
+
 		const diff = diffSnapshots(expected, actual);
 		expect(diff.equal).toBe(false);
 		expect(diff.changes).toContainEqual({
@@ -94,12 +95,14 @@ describe("styled UI baselines", () => {
 
 			await updateBaseline(path, snapshot);
 			const before = await readFile(path, "utf8");
+
 			const changed: StyledSnapshot = {
 				...snapshot,
 				spans: snapshot.spans.map((span, index) =>
 					index === 0 ? { ...span, foreground: { r: 13, g: 188, b: 121 } } : span,
 				),
 			};
+
 			const mismatch = await compareBaseline(path, changed);
 			expect(mismatch.kind).toBe("mismatch");
 			expect(await readFile(path, "utf8")).toBe(before);
@@ -156,6 +159,7 @@ describe("pinned Terminal Control", () => {
 function processExists(pid: number): boolean {
 	try {
 		process.kill(pid, 0);
+
 		return true;
 	} catch {
 		return false;

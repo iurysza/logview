@@ -117,6 +117,7 @@ export async function withTerminalSession<T>(
 	if (workError) throw workError;
 
 	if (cleanupErrors.length === 1) throw cleanupErrors[0];
+
 	if (cleanupErrors.length > 1) throw new AggregateError(cleanupErrors, "terminal cleanup failed");
 
 	return result!;
@@ -165,6 +166,7 @@ export async function waitForExit(session: Session, timeoutMs = 5_000): Promise<
 	const result = await session.waitForExit({ timeoutMs });
 
 	if (result.reason !== "exited") throw new Error(`logview did not exit within ${timeoutMs}ms after quit`);
+
 	if (!result.exit.success) throw new Error(`logview exited unsuccessfully after quit: ${result.exit.code}`);
 }
 
@@ -202,8 +204,10 @@ export async function capture(
 		snapshot: `${stem}.snapshot.json`,
 		metadata: `${stem}.meta.json`,
 	};
+
 	const ansiPath = `${stem}.ansi`;
 	const snapshot = snapshotFromTerminalControl(JSON.stringify(frame.frame));
+
 	const metadata: CaptureMetadata = {
 		...options.metadata,
 		checkpoint,
@@ -272,25 +276,34 @@ export async function removeCaptureDirectory(directory: string): Promise<void> {
 }
 
 function key(input: string): Parameters<Session["keyboard"]["press"]>[0] {
-	const keys: Readonly<Record<string, Parameters<Session["keyboard"]["press"]>[0]>> = {
-		enter: "Enter",
-		escape: "Escape",
-		up: "ArrowUp",
-		down: "ArrowDown",
-		tab: "Tab",
-		"shift-tab": "Shift+Tab",
-		backspace: "Backspace",
-		home: "Home",
-		end: "End",
-		"page-up": "PageUp",
-		"page-down": "PageDown",
-		"ctrl-c": "Control+C",
-	};
-	const mapped = keys[input];
-
-	if (!mapped) throw new Error(`unsupported Terminal Control input ${input}`);
-
-	return mapped;
+	switch (input) {
+		case "enter":
+			return "Enter";
+		case "escape":
+			return "Escape";
+		case "up":
+			return "ArrowUp";
+		case "down":
+			return "ArrowDown";
+		case "tab":
+			return "Tab";
+		case "shift-tab":
+			return "Shift+Tab";
+		case "backspace":
+			return "Backspace";
+		case "home":
+			return "Home";
+		case "end":
+			return "End";
+		case "page-up":
+			return "PageUp";
+		case "page-down":
+			return "PageDown";
+		case "ctrl-c":
+			return "Control+C";
+		default:
+			throw new Error(`unsupported Terminal Control input ${input}`);
+	}
 }
 
 function pinnedBinaryPath(): string {
@@ -319,8 +332,11 @@ function pinnedBinaryPath(): string {
 
 function nativePackageName(platform: string, arch: string): string | null {
 	if (platform === "darwin" && arch === "arm64") return "@kitlangton/terminal-control-darwin-arm64";
+
 	if (platform === "darwin" && arch === "x64") return "@kitlangton/terminal-control-darwin-x64";
+
 	if (platform === "linux" && arch === "arm64") return "@kitlangton/terminal-control-linux-arm64-gnu";
+
 	if (platform === "linux" && arch === "x64") return "@kitlangton/terminal-control-linux-x64-gnu";
 
 	return null;
@@ -333,6 +349,7 @@ async function run(
 ): Promise<Readonly<{ code: number; stdout: string; stderr: string }>> {
 	try {
 		const process = Bun.spawn([binary, ...args], { cwd, stdin: "ignore", stdout: "pipe", stderr: "pipe" });
+
 		const [stdout, stderr, code] = await Promise.all([
 			new Response(process.stdout).text(),
 			new Response(process.stderr).text(),

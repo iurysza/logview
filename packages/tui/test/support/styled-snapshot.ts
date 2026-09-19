@@ -1,3 +1,5 @@
+import { Either, Schema } from "effect";
+
 export type Rgb = Readonly<{ r: number; g: number; b: number }>;
 
 export type CellAttributes = Readonly<{
@@ -89,23 +91,89 @@ type Frame = Readonly<{
 	cells: readonly StyledCell[];
 }>;
 
-export function snapshotFromTerminalControl(text: string): StyledSnapshot {
-	const frame = parseFrame(parseJson(text));
+const RgbJsonSchema = Schema.Struct({ r: Schema.Number, g: Schema.Number, b: Schema.Number });
 
-	return compactSnapshot(frame);
+const AttributesJsonSchema = Schema.Struct({
+	bold: Schema.Boolean,
+	italic: Schema.Boolean,
+	faint: Schema.Boolean,
+	invisible: Schema.Boolean,
+	strikethrough: Schema.Boolean,
+	overline: Schema.Boolean,
+	underline: Schema.Literal("single", null),
+});
+
+const CellJsonSchema = Schema.Struct({
+	x: Schema.Number,
+	y: Schema.Number,
+	text: Schema.String,
+	width: Schema.Number,
+	foreground: RgbJsonSchema,
+	background: RgbJsonSchema,
+	attributes: AttributesJsonSchema,
+});
+
+const FrameJsonSchema = Schema.Struct({
+	version: Schema.Literal(1),
+	cols: Schema.Number,
+	rows: Schema.Number,
+	foreground: RgbJsonSchema,
+	background: RgbJsonSchema,
+	cells: Schema.Array(CellJsonSchema),
+});
+
+const SpanStyleJsonSchema = {
+	x: Schema.Number,
+	y: Schema.Number,
+	foreground: RgbJsonSchema,
+	background: RgbJsonSchema,
+	attributes: AttributesJsonSchema,
+};
+
+const TextSpanJsonSchema = Schema.Struct({
+	...SpanStyleJsonSchema,
+	text: Schema.String,
+	widths: Schema.optional(Schema.Array(Schema.Number)),
+});
+
+const GlyphSpanJsonSchema = Schema.Struct({
+	...SpanStyleJsonSchema,
+	glyphs: Schema.Array(Schema.Struct({ text: Schema.String, width: Schema.Number })),
+});
+
+const StyledSnapshotJsonSchema = Schema.Struct({
+	cols: Schema.Number,
+	rows: Schema.Number,
+	foreground: RgbJsonSchema,
+	background: RgbJsonSchema,
+	spans: Schema.Array(Schema.Union(TextSpanJsonSchema, GlyphSpanJsonSchema)),
+});
+
+type RgbJson = Schema.Schema.Type<typeof RgbJsonSchema>;
+
+type AttributesJson = Schema.Schema.Type<typeof AttributesJsonSchema>;
+
+type CellJson = Schema.Schema.Type<typeof CellJsonSchema>;
+
+type FrameJson = Schema.Schema.Type<typeof FrameJsonSchema>;
+
+type StyledSpanJson = Schema.Schema.Type<typeof StyledSnapshotJsonSchema>["spans"][number];
+
+type StyledSnapshotJson = Schema.Schema.Type<typeof StyledSnapshotJsonSchema>;
+
+export function snapshotFromTerminalControl(text: string): StyledSnapshot {
+	return compactSnapshot(parseFrame(decodeFrame(text)));
 }
 
 export function parseStyledSnapshot(text: string): StyledSnapshot {
-	const value = parseJson(text);
-
-	if (!isRecord(value)) throw new Error("styled snapshot must be an object");
+	const snapshot = decodeStyledSnapshot(text);
 
 	return {
-		cols: positiveInteger(value.cols, "cols"),
-		rows: positiveInteger(value.rows, "rows"),
-		foreground: color(value.foreground, "foreground"),
-		background: color(value.background, "background"),
-		spans: array(value.spans, "spans").map((span, index) => parseSpan(span, index)),
+		cols: positiveInteger(snapshot.cols, "cols"),
+		rows: positiveInteger(snapshot.rows, "rows"),
+		foreground: color(snapshot.foreground, "foreground"),
+		background: color(snapshot.background, "background"),
+		spans: snapshot.spans.map((span, index) => parseSpan(span, index)),
 	};
 }
 
@@ -225,6 +293,7 @@ export function textFromSnapshot(snapshot: StyledSnapshot): string {
 		if (cell.y >= snapshot.rows || cell.x >= snapshot.cols) continue;
 
 		rows[cell.y]![cell.x] = cell.text;
+
 		for (let offset = 1; offset < cell.width && cell.x + offset < snapshot.cols; offset += 1) {
 			rows[cell.y]![cell.x + offset] = "";
 		}
@@ -237,6 +306,7 @@ function compactSpan(cells: readonly StyledCell[]): StyledSpan {
 	const first = cells[0]!;
 	const text = cells.map((cell) => cell.text).join("");
 	const codePoints = [...text];
+
 	const base: SpanStyle = {
 		x: first.x,
 		y: first.y,
@@ -263,34 +333,31 @@ function glyphs(span: StyledSpan): readonly Readonly<{ text: string; width: numb
 	return text.map((character, index) => ({ text: character, width: widths[index]! }));
 }
 
-function parseFrame(value: unknown): Frame {
-	if (!isRecord(value) || value.version !== 1) {
-		throw new Error("Terminal Control JSON must be a version 1 frame");
-	}
-
+function parseFrame(frame: FrameJson): Frame {
 	return {
-		cols: positiveInteger(value.cols, "cols"),
-		rows: positiveInteger(value.rows, "rows"),
-		foreground: color(value.foreground, "foreground"),
-		background: color(value.background, "background"),
-		cells: array(value.cells, "cells").map((cell, index) => parseCell(cell, `cells[${index}]`)),
+		cols: positiveInteger(frame.cols, "cols"),
+		rows: positiveInteger(frame.rows, "rows"),
+		foreground: color(frame.foreground, "foreground"),
+		background: color(frame.background, "background"),
+		cells: frame.cells.map((cell, index) => parseCell(cell, `cells[${index}]`)),
 	};
 }
 
-function parseSpan(value: unknown, index: number): StyledSpan {
-	if (!isRecord(value)) throw new Error(`spans[${index}] must be an object`);
-
+function parseSpan(value: StyledSpanJson, index: number): StyledSpan {
 	const base: SpanStyle = {
 		x: nonNegativeInteger(value.x, `spans[${index}].x`),
 		y: nonNegativeInteger(value.y, `spans[${index}].y`),
 		foreground: color(value.foreground, `spans[${index}].foreground`),
 		background: color(value.background, `spans[${index}].background`),
-		attributes: attributes(value.attributes, `spans[${index}].attributes`),
+		attributes: attributes(value.attributes),
 	};
 
-	if (typeof value.text === "string") {
+	if ("text" in value) {
 		const codePoints = [...value.text];
-		const widths = value.widths === undefined ? undefined : array(value.widths, `spans[${index}].widths`).map((width, widthIndex) => positiveInteger(width, `spans[${index}].widths[${widthIndex}]`));
+
+		const widths = value.widths?.map((width, widthIndex) =>
+			positiveInteger(width, `spans[${index}].widths[${widthIndex}]`),
+		);
 
 		if (codePoints.length === 0 || (widths && widths.length !== codePoints.length)) {
 			throw new Error(`spans[${index}] has invalid text widths`);
@@ -299,31 +366,25 @@ function parseSpan(value: unknown, index: number): StyledSpan {
 		return widths ? { ...base, text: value.text, widths } : { ...base, text: value.text };
 	}
 
-	const parsedGlyphs = array(value.glyphs, `spans[${index}].glyphs`).map((glyph, glyphIndex) => {
-		if (!isRecord(glyph)) throw new Error(`spans[${index}].glyphs[${glyphIndex}] must be an object`);
-
-		return {
-			text: string(glyph.text, `spans[${index}].glyphs[${glyphIndex}].text`),
-			width: positiveInteger(glyph.width, `spans[${index}].glyphs[${glyphIndex}].width`),
-		};
-	});
+	const parsedGlyphs = value.glyphs.map((glyph, glyphIndex) => ({
+		text: glyph.text,
+		width: positiveInteger(glyph.width, `spans[${index}].glyphs[${glyphIndex}].width`),
+	}));
 
 	if (parsedGlyphs.length === 0) throw new Error(`spans[${index}].glyphs must not be empty`);
 
 	return { ...base, glyphs: parsedGlyphs };
 }
 
-function parseCell(value: unknown, name: string): StyledCell {
-	if (!isRecord(value)) throw new Error(`${name} must be an object`);
-
+function parseCell(value: CellJson, name: string): StyledCell {
 	return {
 		x: nonNegativeInteger(value.x, `${name}.x`),
 		y: nonNegativeInteger(value.y, `${name}.y`),
-		text: string(value.text, `${name}.text`),
+		text: value.text,
 		width: positiveInteger(value.width, `${name}.width`),
 		foreground: color(value.foreground, `${name}.foreground`),
 		background: color(value.background, `${name}.background`),
-		attributes: attributes(value.attributes, `${name}.attributes`),
+		attributes: attributes(value.attributes),
 	};
 }
 
@@ -367,26 +428,19 @@ function pushChange(
 	}
 }
 
-function color(value: unknown, name: string): Rgb {
-	if (!isRecord(value)) throw new Error(`${name} must be an RGB object`);
-
+function color(value: RgbJson, name: string): Rgb {
 	return { r: byte(value.r, `${name}.r`), g: byte(value.g, `${name}.g`), b: byte(value.b, `${name}.b`) };
 }
 
-function attributes(value: unknown, name: string): CellAttributes {
-	if (!isRecord(value)) throw new Error(`${name} must be an object`);
-
-	const underline = value.underline;
-	if (underline !== null && underline !== "single") throw new Error(`${name}.underline must be \"single\" or null`);
-
+function attributes(value: AttributesJson): CellAttributes {
 	return {
-		bold: boolean(value.bold, `${name}.bold`),
-		italic: boolean(value.italic, `${name}.italic`),
-		faint: boolean(value.faint, `${name}.faint`),
-		invisible: boolean(value.invisible, `${name}.invisible`),
-		strikethrough: boolean(value.strikethrough, `${name}.strikethrough`),
-		overline: boolean(value.overline, `${name}.overline`),
-		underline,
+		bold: value.bold,
+		italic: value.italic,
+		faint: value.faint,
+		invisible: value.invisible,
+		strikethrough: value.strikethrough,
+		overline: value.overline,
+		underline: value.underline,
 	};
 }
 
@@ -422,60 +476,45 @@ function formatUnderline(underline: CellAttributes["underline"]): string {
 	return underline ?? "none";
 }
 
-function parseJson(text: string): unknown {
-	try {
-		return JSON.parse(text);
-	} catch (cause) {
-		throw new Error(`invalid JSON: ${errorMessage(cause)}`);
-	}
+function decodeFrame(text: string): FrameJson {
+	return decodeJson(Schema.parseJson(FrameJsonSchema), text, "Terminal Control JSON");
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
+function decodeStyledSnapshot(text: string): StyledSnapshotJson {
+	return decodeJson(Schema.parseJson(StyledSnapshotJsonSchema), text, "styled snapshot");
 }
 
-function array(value: unknown, name: string): readonly unknown[] {
-	if (!Array.isArray(value)) throw new Error(`${name} must be an array`);
+function decodeJson<Value>(schema: Schema.Schema<Value, string>, text: string, label: string): Value {
+	const decoded = Schema.decodeEither(schema)(text);
 
-	return value;
+	return Either.match(decoded, {
+		onLeft: (error) => {
+			throw new Error(`invalid ${label}: ${error.message}`);
+		},
+		onRight: (value) => value,
+	});
 }
 
-function string(value: unknown, name: string): string {
-	if (typeof value !== "string") throw new Error(`${name} must be a string`);
-
-	return value;
-}
-
-function boolean(value: unknown, name: string): boolean {
-	if (typeof value !== "boolean") throw new Error(`${name} must be a boolean`);
-
-	return value;
-}
-
-function positiveInteger(value: unknown, name: string): number {
-	if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1) {
+function positiveInteger(value: number, name: string): number {
+	if (!Number.isSafeInteger(value) || value < 1) {
 		throw new Error(`${name} must be a positive safe integer`);
 	}
 
 	return value;
 }
 
-function nonNegativeInteger(value: unknown, name: string): number {
-	if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+function nonNegativeInteger(value: number, name: string): number {
+	if (!Number.isSafeInteger(value) || value < 0) {
 		throw new Error(`${name} must be a non-negative safe integer`);
 	}
 
 	return value;
 }
 
-function byte(value: unknown, name: string): number {
-	if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 255) {
+function byte(value: number, name: string): number {
+	if (!Number.isInteger(value) || value < 0 || value > 255) {
 		throw new Error(`${name} must be an integer from 0 to 255`);
 	}
 
 	return value;
-}
-
-function errorMessage(cause: unknown): string {
-	return cause instanceof Error ? cause.message : "unknown error";
 }

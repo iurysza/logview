@@ -500,6 +500,7 @@ function matchNextKey(
 
 		for (const [sequence, key] of ESCAPE_SEQUENCES) {
 			if (slice.startsWith(sequence)) return { key, size: sequence.length };
+
 			if (sequence.startsWith(slice)) return "incomplete";
 		}
 
@@ -652,6 +653,7 @@ export async function attachTui(
 			if (closed) return;
 
 			const snapshot = session.snapshot();
+
 			const result = reduceInteraction(
 				interaction,
 				{ kind: "key", key: mapped.key, ctrl: mapped.ctrl, shift: mapped.shift },
@@ -666,6 +668,7 @@ export async function attachTui(
 
 			if (result.quit) {
 				void shutdown();
+
 				return;
 			}
 		}
@@ -709,6 +712,7 @@ export async function attachTui(
 		if (closed) return;
 
 		closed = true;
+
 		if (inputTimer !== null) clearTimeout(inputTimer);
 		unsubscribe();
 		process.stdin.off("data", onData);
