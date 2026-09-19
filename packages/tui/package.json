@@ -12,5 +12,11 @@
   },
   "devDependencies": {
     "@kitlangton/terminal-control": "0.4.1"
+  },
+  "optionalDependencies": {
+    "@kitlangton/terminal-control-darwin-arm64": "0.4.1",
+    "@kitlangton/terminal-control-darwin-x64": "0.4.1",
+    "@kitlangton/terminal-control-linux-arm64-gnu": "0.4.1",
+    "@kitlangton/terminal-control-linux-x64-gnu": "0.4.1"
   }
 }
