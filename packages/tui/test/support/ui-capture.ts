@@ -2,11 +2,10 @@ import { TerminalControl, type Session } from "@kitlangton/terminal-control";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { snapshotFromTerminalControl, type StyledSnapshot } from "./styled-snapshot.ts";
 
 export const TERMCTRL_VERSION = "0.4.1";
-
-const requireFromTui = createRequire(new URL("../../package.json", import.meta.url));
 
 export type TerminalControlTool = Readonly<{
 	binary: string;
@@ -107,7 +106,12 @@ export async function withTerminalSession<T>(
 	}
 
 	if (workError && cleanupErrors.length > 0) {
-		throw new AggregateError([workError, ...cleanupErrors], "UI scenario and terminal cleanup failed");
+		const workMessage = workError instanceof Error ? workError.message : "UI scenario failed";
+
+		throw new AggregateError(
+			[workError, ...cleanupErrors],
+			`${workMessage}; terminal cleanup also failed`,
+		);
 	}
 
 	if (workError) throw workError;
@@ -299,7 +303,13 @@ function pinnedBinaryPath(): string {
 	}
 
 	try {
-		return requireFromTui.resolve(`${packageName}/bin/termctrl`);
+		// Bun's createRequire from @logview/tui cannot see the native optional
+		// package. Resolve it from @kitlangton/terminal-control, which owns it.
+		const terminalControlPackage = fileURLToPath(
+			import.meta.resolve("@kitlangton/terminal-control/package.json"),
+		);
+
+		return createRequire(terminalControlPackage).resolve(`${packageName}/bin/termctrl`);
 	} catch {
 		throw new Error(
 			`Pinned Terminal Control ${TERMCTRL_VERSION} package ${packageName} is missing. Run bun install; do not use a different termctrl from PATH.`,
