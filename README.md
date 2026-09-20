@@ -1,6 +1,6 @@
 # logview
 
-Keyboard-driven Android log viewer. V1 is a **headless engine**: live capture, recording, and replay share one byte pipeline. OpenTUI is an optional later adapter and is not required to test behavior.
+Keyboard-driven Android log viewer. Live capture, recording, and replay share one byte pipeline. The same `Session` API supports headless tests and the optional ANSI terminal UI.
 
 ## Requirements
 
@@ -60,7 +60,7 @@ bun run test:headless
 bun run check
 ```
 
-`test:headless` runs **anti-slop** (Oxlint) then core, engine, CLI, architecture, and quality tests. It does not load OpenTUI, start a physical ADB server, or sleep on wall-clock timers. Tests drive the public `Session` API with a scripted source and a manual scheduler.
+`test:headless` runs **anti-slop** (Oxlint) then core, engine, CLI, architecture, and quality tests. It does not load the terminal UI, start a physical ADB server, or sleep on wall-clock timers. Tests drive the public `Session` API with a scripted source and a manual scheduler.
 
 `bun run check` is the default quality path: anti-slop + TypeScript + the same headless tests.
 
@@ -137,7 +137,7 @@ Each JSON report records Bun version, OS, CPU, memory, seed, line-size plan, RSS
 
 ## Architecture
 
-Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). Core has no Bun or OpenTUI imports. Effect is internal:
+Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). Core has no Bun or terminal imports. The terminal UI is a direct ANSI adapter in `@logview/tui`, and the CLI dynamically loads it only for an interactive terminal. Effect is internal:
 
 - `Either` / `Effect` at session construction, mapped to documented `Result` types at public boundaries
 - `Match` for tagged commands and recording records
@@ -145,7 +145,7 @@ Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). 
 - `Context.Tag` layers for scheduler, source, files, and processes
 - `Effect.scoped` / finalizers for recording and process lifetime
 
-Public contracts stay those in `specs/2026-09-18-logview-technical-design.md` (`Session`, snapshots, commands, `LogEvent`).
+Read [the architecture reference](ai-artifacts/architecture.md) for the implemented package boundaries, session lifecycle, recordings, filtering, semantic queries, terminal rendering, and test seams. `specs/2026-09-18-logview-technical-design.md` remains the original design handoff; source and tests define current contracts.
 
 Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or `semantic.enabled` in `logview.json`, and set `TYPESAFE_API_KEY`. The `/` text field becomes a query. When you apply a query, Jev classifies the newest `semantic.historyEvents` locally eligible retained logs, which defaults to 100. New locally eligible arrivals continue to be classified while the query is active. Older rows stay visible with an unrequested icon. Rows scored below the threshold are dimmed. Headless tests never call Jev.
 
