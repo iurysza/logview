@@ -161,6 +161,33 @@ describe("semantic classification", () => {
 		}
 	});
 
+	test("search mode switches between literal text and Jev", async () => {
+		const classifier = new ScriptedClassifier();
+		const scenario = await openScenario({ maxEvents: 20, classifier, semantic: { flushDelayMs: 0 } });
+
+		try {
+			await scenario.deliver([1, 2], (id) => ({ message: id === 1 ? "database lock" : "network timeout" }));
+			expect(scenario.session.snapshot().searchMode).toBe("jev");
+
+			scenario.session.dispatch({ kind: "toggle-search-mode" });
+			expect(scenario.session.snapshot().searchMode).toBe("text");
+			scenario.session.dispatch({
+				kind: "set-filter",
+				filter: { minLevel: null, tag: null, pid: null, packageName: null, text: "database" },
+			});
+
+			const textSnapshot = await scenario.waitUntil((current) => current.pendingFilter === null);
+			expect(textSnapshot.rows.map((row) => row.id)).toEqual([1]);
+			expect(classifier.pending).toHaveLength(0);
+
+			scenario.session.dispatch({ kind: "toggle-search-mode" });
+			expect(scenario.session.snapshot().searchMode).toBe("jev");
+			await scenario.waitUntil(() => classifier.pending.length === 1);
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
 	test("a query classifies only the newest 100 locally eligible retained events", async () => {
 		const classifier = new ScriptedClassifier();
 		const ids = Array.from({ length: 10_000 }, (_, index) => index + 1);

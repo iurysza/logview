@@ -274,10 +274,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Text / "
+      "text": " Package any "
     },
     {
-      "x": 40,
+      "x": 45,
       "y": 1,
       "foreground": {
         "r": 195,
@@ -298,7 +298,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "        "
+      "text": "   "
     },
     {
       "x": 0,

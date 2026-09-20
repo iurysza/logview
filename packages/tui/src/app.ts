@@ -62,17 +62,16 @@ function classificationLabel(row: SessionSnapshot["rows"][number] | undefined): 
 function helpLines(width: number): string[] {
 	const lines = [
 		"Keys",
-		"",
-		"↑↓ / j k     move between events",
-		"PgUp PgDn / ^U ^D  page",
-		"G / End      jump to end · Home oldest",
-		"w wrap · y copy selected event",
-		"Enter        inspect event",
-		"/            text filter (Jev when enabled)",
-		"f            filter editor",
-		"t / p / y    from inspect: filter tag, pid, or copy",
-		"?            this help",
-		"q            quit",
+		"↑↓ / j k     select previous or next event",
+		"PgUp PgDn / ^U ^D  move one page",
+		"G / End      follow newest logs · Home first event",
+		"w            toggle line wrapping",
+		"m            choose text or Jev search",
+		"h            fill empty list space",
+		"y            copy selected event",
+		"Enter        inspect event · t tag · p PID · y copy",
+		"/            search event text",
+		"f            change filters",
 	];
 
 	const fitted: string[] = [];
@@ -112,6 +111,7 @@ function paintLogRows(
 	count: number,
 	style: PaintStyle,
 	semantic: SessionSnapshot["semantic"],
+	listBackground: boolean,
 ): string[] {
 	const lines: string[] = [];
 
@@ -139,7 +139,13 @@ function paintLogRows(
 		}
 	}
 
-	while (lines.length < count) lines.push(padToWidth("", columns));
+	while (lines.length < count) {
+		lines.push(
+			listBackground
+				? paintFilled("", columns, style, THEME.text, THEME.canvas)
+				: padToWidth("", columns),
+		);
+	}
 
 	return lines;
 }
@@ -186,6 +192,7 @@ function layoutLines(
 	style: PaintStyle,
 	columns: number,
 	rows: number,
+	listBackground = true,
 ): readonly string[] {
 	if (rows <= 0 || columns <= 0) return [];
 
@@ -218,8 +225,8 @@ function layoutLines(
 	const helpOpen = interaction.focus === "help";
 	const wideInspect = inspectOpen && columns >= INSPECT_WIDE_COLUMNS;
 	const logWidth = wideInspect ? Math.max(1, columns - inspectorWidth(columns) - 1) : columns;
-	const semantic = snapshot.semantic !== null && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
-	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic);
+	const semantic = snapshot.searchMode === "jev" && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
+	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic, listBackground);
 	const selectedRow = selectedHeaderRow(snapshot);
 	const classification = classificationLabel(selectedRow);
 
@@ -264,8 +271,9 @@ export function layoutSession(
 	style: PaintStyle = "plain",
 	columns = 80,
 	rows = 24,
+	listBackground = true,
 ): readonly string[] {
-	return layoutLines(snapshot, interaction, style, columns, rows);
+	return layoutLines(snapshot, interaction, style, columns, rows, listBackground);
 }
 
 export function layoutFrame(
@@ -274,8 +282,9 @@ export function layoutFrame(
 	columns: number,
 	rows: number,
 	style: PaintStyle = "plain",
+	listBackground = true,
 ): readonly string[] {
-	return layoutLines(snapshot, interaction, style, columns, rows);
+	return layoutLines(snapshot, interaction, style, columns, rows, listBackground);
 }
 
 type KeyCommand = Readonly<{
@@ -409,6 +418,7 @@ export async function attachTui(
 	}
 
 	let interaction: InteractionState = LIST_FOCUS;
+	let listBackground = true;
 	let closed = false;
 	let resolveDone: () => void = () => undefined;
 	let lastColumns = -1;
@@ -456,7 +466,7 @@ export async function attachTui(
 			}
 
 			const current = resized ? session.snapshot() : (published ?? session.snapshot());
-			const lines = layoutLines(current, interaction, style, size.columns, size.rows);
+			const lines = layoutLines(current, interaction, style, size.columns, size.rows, listBackground);
 			let frame = "\x1b[H\x1b[2J";
 
 			for (let i = 0; i < lines.length; i += 1) {
@@ -482,6 +492,12 @@ export async function attachTui(
 			if (closed) return;
 
 			const snapshot = session.snapshot();
+
+			if (interaction.focus === "list" && (mapped.key === "h" || mapped.key === "H")) {
+				listBackground = !listBackground;
+				paint();
+				continue;
+			}
 
 			if ((interaction.focus === "list" || interaction.focus === "inspect") && (mapped.key === "y" || mapped.key === "Y")) {
 				if (snapshot.selectedEvent) void copyToClipboard(formatClipboardEvent(snapshot.selectedEvent));

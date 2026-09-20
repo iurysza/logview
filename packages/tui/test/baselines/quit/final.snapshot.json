@@ -274,10 +274,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Text / "
+      "text": " Package any "
     },
     {
-      "x": 40,
+      "x": 45,
       "y": 1,
       "foreground": {
         "r": 195,
@@ -298,7 +298,55 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                "
+      "text": " "
+    },
+    {
+      "x": 46,
+      "y": 1,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Text / "
+    },
+    {
+      "x": 54,
+      "y": 1,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                  "
     },
     {
       "x": 0,

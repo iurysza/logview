@@ -75,6 +75,12 @@ describe("reduceInteraction", () => {
 		expect(upper.command).toEqual({ kind: "toggle-line-display" });
 	});
 
+	test("m toggles the search mode", () => {
+		const toggle = reduceInteraction(LIST_FOCUS, { kind: "key", key: "m", ctrl: false, shift: false }, EMPTY_FILTER);
+
+		expect(toggle.command).toEqual({ kind: "toggle-search-mode" });
+	});
+
 	test("Enter opens inspect and t filters the selected tag", () => {
 		const opened = reduceInteraction(LIST_FOCUS, { kind: "key", key: "enter", ctrl: false, shift: false }, EMPTY_FILTER);
 		expect(opened.state.focus).toBe("inspect");

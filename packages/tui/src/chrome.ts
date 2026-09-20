@@ -1,4 +1,4 @@
-import { clipToWidth, displayWidth, LIST_FOCUS, type FilterSpec, type InteractionState, type LineDisplay } from "@logview/core";
+import { clipToWidth, displayWidth, LIST_FOCUS, type FilterSpec, type InteractionState, type SearchMode } from "@logview/core";
 import { type SessionSnapshot as EngineSessionSnapshot } from "@logview/engine";
 import { paintStyled, rgbSgr, styleOn, type CellStyle, type Rgb } from "./catppuccin.ts";
 import { type PaintStyle } from "./color.ts";
@@ -76,7 +76,11 @@ export function sourceStatusText(snapshot: Pick<Snapshot, "sourceKind" | "source
 	return `${prefix} • IDLE`;
 }
 
-export function keyHints(interaction: InteractionState, lineDisplay: LineDisplay = "clip"): readonly KeyHint[] {
+export function keyHints(
+	interaction: InteractionState,
+	searchMode: SearchMode = "text",
+	semanticAvailable = false,
+): readonly KeyHint[] {
 	if (interaction.focus === "filters") {
 		return [
 			{ key: "Tab", label: "Next" },
@@ -102,15 +106,19 @@ export function keyHints(interaction: InteractionState, lineDisplay: LineDisplay
 		{ key: "/", label: "Search" },
 		{ key: "f", label: "Filters" },
 		{ key: "G", label: "Tail" },
-		{ key: "w", label: lineDisplay === "wrap" ? "Wrap" : "Clip" },
+		...(semanticAvailable ? [{ key: "m", label: searchMode === "jev" ? "Jev" : "Text" }] : []),
 		{ key: "y", label: "Copy" },
 		{ key: "?", label: "Help" },
 		{ key: "q", label: "Quit" },
 	];
 }
 
-export function formatHints(interaction: InteractionState = LIST_FOCUS, lineDisplay: LineDisplay = "clip"): string {
-	return keyHints(interaction, lineDisplay).map((hint) => `${hint.key} ${hint.label}`).join("  ");
+export function formatHints(
+	interaction: InteractionState = LIST_FOCUS,
+	searchMode: SearchMode = "text",
+	semanticAvailable = false,
+): string {
+	return keyHints(interaction, searchMode, semanticAvailable).map((hint) => `${hint.key} ${hint.label}`).join("  ");
 }
 
 export function formatStatus(snapshot: Snapshot): string {
@@ -125,7 +133,7 @@ export function formatFilter(snapshot: Snapshot): string {
 		filter.tag ? `Tag: ${filter.tag}` : "Tag: any",
 		filter.pid === null ? "PID: any" : `PID: ${filter.pid}`,
 		filter.packageName ? `Package: ${filter.packageName}` : "Package: any",
-		filter.text ? `Text: ${(snapshot.semantic ? "~" : "/")} ${filter.text}` : "Text: /",
+		filter.text ? `Text: ${snapshot.searchMode === "jev" ? "~" : "/"} ${filter.text}` : "Text: /",
 	].join("  ");
 }
 
@@ -155,7 +163,7 @@ export function formatFooter(snapshot: Snapshot, interaction: InteractionState =
 	const badge = displayBadge(snapshot, interaction);
 	const unseen = snapshot.view.mode === "browse" && snapshot.view.newSincePause > 0 ? ` · ${snapshot.view.newSincePause} unseen` : "";
 
-	return `${badge}${unseen}${footerNotice(snapshot)}  ${formatHints(interaction, snapshot.lineDisplay)}`;
+	return `${badge}${unseen}${footerNotice(snapshot)}  ${formatHints(interaction, snapshot.searchMode, snapshot.semantic !== null)}`;
 }
 
 function fitGroups(groups: readonly ChromeSpan[], columns: number): ChromeSpan[] {
@@ -234,7 +242,7 @@ export function paintFilterLine(snapshot: Snapshot, interaction: InteractionStat
 		plain(" "),
 		filterChip(filter.packageName ? `Package ${filter.packageName}` : "Package any", filter.packageName !== null, THEME.green),
 		plain(" "),
-		filterChip(filter.text ? `Text ${(snapshot.semantic ? "~" : "/")} ${filter.text}` : "Text /", filter.text.length > 0, THEME.purple),
+		filterChip(filter.text ? `Text ${snapshot.searchMode === "jev" ? "~" : "/"} ${filter.text}` : "Text /", filter.text.length > 0, THEME.purple),
 	];
 
 	if (snapshot.notice === "applying-filter") spans.push(plain("  applying", THEME.amber));
@@ -246,7 +254,7 @@ export function paintFooter(snapshot: Snapshot, interaction: InteractionState, c
 	const badge = displayBadge(snapshot, interaction);
 	const badgeColor = badge === "BROWSE" ? THEME.amber : THEME.accent;
 	const badgeSpan = bold(` ${badge} `, THEME.canvas, badgeColor);
-	const hints = keyHints(interaction, snapshot.lineDisplay);
+	const hints = keyHints(interaction, snapshot.searchMode, snapshot.semantic !== null);
 	const quit = hints.at(-1)!;
 	const optional = hints.slice(0, -1);
 

@@ -274,10 +274,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Text / "
+      "text": " Package any "
     },
     {
-      "x": 40,
+      "x": 45,
       "y": 1,
       "foreground": {
         "r": 195,
@@ -298,7 +298,55 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                "
+      "text": " "
+    },
+    {
+      "x": 46,
+      "y": 1,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Text / "
+    },
+    {
+      "x": 54,
+      "y": 1,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                  "
     },
     {
       "x": 0,
@@ -370,7 +418,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                        "
+      "text": "↑↓ / j k     select previous or next event                              "
     },
     {
       "x": 0,
@@ -394,7 +442,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "↑↓ / j k     move between events                                        "
+      "text": "PgUp PgDn / ^U ^D  move one page                                        "
     },
     {
       "x": 0,
@@ -418,7 +466,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "PgUp PgDn / ^U ^D  page                                                 "
+      "text": "G / End      follow newest logs · Home first event                      "
     },
     {
       "x": 0,
@@ -442,7 +490,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "G / End      jump to end · Home oldest                                  "
+      "text": "w            toggle line wrapping                                       "
     },
     {
       "x": 0,
@@ -466,7 +514,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "w wrap · y copy selected event                                          "
+      "text": "m            choose text or Jev search                                  "
     },
     {
       "x": 0,
@@ -490,7 +538,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "Enter        inspect event                                              "
+      "text": "h            fill empty list space                                      "
     },
     {
       "x": 0,
@@ -514,7 +562,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "/            text filter (Jev when enabled)                             "
+      "text": "y            copy selected event                                        "
     },
     {
       "x": 0,
@@ -538,7 +586,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "f            filter editor                                              "
+      "text": "Enter        inspect event · t tag · p PID · y copy                     "
     },
     {
       "x": 0,
@@ -562,7 +610,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "t / p / y    from inspect: filter tag, pid, or copy                     "
+      "text": "/            search event text                                          "
     },
     {
       "x": 0,
@@ -586,7 +634,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "?            this help                                                  "
+      "text": "f            change filters                                             "
     },
     {
       "x": 0,

@@ -283,6 +283,10 @@ export function reduceInteraction(
 		return { state, command: { kind: "toggle-line-display" }, quit: false };
 	}
 
+	if (key === "m" || key === "M") {
+		return { state, command: { kind: "toggle-search-mode" }, quit: false };
+	}
+
 	if (key === "/") {
 		return { state: openEditor(activeFilter, "text"), command: null, quit: false };
 	}

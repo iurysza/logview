@@ -48,6 +48,7 @@ export type {
 	LogMetadata,
 	PreparedFilter,
 	Result,
+	SearchMode,
 	SessionId,
 	SourceKind,
 	TextSlice,

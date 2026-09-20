@@ -370,10 +370,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Text / "
+      "text": " Package any "
     },
     {
-      "x": 40,
+      "x": 45,
       "y": 1,
       "foreground": {
         "r": 195,
@@ -394,7 +394,55 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                                "
+      "text": " "
+    },
+    {
+      "x": 46,
+      "y": 1,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Text / "
+    },
+    {
+      "x": 54,
+      "y": 1,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                  "
     },
     {
       "x": 0,
@@ -1378,7 +1426,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "PID         "
+      "text": "Process     "
     },
     {
       "x": 84,
@@ -1402,10 +1450,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "4321"
+      "text": "PID 4321 · TID 4321"
     },
     {
-      "x": 88,
+      "x": 103,
       "y": 5,
       "foreground": {
         "r": 195,
@@ -1426,7 +1474,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                "
+      "text": "                 "
     },
     {
       "x": 0,
@@ -1666,15 +1714,15 @@
         "overline": false,
         "underline": null
       },
-      "text": "TID         "
+      "text": "Package     "
     },
     {
       "x": 84,
       "y": 6,
       "foreground": {
-        "r": 53,
-        "g": 212,
-        "b": 234
+        "r": 244,
+        "g": 201,
+        "b": 93
       },
       "background": {
         "r": 29,
@@ -1690,10 +1738,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "4321"
+      "text": "Not recorded"
     },
     {
-      "x": 88,
+      "x": 96,
       "y": 6,
       "foreground": {
         "r": 195,
@@ -1714,7 +1762,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                "
+      "text": "                        "
     },
     {
       "x": 0,

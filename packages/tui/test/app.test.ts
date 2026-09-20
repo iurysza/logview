@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { INSPECT_FOCUS, LIST_FOCUS, NONE_CLASSIFICATION, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
+import { HELP_FOCUS, INSPECT_FOCUS, LIST_FOCUS, NONE_CLASSIFICATION, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
 import type { SessionSnapshot } from "@logview/engine";
 import { EMPTY_FILTER, EMPTY_VIEW } from "@logview/core";
 import {
@@ -31,8 +31,10 @@ const snapshot: SessionSnapshot = {
 	pendingFilter: null,
 	view: EMPTY_VIEW,
 	lineDisplay: "clip",
+	searchMode: "text",
 	rows: [],
 	selectedEvent: null,
+	packageAttribution: { kind: "idle" },
 	stats: {
 		receivedBytes: 0,
 		admittedEvents: 0,
@@ -57,6 +59,7 @@ const selectedEvent: LogEvent = {
 	rawText: "1760000000.002800  4321  4321 W Database: Retry after lock timeout",
 	metadata: {
 		epochMicros: 1760000000002800,
+		uid: 10123,
 		pid: 4321,
 		tid: 4321,
 		level: "W",
@@ -73,6 +76,7 @@ const selectedEvent: LogEvent = {
 const inspectSnapshot: SessionSnapshot = {
 	...snapshot,
 	selectedEvent,
+	packageAttribution: { kind: "resolved", uid: 10123, packages: ["com.example.app", "com.example.shared"] },
 	stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 15 },
 };
 
@@ -95,6 +99,7 @@ const longMessageSnapshot: SessionSnapshot = { ...inspectSnapshot, selectedEvent
 const jevSnapshot: SessionSnapshot = {
 	...snapshot,
 	activeFilter: { ...EMPTY_FILTER, text: "database failures" },
+	searchMode: "jev",
 	rows: [
 		{
 			id: 1,
@@ -174,7 +179,8 @@ describe("tui chrome", () => {
 		expect(formatFooter(snapshot)).toContain("TAIL");
 		expect(formatHints()).toContain("q Quit");
 		expect(formatHints()).toContain("y Copy");
-		expect(formatHints(LIST_FOCUS, "wrap")).toContain("w Wrap");
+		expect(formatHints()).not.toMatch(/\bw /);
+		expect(formatHints(LIST_FOCUS, "jev", true)).toContain("m Jev");
 		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("Quit");
 	});
 
@@ -195,6 +201,20 @@ describe("tui chrome", () => {
 		expect(frame.at(-1)?.trim()).toBe("");
 	});
 
+	test("fills unused list rows with the list surface by default", () => {
+		const filled = layoutFrame(snapshot, LIST_FOCUS, 72, 16, "ansi");
+		const transparent = layoutFrame(snapshot, LIST_FOCUS, 72, 16, "ansi", false);
+
+		expect(filled[3]).toContain(rgbSgr(THEME.canvas, "bg"));
+		expect(transparent[3]).not.toContain(rgbSgr(THEME.canvas, "bg"));
+	});
+
+	test("documents the list background toggle in Help, not the footer", () => {
+		const help = layoutFrame(snapshot, HELP_FOCUS, 72, 16, "plain").join("\n");
+
+		expect(help).toMatch(/h\s+fill empty list space/);
+		expect(formatHints()).not.toMatch(/\bh List background\b/);
+	});
 
 	test("ansi status fits 48 columns like the plain branch", () => {
 		const plain = layoutFrame(inspectSnapshot, LIST_FOCUS, 48, 12, "plain");
@@ -217,6 +237,7 @@ describe("tui chrome", () => {
 		expect(text).toContain("#7");
 		expect(text).toContain("Timestamp");
 		expect(text).toContain("WARN (W)");
+		expect(text).toContain("com.example.app, com.example.shared");
 		expect(text).toContain("Message");
 		expect(text).toContain("filter by this tag");
 		expect(text).toContain("filter by this PID");

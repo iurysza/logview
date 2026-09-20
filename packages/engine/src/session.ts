@@ -27,6 +27,7 @@ import {
 	type LogEvent,
 	type PreparedFilter,
 	type Result,
+	type SearchMode,
 	type SessionCommand,
 	type StartError,
 	type ViewRow,
@@ -115,6 +116,7 @@ class SessionImpl implements Session {
 	private columns: number;
 	private rows: number;
 	private lineDisplay: LineDisplay = "clip";
+	private searchMode: SearchMode = "text";
 	private framer: FramerState = emptyFramerState();
 	private nextEventId = 1;
 	private revision = 0;
@@ -181,6 +183,7 @@ class SessionImpl implements Session {
 				)
 			: null;
 
+		if (this.coordinator) this.searchMode = "jev";
 
 		if (this.coordinator && options.initialFilter.text.length > 0) {
 			this.replaceSemanticQuery(options.initialFilter);
@@ -214,6 +217,7 @@ class SessionImpl implements Session {
 			}),
 			Match.when({ kind: "toggle-line-display" }, () => this.commandToggleLineDisplay()),
 			Match.when({ kind: "request-package-attribution" }, () => this.commandPackageAttribution()),
+			Match.when({ kind: "toggle-search-mode" }, () => this.commandToggleSearchMode()),
 			Match.when({ kind: "set-filter" }, (set) => this.commandFilter(set.filter)),
 			Match.when({ kind: "resize" }, (resize) => this.commandResize(resize.columns, resize.rows)),
 			Match.exhaustive,
@@ -287,6 +291,14 @@ class SessionImpl implements Session {
 		this.publishImmediate();
 
 		return ok(undefined);
+	}
+
+	private commandToggleSearchMode(): Result<void, CommandError> {
+		if (!this.coordinator) return ok(undefined);
+
+		this.searchMode = this.searchMode === "text" ? "jev" : "text";
+
+		return this.commandFilter(this.activeFilter);
 	}
 
 	private commandResize(columns: number, rows: number): Result<void, CommandError> {
@@ -709,13 +721,13 @@ class SessionImpl implements Session {
 	}
 
 	private semanticQueryActive(spec: FilterSpec = this.activeFilter): boolean {
-		return this.coordinator !== null && spec.text.length > 0;
+		return this.searchMode === "jev" && this.coordinator !== null && spec.text.length > 0;
 	}
 
 	private syncSemanticQuery(spec: FilterSpec): void {
 		if (!this.coordinator) return;
 
-		if (spec.text.length === 0) {
+		if (!this.semanticQueryActive(spec)) {
 			this.clearSemanticVisibleCounts();
 			this.coordinator.setQuery(null);
 
@@ -796,7 +808,7 @@ class SessionImpl implements Session {
 	}
 
 	private semanticDisplayActive(): boolean {
-		return this.coordinator !== null && this.activeFilter.text.length > 0;
+		return this.semanticQueryActive();
 	}
 
 	private clearSemanticVisibleCounts(): void {
@@ -952,6 +964,7 @@ class SessionImpl implements Session {
 			pendingFilter: pendingFilter?.spec ?? null,
 			view: this.view,
 			lineDisplay: this.lineDisplay,
+			searchMode: this.searchMode,
 			rows: this.classifyRows(projectRows(events, this.view.selectedId, projectionColumns, height, this.lineDisplay)),
 			selectedEvent,
 			packageAttribution: this.packageAttribution,

@@ -82,6 +82,8 @@ export type PreparedFilter = Readonly<{
 
 export type LineDisplay = "clip" | "wrap";
 
+export type SearchMode = "text" | "jev";
+
 export type ViewState = Readonly<{
 	mode: "tail" | "browse";
 	topId: EventId | null;

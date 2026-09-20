@@ -165,13 +165,11 @@ const SCENARIOS: readonly UiScenario[] = [
 		viewport: { cols: 120, rows: 24 },
 		color: "always",
 		async run(context) {
+			const clipped = await context.capture("clipped", { cols: 120, rows: 24 });
+			expectText(clipped, "…", "clipped log row");
 			await send(context.session, ["text:w"]);
-			await waitForText(context.session, " w  Wrap");
-			const wrapped = await context.capture("wrapped", { cols: 120, rows: 24 });
-			expectText(wrapped, "│", "wrapped continuation guide");
-			await send(context.session, ["text:w"]);
-			await waitForText(context.session, " w  Clip");
-			await context.capture("clipped", { cols: 120, rows: 24 });
+			await waitForText(context.session, "│");
+			await context.capture("wrapped", { cols: 120, rows: 24 });
 		},
 	},
 	{
@@ -214,7 +212,7 @@ const SCENARIOS: readonly UiScenario[] = [
 			await send(context.session, ["text:?"]);
 			await waitForText(context.session, "Keys");
 			const final = await context.capture("final", DEFAULT_VIEWPORT);
-			expectText(final, "t / p / y    from inspect", "help overlay");
+			expectText(final, "h            fill empty list space", "help overlay");
 		},
 	},
 	{

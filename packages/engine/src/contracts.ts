@@ -20,6 +20,7 @@ import {
 	type LineDisplay,
 	type LogEvent,
 	type Result,
+	type SearchMode,
 	type SessionCommand,
 	type SessionId,
 	type SourceKind,
@@ -29,12 +30,6 @@ import {
 } from "@logview/core";
 import type { LogClassifier, SemanticOptions, SemanticStats } from "./semantic/contracts.ts";
 import type { LogSource, PackageResolver, Scheduler, SourceNotice, SourceStatus, SourceTerminal } from "./ports.ts";
-
-export type PackageAttribution =
-	| { kind: "idle" }
-	| { kind: "resolving"; uid: number }
-	| { kind: "resolved"; uid: number; packages: readonly string[] }
-	| { kind: "unavailable"; reason: "lookup-failed" | "missing-uid" | "not-recorded" };
 
 export type SessionStats = Readonly<{
 	receivedBytes: number;
@@ -51,6 +46,12 @@ export type SessionStats = Readonly<{
 	upstreamLoss: "unknown";
 }>;
 
+export type PackageAttribution =
+	| { kind: "idle" }
+	| { kind: "resolving"; uid: number }
+	| { kind: "resolved"; uid: number; packages: readonly string[] }
+	| { kind: "unavailable"; reason: "lookup-failed" | "missing-uid" | "not-recorded" };
+
 export type SessionSnapshot = Readonly<{
 	sessionId: SessionId;
 	sourceKind: SourceKind;
@@ -63,9 +64,10 @@ export type SessionSnapshot = Readonly<{
 	pendingFilter: FilterSpec | null;
 	view: ViewState;
 	lineDisplay: LineDisplay;
-	packageAttribution: PackageAttribution;
+	searchMode: SearchMode;
 	rows: readonly ViewRow[];
 	selectedEvent: LogEvent | null;
+	packageAttribution: PackageAttribution;
 	stats: SessionStats;
 	semantic: SemanticStats | null;
 	notice: "history-expired" | "applying-filter" | "resize-required" | null;

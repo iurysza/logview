@@ -7,6 +7,7 @@ export type SessionCommand =
 	| { kind: "oldest" }
 	| { kind: "tail" }
 	| { kind: "toggle-line-display" }
+	| { kind: "toggle-search-mode" }
 	| { kind: "request-package-attribution" }
 	| { kind: "set-filter"; filter: FilterSpec }
 	| { kind: "resize"; columns: number; rows: number };

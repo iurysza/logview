@@ -22,7 +22,7 @@ describe("headless session", () => {
 		scenario.session.dispatch({ kind: "move", delta: -1 });
 		snap = scenario.session.snapshot();
 		expect(snap.view.mode).toBe("browse");
-		expect(snap.view.topId).toBe(5);
+		expect(snap.view.topId).toBe(6);
 		expect(snap.view.selectedId).toBe(6);
 
 		await scenario.deliver([9, 10], (id) => ({
@@ -30,7 +30,7 @@ describe("headless session", () => {
 		}));
 		snap = scenario.session.snapshot();
 		expect(snap.stats.retainedEvents).toBe(8);
-		expect(snap.rows.map((row) => row.id)).toEqual([5, 6]);
+		expect(snap.rows.map((row) => row.id)).toEqual([6, 7]);
 		expect(snap.view.selectedId).toBe(6);
 		expect(snap.view.mode).toBe("browse");
 		expect(snap.view.newSincePause).toBe(2);
@@ -66,7 +66,7 @@ describe("headless session", () => {
 		await scenario.session.stop();
 	});
 
-	test("line display toggles between clipped and wrapped rows", async () => {
+	test("line display clips by default and can temporarily wrap rows", async () => {
 		const scenario = await openScenario({ rows: 8, columns: 48 });
 		await scenario.deliver([1], () => ({ message: "retrying database connection after a transient network failure" }));
 
