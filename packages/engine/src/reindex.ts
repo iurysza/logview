@@ -6,7 +6,6 @@ export type FilterMatcher = (event: LogEvent) => boolean;
 
 export type FilterScanStep = Readonly<{
 	done: boolean;
-	matchedIds: readonly EventId[];
 }>;
 
 export class FilterJob {
@@ -23,12 +22,12 @@ export class FilterJob {
 	) {}
 
 	scanSlice(history: History, maxLines: number): FilterScanStep {
-		if (this.done) return { done: true, matchedIds: [] };
+		if (this.done) return { done: true };
 
 		if (this.highWater === null) {
 			this.done = true;
 
-			return { done: true, matchedIds: [] };
+			return { done: true };
 		}
 
 		const batch = history.readAfter(this.scanAfter, this.highWater, maxLines);
@@ -36,16 +35,11 @@ export class FilterJob {
 		if (batch.length === 0) {
 			this.done = true;
 
-			return { done: true, matchedIds: [] };
+			return { done: true };
 		}
 
-		const matchedIds: EventId[] = [];
-
 		for (const event of batch) {
-			if (this.matcher(event)) {
-				this.prefix.append([event.id]);
-				matchedIds.push(event.id);
-			}
+			if (this.matcher(event)) this.prefix.append([event.id]);
 
 			this.scanAfter = event.id;
 		}
@@ -53,10 +47,10 @@ export class FilterJob {
 		if (this.scanAfter === this.highWater) {
 			this.done = true;
 
-			return { done: true, matchedIds };
+			return { done: true };
 		}
 
-		return { done: false, matchedIds };
+		return { done: false };
 	}
 
 	appendArrival(id: EventId, matchesPending: boolean): void {

@@ -6,6 +6,7 @@ import {
 	DEFAULT_JEV_TIMEOUT_MS,
 	DEFAULT_SEMANTIC_BATCH_ITEMS,
 	DEFAULT_SEMANTIC_FLUSH_MS,
+	DEFAULT_SEMANTIC_HISTORY_EVENTS,
 	DEFAULT_SEMANTIC_THRESHOLD,
 	JEV_MODEL_ID,
 } from "@logview/engine";
@@ -39,6 +40,7 @@ describe("logview.json", () => {
 		expect(resolved.semantic.modelId).toBe(JEV_MODEL_ID);
 		expect(resolved.semantic.timeoutMs).toBe(DEFAULT_JEV_TIMEOUT_MS);
 		expect(resolved.semantic.maxBatchItems).toBe(DEFAULT_SEMANTIC_BATCH_ITEMS);
+		expect(resolved.semantic.historyEvents).toBe(DEFAULT_SEMANTIC_HISTORY_EVENTS);
 		expect(resolved.semantic.flushDelayMs).toBe(DEFAULT_SEMANTIC_FLUSH_MS);
 	});
 
@@ -52,6 +54,7 @@ describe("logview.json", () => {
 					model: "jev-test",
 					flushMs: 0,
 					batchItems: 10,
+					historyEvents: 25,
 					maxInFlight: 1,
 					maxQueued: 50,
 					maxRequestBytes: 4096,
@@ -72,6 +75,7 @@ describe("logview.json", () => {
 		expect(resolved.semantic.modelId).toBe("jev-test");
 		expect(resolved.semantic.flushDelayMs).toBe(0);
 		expect(resolved.semantic.maxBatchItems).toBe(10);
+		expect(resolved.semantic.historyEvents).toBe(25);
 		expect(resolved.semantic.maxInFlight).toBe(1);
 		expect(resolved.semantic.maxQueuedIds).toBe(50);
 		expect(resolved.semantic.maxRequestBytes).toBe(4096);

@@ -28,6 +28,7 @@ const SemanticFileSchema = Schema.Struct({
 	model: Schema.optional(Schema.NonEmptyString),
 	flushMs: Schema.optional(DelayMs),
 	batchItems: Schema.optional(NaturalInt),
+	historyEvents: Schema.optional(NaturalInt),
 	maxInFlight: Schema.optional(NaturalInt),
 	maxQueued: Schema.optional(NaturalInt),
 	maxRequestBytes: Schema.optional(NaturalInt),
@@ -60,6 +61,7 @@ export type ResolvedSemantic = Readonly<{
 	modelId: string;
 	timeoutMs: number;
 	maxBatchItems: number;
+	historyEvents: number;
 	flushDelayMs: number;
 	maxInFlight: number;
 	maxQueuedIds: number;
@@ -150,6 +152,7 @@ export function resolveViewerSettings(
 			modelId: overlay.modelFromEnv ?? semanticFile?.model ?? JEV_MODEL_ID,
 			timeoutMs: semanticFile?.timeoutMs ?? DEFAULT_JEV_TIMEOUT_MS,
 			maxBatchItems: semanticFile?.batchItems ?? defaults.maxBatchItems,
+			historyEvents: semanticFile?.historyEvents ?? defaults.historyEvents,
 			flushDelayMs: semanticFile?.flushMs ?? defaults.flushDelayMs,
 			maxInFlight: semanticFile?.maxInFlight ?? defaults.maxInFlight,
 			maxQueuedIds: semanticFile?.maxQueued ?? defaults.maxQueuedIds,
@@ -163,6 +166,7 @@ export function semanticSessionOptions(semantic: ResolvedSemantic): Partial<Sema
 		threshold: semantic.threshold,
 		modelId: semantic.modelId,
 		maxBatchItems: semantic.maxBatchItems,
+		historyEvents: semantic.historyEvents,
 		flushDelayMs: semantic.flushDelayMs,
 		maxInFlight: semantic.maxInFlight,
 		maxQueuedIds: semantic.maxQueuedIds,

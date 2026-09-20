@@ -979,11 +979,11 @@ history commit
   → reconcile browse anchors and publish a snapshot
 ```
 
-Local filters run first to avoid classifying already excluded records. When local filters broaden, previously unclassified retained events become eligible. A new semantic query invalidates earlier work and schedules a bounded backfill of retained eligible events. New arrivals take priority over older backfill.
+Local filters run first to avoid classifying already excluded records. When local filters broaden, previously unclassified retained events become eligible. A new semantic query invalidates earlier work and backfills only the newest 100 retained eligible events by default. Older eligible rows remain visible as `not requested`. New arrivals take priority over older backfill and remain eligible while the query is active.
 
-A later initial policy can batch up to 100 logs, flush after 50 ms, permit two in-flight requests, and hold at most 2,000 queued IDs. Also cap the UTF-8 encoded request at 128 KiB. Split batches that exceed the cap; an individual oversized item becomes `too-large`, not silently truncated. These are proposed application limits, not confirmed Jev API limits. The adapter must also enforce the provider's question, token, and request-size limits.
+Historical coverage, request size, and queue capacity are separate limits. The default history window is 100 events. A later initial policy can batch up to 100 logs, flush after 50 ms, permit two in-flight requests, and hold at most 2,000 queued IDs. Also cap the UTF-8 encoded request at 128 KiB. Split batches that exceed the cap; an individual oversized item becomes `too-large`, not silently truncated. These are proposed application limits, not confirmed Jev API limits. The adapter must also enforce the provider's question, token, and request-size limits.
 
-When the queue is full, leave excess records explicitly unclassified. Do not stall ingestion or create unlimited retries. Pending, failed, and skipped records pass the semantic filter by default and carry an unclassified marker. A scored record is included when `relevance >= threshold`. The raw record remains in history either way.
+When the queue is full, leave excess records explicitly unclassified. Do not stall ingestion or create unlimited retries. Pending, failed, skipped, and scored records that pass the local filters remain visible in the list. Show each record's classification in a Jev column. Dim a scored record when `relevance < threshold`. The raw record remains in history either way.
 
 Do not assume that “100 items per call” meets live throughput. At 100 items, two concurrent calls, and 50-ms end-to-end latency, maximum service capacity is approximately 4,000 items per second before overhead. That is below the V1 ingestion workload of 10,000 lines per second. The semantic feature needs its own capacity test, admission policy, and visible coverage counter.
 
