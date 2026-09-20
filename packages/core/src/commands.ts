@@ -64,6 +64,7 @@ export type RowKind = "header" | "continuation" | "more";
 
 export type ClassificationMark =
 	| { kind: "none" }
+	| { kind: "unrequested" }
 	| { kind: "pending" }
 	| { kind: "scored"; relevance: number }
 	| { kind: "unknown"; reason: "unsupported" | "too-large" | "failed" | "skipped" };

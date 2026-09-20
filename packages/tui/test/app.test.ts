@@ -15,7 +15,7 @@ import {
 	renderRowText,
 } from "../src/app.ts";
 import { paintStyleFromEnv } from "../src/color.ts";
-import { MOCHA } from "../src/catppuccin.ts";
+import { MOCHA, rgbSgr } from "../src/catppuccin.ts";
 import { paintLogList, visiblePoolSize } from "../src/log-list.ts";
 
 const snapshot: SessionSnapshot = {
@@ -72,6 +72,77 @@ const inspectSnapshot: SessionSnapshot = {
 	...snapshot,
 	selectedEvent,
 	stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 15 },
+};
+
+const jevSnapshot: SessionSnapshot = {
+	...snapshot,
+	activeFilter: { ...EMPTY_FILTER, text: "database failures" },
+	rows: [
+		{
+			id: 1,
+			selected: false,
+			level: "I",
+			kind: "header",
+			spans: [{ text: "low relevance", role: "message" }],
+			clipped: false,
+			classification: { kind: "scored", relevance: 0.1 },
+		},
+		{
+			id: 2,
+			selected: false,
+			level: "I",
+			kind: "header",
+			spans: [{ text: "high relevance", role: "message" }],
+			clipped: false,
+			classification: { kind: "scored", relevance: 0.9 },
+		},
+		{
+			id: 3,
+			selected: false,
+			level: "I",
+			kind: "header",
+			spans: [{ text: "awaiting result", role: "message" }],
+			clipped: false,
+			classification: { kind: "pending" },
+		},
+		{
+			id: 4,
+			selected: false,
+			level: "I",
+			kind: "header",
+			spans: [{ text: "request failed", role: "message" }],
+			clipped: false,
+			classification: { kind: "unknown", reason: "failed" },
+		},
+		{
+			id: 5,
+			selected: false,
+			level: "I",
+			kind: "header",
+			spans: [{ text: "older row", role: "message" }],
+			clipped: false,
+			classification: { kind: "unrequested" },
+		},
+		{
+			id: 6,
+			selected: false,
+			level: "I",
+			kind: "header",
+			spans: [{ text: "queue full", role: "message" }],
+			clipped: false,
+			classification: { kind: "unknown", reason: "skipped" },
+		},
+	],
+	semantic: {
+		queryText: "database failures",
+		queryRevision: 1,
+		threshold: 0.5,
+		classifiedEvents: 2,
+		pendingEvents: 1,
+		skippedEvents: 1,
+		failedEvents: 1,
+		inFlight: 0,
+	},
 };
 
 function visibleText(text: string): string {
@@ -133,6 +204,42 @@ describe("tui chrome", () => {
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(120);
 		}
+	});
+
+	test("classification notes use plain states and exception-only icons", () => {
+		const plain = layoutFrame(jevSnapshot, LIST_FOCUS, 72, 12, "plain");
+		const ansi = layoutFrame(jevSnapshot, LIST_FOCUS, 72, 12, "ansi");
+
+		const rows = plain.slice(2, 8).join("\n");
+
+		expect(rows).toContain("0.10");
+		expect(rows).toContain("0.90");
+		expect(rows).toContain("");
+		expect(rows).toContain(" failed");
+		expect(rows).toContain("");
+		expect(rows).not.toContain("pending");
+		expect(rows).not.toContain("not requested");
+		expect(plain.join("\n")).toContain(" skipped");
+		expect(plain.join("\n")).not.toContain("Jev");
+		expect(ansi[2]).toContain(`${rgbSgr(MOCHA.overlay0, "fg")}low relevance`);
+		expect(ansi[3]).not.toContain(`${rgbSgr(MOCHA.overlay0, "fg")}high relevance`);
+
+		for (const frame of [plain, ansi.map(visibleText)]) {
+			for (const line of frame) expect(displayWidth(line)).toBe(72);
+		}
+	});
+
+	test("Jev mode keeps a compact classification column on narrow terminals", () => {
+		const frame = layoutFrame(jevSnapshot, LIST_FOCUS, 40, 12, "plain");
+		const text = frame.join("\n");
+
+		expect(text).toContain("0.10");
+		expect(text).toContain("");
+		expect(text).toContain(" fail");
+		expect(text).toContain("");
+		expect(text).toContain(" skip");
+
+		for (const line of frame) expect(displayWidth(line)).toBe(40);
 	});
 
 	test("row pool size stays bounded to the viewport plus overscan", () => {

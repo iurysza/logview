@@ -115,12 +115,14 @@ export class SemanticCoordinator {
 		this.annotations.delete(id);
 	}
 
-	markFor(id: EventId): Annotation | { eventId: EventId; kind: "pending" } {
+	markFor(id: EventId): Annotation | { eventId: EventId; kind: "pending" | "unrequested" } {
 		const stored = this.annotations.get(id);
 
 		if (stored) return stored;
 
-		return { eventId: id, kind: "pending" };
+		if (this.queued.has(id) || this.isInFlight(id)) return { eventId: id, kind: "pending" };
+
+		return { eventId: id, kind: "unrequested" };
 	}
 
 	stats(): SemanticStats {
@@ -194,6 +196,14 @@ export class SemanticCoordinator {
 
 	private hasQueued(): boolean {
 		return this.urgent.length > 0 || this.backfill.length > 0;
+	}
+
+	private isInFlight(id: EventId): boolean {
+		for (const ids of this.inFlightRequests.values()) {
+			if (ids.has(id)) return true;
+		}
+
+		return false;
 	}
 
 	private scheduleFlush(): void {

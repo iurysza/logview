@@ -34,6 +34,7 @@ bun run logview replay sessions/example.lvr.jsonl --config logview.json
     "model": "jev-1.13.0",
     "flushMs": 50,
     "batchItems": 100,
+    "historyEvents": 100,
     "maxInFlight": 2,
     "maxQueued": 2000,
     "maxRequestBytes": 131072,
@@ -146,7 +147,7 @@ Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). 
 
 Public contracts stay those in `specs/2026-09-18-logview-technical-design.md` (`Session`, snapshots, commands, `LogEvent`).
 
-Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or `semantic.enabled` in `logview.json`, and set `TYPESAFE_API_KEY`. The `/` text field becomes a query: eligible logs (after level/tag/PID) are classified in batches. Pending and failed rows stay visible; scored rows below the threshold are hidden. Headless tests never call Jev.
+Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or `semantic.enabled` in `logview.json`, and set `TYPESAFE_API_KEY`. The `/` text field becomes a query. When you apply a query, Jev classifies the newest `semantic.historyEvents` locally eligible retained logs, which defaults to 100. New locally eligible arrivals continue to be classified while the query is active. Older rows stay visible with an unrequested icon. Rows scored below the threshold are dimmed. Headless tests never call Jev.
 
 ## Scripts
 

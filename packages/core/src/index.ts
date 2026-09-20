@@ -99,6 +99,7 @@ export {
 export type { Location, NavigationFacts, NavigationPlan } from "./navigation.ts";
 
 export {
+	classificationColumnLayout,
 	eventScreenRows,
 	fitRow,
 	formatTimestamp,
@@ -117,4 +118,4 @@ export {
 	rowText,
 } from "./projection.ts";
 
-export type { ColumnLayout } from "./projection.ts";
+export type { ClassificationColumnLayout, ColumnLayout } from "./projection.ts";

@@ -1,6 +1,7 @@
 import {
 	EMPTY_SELECTION,
 	LIST_FOCUS,
+	classificationColumnLayout,
 	displayWidth,
 	formatTimestamp,
 	messageText,
@@ -230,13 +231,17 @@ function selectedHeaderRow(snapshot: SessionSnapshot): SessionSnapshot["rows"][n
 function classificationLabel(row: SessionSnapshot["rows"][number] | undefined): string | null {
 	if (!row || row.classification.kind === "none") return null;
 
-	if (row.classification.kind === "scored") {
-		return `Jev ${row.classification.relevance.toFixed(2)}`;
-	}
+	if (row.classification.kind === "scored") return row.classification.relevance.toFixed(2);
 
-	if (row.classification.kind === "pending") return "Jev pending";
+	if (row.classification.kind === "pending") return " pending";
 
-	return `Jev ${row.classification.reason}`;
+	if (row.classification.kind === "unrequested") return " not requested";
+
+	if (row.classification.reason === "failed") return " failed";
+
+	if (row.classification.reason === "skipped") return " skipped";
+
+	return row.classification.reason;
 }
 
 function inspectLines(
@@ -319,18 +324,61 @@ function helpLines(width: number): string[] {
 	return fitted;
 }
 
+function jevNote(row: SessionSnapshot["rows"][number], compact: boolean): string {
+	if (row.classification.kind === "scored") return row.classification.relevance.toFixed(2);
+
+	if (row.classification.kind === "pending") return "";
+
+	if (row.classification.kind === "unrequested") return "";
+
+	if (row.classification.kind === "unknown") {
+		if (row.classification.reason === "failed") return compact ? " fail" : " failed";
+
+		if (row.classification.reason === "skipped") return compact ? " skip" : " skipped";
+
+		if (row.classification.reason === "too-large") return "too large";
+
+		return "unsupported";
+	}
+
+	return "";
+}
+
+function isBelowJevThreshold(row: SessionSnapshot["rows"][number], threshold: number): boolean {
+	return row.classification.kind === "scored" && row.classification.relevance < threshold;
+}
+
 function paintLogRows(
 	rows: SessionSnapshot["rows"],
 	columns: number,
 	count: number,
 	style: PaintStyle,
+	semantic: SessionSnapshot["semantic"],
 ): string[] {
 	const lines: string[] = [];
 
-	for (const row of rows) {
-		if (lines.length >= count) break;
+	if (semantic === null) {
+		for (const row of rows) {
+			if (lines.length >= count) break;
 
-		lines.push(paintRow(row, style, columns));
+			lines.push(paintRow(row, style, columns));
+		}
+	} else {
+		const jevLayout = classificationColumnLayout(columns);
+
+		for (const row of rows) {
+			if (lines.length >= count) break;
+
+			const dimmed = isBelowJevThreshold(row, semantic.threshold);
+			const logLine = paintRow(row, style, jevLayout.listWidth, { dimmed });
+			const divider = style === "plain" ? "│" : paintChrome("│", MOCHA.overlay0, style);
+			const note = row.kind === "header" ? jevNote(row, jevLayout.noteWidth < 14) : "";
+			const noteColor = dimmed ? MOCHA.overlay0 : MOCHA.subtext0;
+			const background = row.selected ? MOCHA.surface0 : null;
+			const noteLine = paintChrome(padToWidth(note, jevLayout.noteWidth), noteColor, style, background);
+
+			lines.push(`${logLine}${divider}${noteLine}`);
+		}
 	}
 
 	while (lines.length < count) lines.push(padToWidth("", columns));
@@ -405,7 +453,8 @@ function layoutLines(
 	const helpOpen = interaction.focus === "help";
 	const wideInspect = inspectOpen && columns >= INSPECT_WIDE_COLUMNS;
 	const logWidth = wideInspect ? Math.max(1, columns - inspectWidth(columns) - 1) : columns;
-	let body = paintLogRows(snapshot.rows, logWidth, viewport, style);
+	const semantic = snapshot.semantic !== null && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
+	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic);
 	const selectedRow = selectedHeaderRow(snapshot);
 	const classification = classificationLabel(selectedRow);
 
