@@ -188,6 +188,8 @@ describe("tui chrome", () => {
 		expect(decodeTerminalKey("\u001b[F")).toEqual({ key: "end", ctrl: false, shift: false });
 		expect(decodeTerminalKey("G")).toEqual({ key: "G", ctrl: false, shift: false });
 		expect(decodeTerminalKey("\u0003")).toEqual({ key: "c", ctrl: true, shift: false });
+		expect(decodeTerminalKey("\u0004")).toEqual({ key: "d", ctrl: true, shift: false });
+		expect(decodeTerminalKey("\u0015")).toEqual({ key: "u", ctrl: true, shift: false });
 		expect(decodeTerminalKey("\t")).toEqual({ key: "tab", ctrl: false, shift: false });
 		expect(decodeTerminalKey("\u001b")).toEqual({ key: "escape", ctrl: false, shift: false });
 	});

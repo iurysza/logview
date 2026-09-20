@@ -12,6 +12,7 @@ export type Location = Readonly<{
 export type NavigationFacts = Readonly<{
 	count: number;
 	visibleHeight: number;
+	rowHeightAt?: (rank: number) => number;
 	top: Location;
 	selected: Location;
 	newMatchingArrivals: number;
@@ -48,22 +49,74 @@ function clamp(value: number, min: number, max: number): number {
 	return value;
 }
 
+function rowHeightAt(facts: NavigationFacts, rank: number): number {
+	return Math.max(1, facts.rowHeightAt?.(rank) ?? 1);
+}
+
+function topForSelection(selectedRank: number, facts: NavigationFacts): number {
+	const height = Math.max(1, facts.visibleHeight);
+	let top = selectedRank;
+	let used = rowHeightAt(facts, selectedRank);
+
+	while (top > 0) {
+		const next = rowHeightAt(facts, top - 1);
+
+		if (used + next > height) break;
+
+		top -= 1;
+		used += next;
+	}
+
+	return top;
+}
+
+function selectionIsVisible(topRank: number, selectedRank: number, facts: NavigationFacts): boolean {
+	if (selectedRank < topRank) return false;
+
+	const height = Math.max(1, facts.visibleHeight);
+	let used = 0;
+
+	for (let rank = topRank; rank <= selectedRank; rank += 1) {
+		used += rowHeightAt(facts, rank);
+
+		if (used > height) return false;
+	}
+
+	return true;
+}
+
 export function keepSelectedVisible(
 	topRank: number | null,
 	selectedRank: number,
-	visibleHeight: number,
-	count: number,
+	facts: NavigationFacts,
 ): number {
-	if (count <= 0) return 0;
-	const height = Math.max(1, visibleHeight);
-	const lastTop = Math.max(0, count - height);
-	let top = topRank ?? clamp(selectedRank - height + 1, 0, lastTop);
+	if (facts.count <= 0) return 0;
 
-	if (selectedRank < top) top = selectedRank;
+	const top = topRank === null ? topForSelection(selectedRank, facts) : clamp(topRank, 0, facts.count - 1);
 
-	if (selectedRank >= top + height) top = selectedRank - height + 1;
+	if (selectionIsVisible(top, selectedRank, facts)) return top;
 
-	return clamp(top, 0, lastTop);
+	return topForSelection(selectedRank, facts);
+}
+
+function pageTarget(current: number, delta: -1 | 1, facts: NavigationFacts): number {
+	const budget = Math.max(1, facts.visibleHeight - 1);
+	let target = current;
+	let used = 0;
+
+	while (target + delta >= 0 && target + delta < facts.count) {
+		const next = target + delta;
+		const nextHeight = rowHeightAt(facts, next);
+
+		if (used > 0 && used + nextHeight > budget) break;
+
+		target = next;
+		used += nextHeight;
+
+		if (used >= budget) break;
+	}
+
+	return target;
 }
 
 function tailPlan(facts: NavigationFacts): NavigationPlan {
@@ -76,7 +129,7 @@ function tailPlan(facts: NavigationFacts): NavigationPlan {
 	return {
 		mode: "tail",
 		selectedRank,
-		topRank: keepSelectedVisible(null, selectedRank, facts.visibleHeight, facts.count),
+		topRank: keepSelectedVisible(null, selectedRank, facts),
 		newSincePause: 0,
 	};
 }
@@ -102,7 +155,7 @@ function browseFromAnchors(
 	return {
 		mode: "browse",
 		selectedRank,
-		topRank: keepSelectedVisible(topHint, selectedRank, facts.visibleHeight, facts.count),
+		topRank: keepSelectedVisible(topHint, selectedRank, facts),
 		newSincePause,
 	};
 }
@@ -116,8 +169,6 @@ function planMove(
 		return emptyBrowse(state.mode === "tail" ? 0 : state.newSincePause);
 	}
 
-	const step = cause.kind === "page" ? Math.max(1, facts.visibleHeight - 1) : 1;
-
 	const current =
 		resolveLocation(facts.selected) ?? (state.mode === "tail" ? facts.count - 1 : 0);
 
@@ -127,23 +178,22 @@ function planMove(
 		return {
 			mode: "browse",
 			selectedRank,
-			topRank: keepSelectedVisible(facts.top.exactRank, selectedRank, facts.visibleHeight, facts.count),
+			topRank: keepSelectedVisible(facts.top.exactRank, selectedRank, facts),
 			newSincePause: 0,
 		};
 	}
 
-	const selectedRank = clamp(current + cause.delta * step, 0, facts.count - 1);
+	const selectedRank =
+		cause.kind === "page"
+			? pageTarget(current, cause.delta, facts)
+			: clamp(current + cause.delta, 0, facts.count - 1);
+
 	const newSincePause = state.mode === "tail" ? 0 : state.newSincePause;
 
 	return {
 		mode: "browse",
 		selectedRank,
-		topRank: keepSelectedVisible(
-			facts.top.exactRank,
-			selectedRank,
-			facts.visibleHeight,
-			facts.count,
-		),
+		topRank: keepSelectedVisible(facts.top.exactRank, selectedRank, facts),
 		newSincePause,
 	};
 }
@@ -214,12 +264,7 @@ export function planNavigation(
 				return {
 					mode: "browse" as const,
 					selectedRank,
-					topRank: keepSelectedVisible(
-						facts.top.exactRank,
-						selectedRank,
-						facts.visibleHeight,
-						facts.count,
-					),
+					topRank: keepSelectedVisible(facts.top.exactRank, selectedRank, facts),
 					newSincePause: state.newSincePause,
 				};
 			},

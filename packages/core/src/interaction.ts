@@ -255,11 +255,11 @@ export function reduceInteraction(
 		return { state, command: { kind: "move", delta: 1 }, quit: false };
 	}
 
-	if (key === "pageup") {
+	if (key === "pageup" || (ctrl && (key === "u" || key === "U"))) {
 		return { state, command: { kind: "page", delta: -1 }, quit: false };
 	}
 
-	if (key === "pagedown") {
+	if (key === "pagedown" || (ctrl && (key === "d" || key === "D"))) {
 		return { state, command: { kind: "page", delta: 1 }, quit: false };
 	}
 

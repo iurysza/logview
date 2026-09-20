@@ -681,6 +681,12 @@ class SessionImpl implements Session {
 		const plan = planNavigation(this.view, cause, {
 			count: this.activeIndex.size,
 			visibleHeight,
+			rowHeightAt: (rank) => {
+				const id = this.activeIndex.at(rank);
+				const event = id === null ? null : this.history.get(id);
+
+				return event ? eventScreenRows(event) : 1;
+			},
 			top: this.activeIndex.locate(this.view.topId),
 			selected: this.activeIndex.locate(this.view.selectedId),
 			newMatchingArrivals,

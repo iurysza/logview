@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { threadtimeLine } from "../../../tests/support/log-lines.ts";
 import { openScenario, tick } from "../../../tests/support/scenario.ts";
 
 describe("headless session", () => {
@@ -95,6 +96,44 @@ describe("headless session", () => {
 		expect(snap.view.mode).toBe("tail");
 		expect(snap.view.selectedId).toBe(9);
 
+		await scenario.finish();
+		await scenario.session.stop();
+	});
+
+	test("page navigation keeps the selected header visible across continuation rows", async () => {
+		const scenario = await openScenario({ maxEvents: 20, rows: 8, columns: 100 });
+
+		for (let id = 1; id <= 12; id += 1) {
+			scenario.source.pushLine(threadtimeLine(id, { message: `event-${id}` }), id);
+
+			if (id % 3 === 0) scenario.source.pushLine(`\tat com.example.App.row${id}(App.java:${id})`, id);
+		}
+
+		await tick(scenario.scheduler);
+
+		const assertSelectionVisible = (): void => {
+			const snapshot = scenario.session.snapshot();
+			expect(
+				snapshot.rows.some((row) => row.id === snapshot.view.selectedId && row.kind === "header" && row.selected),
+			).toBe(true);
+		};
+
+		scenario.session.dispatch({ kind: "oldest" });
+		assertSelectionVisible();
+
+		for (let i = 0; i < 6; i += 1) {
+			scenario.session.dispatch({ kind: "page", delta: 1 });
+			assertSelectionVisible();
+		}
+
+		expect(scenario.session.snapshot().view.selectedId).toBe(12);
+
+		for (let i = 0; i < 6; i += 1) {
+			scenario.session.dispatch({ kind: "page", delta: -1 });
+			assertSelectionVisible();
+		}
+
+		expect(scenario.session.snapshot().view.selectedId).toBe(1);
 		await scenario.finish();
 		await scenario.session.stop();
 	});
