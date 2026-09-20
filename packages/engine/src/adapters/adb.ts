@@ -27,6 +27,8 @@ export const LOGCAT_ARGS = [
 	"epoch",
 	"-v",
 	"usec",
+	"-v",
+	"uid",
 	"*:V",
 ] as const;
 

@@ -1,5 +1,20 @@
-import { fgItalic, fgOn, fgOnly, MOCHA, paintStyled, styleOn, type CellStyle } from "./catppuccin.ts";
+import { fgItalic, fgOnly, paintStyled, styleOn, type CellStyle } from "./catppuccin.ts";
 import type { Rgb } from "./catppuccin.ts";
+import { THEME } from "./theme.ts";
+
+const MOCHA = {
+	blue: THEME.accent,
+	crust: THEME.canvas,
+	green: THEME.green,
+	maroon: THEME.red,
+	mauve: THEME.purple,
+	overlay0: THEME.subtle,
+	overlay2: THEME.muted,
+	red: THEME.red,
+	teal: THEME.cyan,
+	text: THEME.text,
+	yellow: THEME.amber,
+} as const;
 
 export type HighlightKind =
 	| "uuid"
@@ -252,13 +267,13 @@ function keywordStyle(word: string): CellStyle {
 }
 
 function httpStyle(method: string): CellStyle {
-	if (method === "GET" || method === "HEAD") return fgOn(MOCHA.crust, MOCHA.green);
+	if (method === "GET" || method === "HEAD") return { ...fgOnly(MOCHA.green), bold: true };
 
-	if (method === "POST") return fgOn(MOCHA.crust, MOCHA.yellow);
+	if (method === "POST") return { ...fgOnly(MOCHA.yellow), bold: true };
 
-	if (method === "DELETE") return fgOn(MOCHA.crust, MOCHA.red);
+	if (method === "DELETE") return { ...fgOnly(MOCHA.red), bold: true };
 
-	return fgOn(MOCHA.crust, MOCHA.mauve);
+	return { ...fgOnly(MOCHA.mauve), bold: true };
 }
 
 function paintDate(text: string): string {

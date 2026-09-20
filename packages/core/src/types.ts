@@ -45,6 +45,7 @@ export function levelRank(level: LogLevel): number {
 
 export type LogMetadata = Readonly<{
 	epochMicros: number;
+	uid?: number | null;
 	pid: number;
 	tid: number;
 	level: LogLevel;
@@ -70,6 +71,7 @@ export type FilterSpec = Readonly<{
 	minLevel: LogLevel | null;
 	tag: string | null;
 	pid: number | null;
+	packageName?: string | null;
 	text: string;
 }>;
 
@@ -77,6 +79,10 @@ export type PreparedFilter = Readonly<{
 	spec: FilterSpec;
 	foldedText: string;
 }>;
+
+export type LineDisplay = "clip" | "wrap";
+
+export type SearchMode = "text" | "jev";
 
 export type ViewState = Readonly<{
 	mode: "tail" | "browse";
@@ -89,6 +95,7 @@ export const EMPTY_FILTER: FilterSpec = {
 	minLevel: null,
 	tag: null,
 	pid: null,
+	packageName: null,
 	text: "",
 };
 
@@ -129,7 +136,7 @@ export const MIN_TERMINAL_COLUMNS = 40;
 
 export const MIN_TERMINAL_ROWS = 8;
 
-export const CHROME_ROWS = 3;
+export const CHROME_ROWS = 6;
 
 export function eventChargeBytes(rawText: string, continuations: readonly string[] = []): number {
 	let chars = rawText.length;

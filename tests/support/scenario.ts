@@ -2,6 +2,7 @@ import {
 	createSession,
 	defaultSessionOptions,
 	type LogClassifier,
+	type PackageResolver,
 	type SemanticOptions,
 	type Session,
 	type SessionSnapshot,
@@ -28,6 +29,7 @@ export async function openScenario(options?: {
 	sessionId?: string;
 	classifier?: LogClassifier;
 	semantic?: Partial<SemanticOptions>;
+	packageResolver?: PackageResolver;
 }): Promise<Scenario> {
 	const source = new ScriptedSource();
 	const scheduler = new ManualScheduler();
@@ -39,7 +41,13 @@ export async function openScenario(options?: {
 			rows: options?.rows ?? 8,
 			columns: options?.columns ?? 80,
 		}),
-		{ source, scheduler, classifier: options?.classifier, semantic: options?.semantic },
+		{
+			source,
+			scheduler,
+			classifier: options?.classifier,
+			semantic: options?.semantic,
+			packageResolver: options?.packageResolver,
+		},
 	);
 
 	if (!created.ok) throw new Error(created.error.message);

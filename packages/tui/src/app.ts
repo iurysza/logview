@@ -1,224 +1,39 @@
 import {
+	CHROME_ROWS,
 	EMPTY_SELECTION,
 	LIST_FOCUS,
 	classificationColumnLayout,
-	displayWidth,
-	formatTimestamp,
-	messageText,
 	padToWidth,
+	projectColumnHeader,
 	reduceInteraction,
-	sanitizeDisplay,
 	tagText,
 	type InteractionSelection,
 	type InteractionState,
-	type LogEvent,
 	err,
 	ok,
 	type Result,
 } from "@logview/core";
 import type { Session, SessionSnapshot, TerminalAttachment, UiError } from "@logview/engine";
-import { MOCHA, type Rgb } from "./catppuccin.ts";
 import { paintChrome, paintFilled, paintRow, paintStyleFromEnv, type PaintStyle } from "./color.ts";
+import {
+	formatFilter,
+	formatFooter,
+	formatHints,
+	formatStatus,
+	paintChromeLine,
+	paintFilterLine,
+	paintFooter,
+	paintStatus,
+} from "./chrome.ts";
+import { copyToClipboard, formatClipboardEvent } from "./clipboard.ts";
+import { inspectorHeader, inspectorWidth, paintInspector } from "./inspect.ts";
+import { THEME } from "./theme.ts";
+
+export { formatFilter, formatFooter, formatHints, formatStatus };
 
 export const ROW_POOL_OVERSCAN = 2;
 
 export const INSPECT_WIDE_COLUMNS = 120;
-
-function modeLabel(snapshot: SessionSnapshot): string {
-	if (snapshot.source.kind === "failed") {
-		return snapshot.sourceKind === "replay" ? "REPLAY • FAILED" : "LIVE • FAILED";
-	}
-
-	if (snapshot.sourceKind === "replay") {
-		if (snapshot.view.mode === "browse") return "REPLAY • BROWSE";
-
-		if (snapshot.source.kind === "ended") return "REPLAY • END";
-
-		if (snapshot.source.kind === "running" || snapshot.source.kind === "starting") return "REPLAY • PLAYING";
-
-		return "REPLAY • IDLE";
-	}
-
-	if (snapshot.view.mode === "browse") return `BROWSE • +${snapshot.view.newSincePause} NEW`;
-
-	if (snapshot.source.kind === "running" || snapshot.source.kind === "starting") return "LIVE • FOLLOWING";
-
-	if (snapshot.source.kind === "ended") return "LIVE • END";
-
-	return "LIVE • IDLE";
-}
-
-function modeColor(snapshot: SessionSnapshot): Rgb {
-	if (snapshot.source.kind === "failed") return MOCHA.red;
-
-	if (snapshot.view.mode === "browse") return MOCHA.yellow;
-
-	if (snapshot.source.kind === "running" || snapshot.source.kind === "starting") return MOCHA.green;
-
-	return MOCHA.overlay1;
-}
-
-export function formatStatus(snapshot: SessionSnapshot): string {
-	return `logview   ${modeLabel(snapshot)}   ${snapshot.label}`;
-}
-
-export function formatFilter(snapshot: SessionSnapshot): string {
-	const filter = snapshot.activeFilter;
-	const level = filter.minLevel ? `${filter.minLevel}+` : "ALL";
-	const tag = filter.tag ? `tag:${filter.tag}` : "tag:*";
-	const pid = filter.pid === null ? "pid:*" : `pid:${filter.pid}`;
-	const semantic = snapshot.semantic !== null && filter.text.length > 0;
-	const text = filter.text ? `${semantic ? "~" : "/"} ${filter.text}` : "/";
-
-	return `${level}   ${tag}   ${pid}   ${text}`;
-}
-
-export function formatHints(): string {
-	return "↑↓  Enter  /  f  G  ?  q quit";
-}
-
-export function formatFooter(snapshot: SessionSnapshot): string {
-	let extra = "";
-
-	if (snapshot.notice === "history-expired") extra = " · earlier history expired";
-	else if (snapshot.notice === "applying-filter") extra = " · applying filters";
-	else if (snapshot.notice === "resize-required") extra = " · resize terminal";
-	else if (snapshot.stats.lagging) extra = " · catching up";
-
-	const shown = snapshot.stats.matchedEvents;
-	const buffered = snapshot.stats.retainedEvents;
-
-	const semantic =
-		snapshot.semantic && snapshot.semantic.queryText.length > 0
-			? ` · ${snapshot.semantic.classifiedEvents} classified · ${snapshot.semantic.pendingEvents} pending`
-			: "";
-
-	const unseen =
-		snapshot.view.mode === "browse" && snapshot.view.newSincePause > 0
-			? ` · ${snapshot.view.newSincePause} unseen`
-			: "";
-
-	const mode = modeLabel(snapshot).split(" • ")[0] ?? "LIVE";
-
-	return `${mode}   ${shown}/${buffered} shown${unseen}${semantic}${extra}    ${formatHints()}`;
-}
-
-function splitEnds(left: string, right: string, columns: number): string {
-	const rightWidth = displayWidth(right);
-	const leftBudget = Math.max(0, columns - rightWidth - 1);
-	const leftFitted = padToWidth(left, leftBudget);
-	const gap = Math.max(1, columns - displayWidth(leftFitted) - rightWidth);
-
-	return `${leftFitted}${" ".repeat(gap)}${right}`;
-}
-
-function paintStatusLeft(
-	fitted: string,
-	snapshot: SessionSnapshot,
-	style: PaintStyle,
-): string {
-	const segments: ReadonlyArray<Readonly<{ text: string; color: Rgb }>> = [
-		{ text: "logview", color: MOCHA.subtext1 },
-		{ text: "   ", color: MOCHA.overlay0 },
-		{ text: modeLabel(snapshot), color: modeColor(snapshot) },
-		{ text: "   ", color: MOCHA.overlay0 },
-		{ text: snapshot.label, color: MOCHA.overlay1 },
-	];
-
-	let offset = 0;
-	let out = "";
-
-	for (const segment of segments) {
-		if (offset >= fitted.length) break;
-
-		const available = fitted.slice(offset);
-
-		if (available.startsWith(segment.text)) {
-			out += paintChrome(segment.text, segment.color, style);
-			offset += segment.text.length;
-			continue;
-		}
-
-		let matched = 0;
-
-		while (
-			matched < segment.text.length &&
-			matched < available.length &&
-			available[matched] === segment.text[matched]
-		) {
-			matched += 1;
-		}
-
-		if (matched > 0) {
-			out += paintChrome(available.slice(0, matched), segment.color, style);
-			offset += matched;
-		}
-
-		break;
-	}
-
-	if (offset < fitted.length) out += paintChrome(fitted.slice(offset), MOCHA.overlay1, style);
-
-	return out;
-}
-
-function paintStatus(snapshot: SessionSnapshot, columns: number, style: PaintStyle): string {
-	const right = `${snapshot.stats.retainedEvents} events`;
-	const leftPlain = formatStatus(snapshot);
-	const plain = splitEnds(leftPlain, right, columns);
-
-	if (style === "plain") return plain;
-
-	const rightWidth = displayWidth(right);
-	const leftBudget = Math.max(0, columns - rightWidth - 1);
-	const leftFitted = padToWidth(leftPlain, leftBudget);
-	const gap = Math.max(1, columns - displayWidth(leftFitted) - rightWidth);
-	const count = paintChrome(right, MOCHA.overlay1, style);
-
-	return `${paintStatusLeft(leftFitted, snapshot, style)}${" ".repeat(gap)}${count}`;
-}
-
-function paintFilterLine(
-	snapshot: SessionSnapshot,
-	interaction: InteractionState,
-	columns: number,
-	style: PaintStyle,
-): string {
-	if (interaction.focus === "filters") {
-		const error = interaction.error ? `  ! ${interaction.error.message}` : "";
-		const editor = `Edit ${interaction.field}: ${interaction.draft[interaction.field]}${error}`;
-		const color = interaction.error ? MOCHA.red : MOCHA.peach;
-
-		return paintFilled(editor, columns, style, color, style === "ansi" ? MOCHA.surface0 : null);
-	}
-
-	if (style === "plain") return padToWidth(formatFilter(snapshot), columns);
-
-	const filter = snapshot.activeFilter;
-	const levelText = filter.minLevel ? `${filter.minLevel}+` : "ALL";
-	const tagTextValue = filter.tag ? `tag:${filter.tag}` : "tag:*";
-	const pidText = filter.pid === null ? "pid:*" : `pid:${filter.pid}`;
-	const searchText = filter.text ? `${snapshot.semantic && filter.text ? "~" : "/"} ${filter.text}` : "/";
-	const level = paintChrome(levelText, filter.minLevel ? MOCHA.yellow : MOCHA.overlay2, style);
-	const tag = paintChrome(tagTextValue, filter.tag ? MOCHA.green : MOCHA.overlay2, style);
-	const pid = paintChrome(pidText, filter.pid === null ? MOCHA.overlay2 : MOCHA.teal, style);
-	const text = paintChrome(searchText, filter.text ? MOCHA.peach : MOCHA.overlay2, style);
-	const painted = `${level}   ${tag}   ${pid}   ${text}`;
-
-	return `${painted}${" ".repeat(Math.max(0, columns - displayWidth(formatFilter(snapshot))))}`;
-}
-
-function paintFooter(snapshot: SessionSnapshot, columns: number, style: PaintStyle): string {
-	const plain = padToWidth(formatFooter(snapshot), columns);
-
-	if (style === "plain") return plain;
-
-	return paintFilled(formatFooter(snapshot), columns, style, MOCHA.subtext0, MOCHA.surface0);
-}
-
-function inspectWidth(columns: number): number {
-	return Math.min(48, Math.max(32, Math.floor(columns * 0.36)));
-}
 
 function selectedHeaderRow(snapshot: SessionSnapshot): SessionSnapshot["rows"][number] | undefined {
 	for (const row of snapshot.rows) {
@@ -244,77 +59,19 @@ function classificationLabel(row: SessionSnapshot["rows"][number] | undefined): 
 	return row.classification.reason;
 }
 
-function inspectLines(
-	event: LogEvent | null,
-	width: number,
-	height: number,
-	classification: string | null = null,
-): string[] {
-	const actions = ["t filter tag", "p filter pid", "Esc close"];
-	const content: string[] = [];
-
-	if (!event) {
-		content.push("No event selected");
-	} else {
-		content.push("Event", "");
-
-		if (event.metadata) {
-			content.push(formatTimestamp(event.metadata.epochMicros));
-			content.push(event.metadata.level);
-			content.push(`PID ${event.metadata.pid}  TID ${event.metadata.tid}`);
-			content.push(`tag ${tagText(event.rawText, event.metadata.tag)}`);
-			content.push("");
-			content.push(sanitizeDisplay(messageText(event.rawText, event.metadata.message)));
-		} else {
-			content.push(sanitizeDisplay(event.rawText));
-		}
-
-		if (classification) {
-			content.push("");
-			content.push(classification);
-		}
-
-		if (event.continuations.length > 0) {
-			content.push("");
-
-			for (const line of event.continuations) content.push(sanitizeDisplay(line));
-		}
-
-		content.push("");
-		content.push("Raw");
-		content.push(sanitizeDisplay(event.rawText));
-
-		for (const line of event.continuations) content.push(sanitizeDisplay(line));
-	}
-
-	const fitted: string[] = [];
-	const rows = Math.max(1, height);
-	const actionRows = Math.min(actions.length, rows);
-	const contentRows = Math.max(0, rows - actionRows);
-
-	for (let i = 0; i < contentRows; i += 1) fitted.push(padToWidth(content[i] ?? "", width));
-
-	for (let i = actions.length - actionRows; i < actions.length; i += 1) {
-		fitted.push(padToWidth(actions[i]!, width));
-	}
-
-	return fitted;
-}
-
 function helpLines(width: number): string[] {
 	const lines = [
 		"Keys",
-		"",
-		"↑↓ / j k     move between events",
-		"PgUp PgDn / ^U ^D  page",
-		"G / End      jump to end",
-		"Home         oldest",
-		"Enter        inspect event",
-		"/            text filter (Jev when enabled)",
-		"f            filter editor",
-		"t / p        from inspect: filter tag or pid",
-		"?            this help",
-		"q            quit",
+		"↑↓ / j k     select previous or next event",
+		"PgUp PgDn / ^U ^D  move one page",
+		"G / End      follow newest logs · Home first event",
+		"w            toggle line wrapping",
+		"m            choose text or Jev search",
+		"h            fill empty list space",
+		"y            copy selected event",
+		"Enter        inspect event · t tag · p PID · y copy",
+		"/            search event text",
+		"f            change filters",
 	];
 
 	const fitted: string[] = [];
@@ -354,6 +111,7 @@ function paintLogRows(
 	count: number,
 	style: PaintStyle,
 	semantic: SessionSnapshot["semantic"],
+	listBackground: boolean,
 ): string[] {
 	const lines: string[] = [];
 
@@ -371,17 +129,23 @@ function paintLogRows(
 
 			const dimmed = isBelowJevThreshold(row, semantic.threshold);
 			const logLine = paintRow(row, style, jevLayout.listWidth, { dimmed });
-			const divider = style === "plain" ? "│" : paintChrome("│", MOCHA.overlay0, style);
+			const divider = style === "plain" ? "│" : paintChrome("│", THEME.subtle, style);
 			const note = row.kind === "header" ? jevNote(row, jevLayout.noteWidth < 14) : "";
-			const noteColor = dimmed ? MOCHA.overlay0 : MOCHA.subtext0;
-			const background = row.selected ? MOCHA.surface0 : null;
+			const noteColor = dimmed ? THEME.subtle : THEME.muted;
+			const background = row.selected ? THEME.selection : THEME.canvas;
 			const noteLine = paintChrome(padToWidth(note, jevLayout.noteWidth), noteColor, style, background);
 
 			lines.push(`${logLine}${divider}${noteLine}`);
 		}
 	}
 
-	while (lines.length < count) lines.push(padToWidth("", columns));
+	while (lines.length < count) {
+		lines.push(
+			listBackground
+				? paintFilled("", columns, style, THEME.text, THEME.canvas)
+				: padToWidth("", columns),
+		);
+	}
 
 	return lines;
 }
@@ -391,7 +155,7 @@ function fillPane(pane: string[], count: number, columns: number, style: PaintSt
 
 	for (let i = 0; i < count; i += 1) {
 		const text = pane[i] ?? "";
-		lines.push(paintFilled(text.trimEnd(), columns, style, MOCHA.text, style === "ansi" ? MOCHA.surface0 : null));
+		lines.push(paintFilled(text.trimEnd(), columns, style, THEME.text, style === "ansi" ? THEME.bar : null));
 	}
 
 	return lines;
@@ -403,19 +167,16 @@ function splitPane(
 	columns: number,
 	style: PaintStyle,
 ): string[] {
-	const width = inspectWidth(columns);
+	const width = inspectorWidth(columns);
 	const leftWidth = Math.max(1, columns - width - 1);
 	const out: string[] = [];
 
 	for (let i = 0; i < logLines.length; i += 1) {
 		const left = logLines[i] ?? padToWidth("", leftWidth);
-		const right = pane[i] ?? padToWidth("", width);
-		const divider = style === "plain" ? "│" : paintChrome("│", MOCHA.overlay0, style);
+		const right = pane[i] ?? paintChromeLine([], width, style, THEME.bar);
+		const divider = style === "plain" ? "│" : paintChromeLine([{ text: "│", style: { fg: THEME.subtle, bg: null, bold: false, italic: false } }], 1, style, THEME.canvas);
 
-		const rightPainted =
-			style === "plain" ? right : paintFilled(right.trimEnd(), width, style, MOCHA.text, MOCHA.surface0);
-
-		out.push(`${left}${divider}${rightPainted}`);
+		out.push(`${left}${divider}${right}`);
 	}
 
 	return out;
@@ -431,6 +192,7 @@ function layoutLines(
 	style: PaintStyle,
 	columns: number,
 	rows: number,
+	listBackground = true,
 ): readonly string[] {
 	if (rows <= 0 || columns <= 0) return [];
 
@@ -445,38 +207,58 @@ function layoutLines(
 	const header = [
 		paintStatus(snapshot, columns, style),
 		paintFilterLine(snapshot, interaction, columns, style),
+		paintChromeLine(
+			projectColumnHeader(columns).map((span) => ({
+				text: span.text,
+				style: { fg: THEME.muted, bg: null, bold: true, italic: false },
+			})),
+			columns,
+			style,
+			THEME.bar,
+		),
 	];
 
-	const footer = paintFooter(snapshot, columns, style);
-	const viewport = Math.max(0, rows - 3);
+	const footerPadding = paintChromeLine([], columns, style, THEME.bar);
+	const footer = [footerPadding, paintFooter(snapshot, interaction, columns, style), footerPadding];
+	const viewport = Math.max(0, rows - CHROME_ROWS);
 	const inspectOpen = interaction.focus === "inspect";
 	const helpOpen = interaction.focus === "help";
 	const wideInspect = inspectOpen && columns >= INSPECT_WIDE_COLUMNS;
-	const logWidth = wideInspect ? Math.max(1, columns - inspectWidth(columns) - 1) : columns;
-	const semantic = snapshot.semantic !== null && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
-	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic);
+	const logWidth = wideInspect ? Math.max(1, columns - inspectorWidth(columns) - 1) : columns;
+	const semantic = snapshot.searchMode === "jev" && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
+	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic, listBackground);
 	const selectedRow = selectedHeaderRow(snapshot);
 	const classification = classificationLabel(selectedRow);
 
 	if (helpOpen) {
-		body = fillPane(helpLines(columns), viewport, columns, style);
+		header[2] = paintChromeLine([{ text: "Keys", style: { fg: THEME.muted, bg: null, bold: true, italic: false } }], columns, style, THEME.bar);
+		body = fillPane(helpLines(columns).slice(1), viewport, columns, style);
 	} else if (inspectOpen && !wideInspect) {
-		body = fillPane(
-			inspectLines(snapshot.selectedEvent, columns, viewport, classification),
-			viewport,
+		header[2] = paintChromeLine(inspectorHeader(snapshot.selectedEvent, columns), columns, style, THEME.bar);
+		body = paintInspector(snapshot.selectedEvent, columns, viewport, style, classification, snapshot.packageAttribution);
+	} else if (wideInspect) {
+		const paneWidth = inspectorWidth(columns);
+		const leftWidth = Math.max(1, columns - paneWidth - 1);
+		const headingText = projectColumnHeader(columns).map((span) => span.text).join("");
+		header[2] = paintChromeLine(
+			[
+				{ text: padToWidth(headingText, leftWidth), style: { fg: THEME.muted, bg: null, bold: true, italic: false } },
+				{ text: "│", style: { fg: THEME.subtle, bg: null, bold: false, italic: false } },
+				...inspectorHeader(snapshot.selectedEvent, paneWidth),
+			],
 			columns,
 			style,
+			THEME.bar,
 		);
-	} else if (wideInspect) {
 		body = splitPane(
 			body,
-			inspectLines(snapshot.selectedEvent, inspectWidth(columns), viewport, classification),
+			paintInspector(snapshot.selectedEvent, paneWidth, viewport, style, classification, snapshot.packageAttribution),
 			columns,
 			style,
 		);
 	}
 
-	const lines = [...header, ...body, footer];
+	const lines = [...header, ...body, ...footer];
 
 	while (lines.length < rows) lines.push(padToWidth("", columns));
 
@@ -489,8 +271,9 @@ export function layoutSession(
 	style: PaintStyle = "plain",
 	columns = 80,
 	rows = 24,
+	listBackground = true,
 ): readonly string[] {
-	return layoutLines(snapshot, interaction, style, columns, rows);
+	return layoutLines(snapshot, interaction, style, columns, rows, listBackground);
 }
 
 export function layoutFrame(
@@ -499,8 +282,9 @@ export function layoutFrame(
 	columns: number,
 	rows: number,
 	style: PaintStyle = "plain",
+	listBackground = true,
 ): readonly string[] {
-	return layoutLines(snapshot, interaction, style, columns, rows);
+	return layoutLines(snapshot, interaction, style, columns, rows, listBackground);
 }
 
 type KeyCommand = Readonly<{
@@ -634,6 +418,7 @@ export async function attachTui(
 	}
 
 	let interaction: InteractionState = LIST_FOCUS;
+	let listBackground = true;
 	let closed = false;
 	let resolveDone: () => void = () => undefined;
 	let lastColumns = -1;
@@ -681,7 +466,7 @@ export async function attachTui(
 			}
 
 			const current = resized ? session.snapshot() : (published ?? session.snapshot());
-			const lines = layoutLines(current, interaction, style, size.columns, size.rows);
+			const lines = layoutLines(current, interaction, style, size.columns, size.rows, listBackground);
 			let frame = "\x1b[H\x1b[2J";
 
 			for (let i = 0; i < lines.length; i += 1) {
@@ -707,6 +492,18 @@ export async function attachTui(
 			if (closed) return;
 
 			const snapshot = session.snapshot();
+
+			if (interaction.focus === "list" && (mapped.key === "h" || mapped.key === "H")) {
+				listBackground = !listBackground;
+				paint();
+				continue;
+			}
+
+			if ((interaction.focus === "list" || interaction.focus === "inspect") && (mapped.key === "y" || mapped.key === "Y")) {
+				if (snapshot.selectedEvent) void copyToClipboard(formatClipboardEvent(snapshot.selectedEvent));
+				paint();
+				continue;
+			}
 
 			const result = reduceInteraction(
 				interaction,
@@ -770,6 +567,7 @@ export async function attachTui(
 		if (inputTimer !== null) clearTimeout(inputTimer);
 		unsubscribe();
 		process.stdin.off("data", onData);
+		process.stdin.pause();
 		process.stdout.off("resize", onResize);
 		process.stdin.setRawMode?.(wasRaw ?? false);
 		process.stdout.write("\x1b[0m\x1b[?25h\x1b[?7h\x1b[?1049l");

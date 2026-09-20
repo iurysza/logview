@@ -190,10 +190,18 @@ function planMove(
 
 	const newSincePause = state.mode === "tail" ? 0 : state.newSincePause;
 
+	const movedAboveViewport =
+		cause.kind === "move" &&
+		cause.delta === -1 &&
+		facts.top.exactRank !== null &&
+		selectedRank < facts.top.exactRank;
+
 	return {
 		mode: "browse",
 		selectedRank,
-		topRank: keepSelectedVisible(facts.top.exactRank, selectedRank, facts),
+		topRank: movedAboveViewport
+			? selectedRank
+			: keepSelectedVisible(facts.top.exactRank, selectedRank, facts),
 		newSincePause,
 	};
 }

@@ -5,6 +5,7 @@ import type {
 	RecordingError,
 	RecordingHeader,
 	RecordingRecord,
+	PackageTable,
 	SourceError,
 	SourcePacket,
 } from "./ports.ts";
@@ -34,14 +35,32 @@ const SourceErrorSchema = Schema.Struct({
 	exitCode: Schema.optional(Schema.Number),
 });
 
-const HeaderSchema = Schema.Struct({
-	kind: Schema.Literal("header"),
-	format: Schema.Literal("logview-recording"),
-	version: Schema.Literal(1),
-	profile: Schema.Literal("threadtime-epoch-usec-v1"),
-	provenance: Schema.Literal("raw-capture", "sanitized-real", "synthetic"),
-	redactionVersion: Schema.NullOr(Schema.String),
-});
+const PackageTableSchema = Schema.Array(
+	Schema.Struct({
+		uid: Schema.Number.pipe(Schema.int(), Schema.greaterThanOrEqualTo(0)),
+		packages: Schema.Array(Schema.String),
+	}),
+);
+
+const HeaderSchema = Schema.Union(
+	Schema.Struct({
+		kind: Schema.Literal("header"),
+		format: Schema.Literal("logview-recording"),
+		version: Schema.Literal(1),
+		profile: Schema.Literal("threadtime-epoch-usec-v1"),
+		provenance: Schema.Literal("raw-capture", "sanitized-real", "synthetic"),
+		redactionVersion: Schema.NullOr(Schema.String),
+	}),
+	Schema.Struct({
+		kind: Schema.Literal("header"),
+		format: Schema.Literal("logview-recording"),
+		version: Schema.Literal(2),
+		profile: Schema.Literal("threadtime-epoch-usec-uid-v2"),
+		provenance: Schema.Literal("raw-capture", "sanitized-real", "synthetic"),
+		redactionVersion: Schema.NullOr(Schema.String),
+		packageTable: Schema.NullOr(PackageTableSchema),
+	}),
+);
 
 const ChunkSchema = Schema.Struct({
 	kind: Schema.Literal("chunk"),
@@ -136,7 +155,7 @@ export function packetFromChunk(record: Extract<RecordingRecord, { kind: "chunk"
 
 export function encodeRecordingRecord(record: RecordingRecord): Uint8Array {
 	const json = Match.value(record).pipe(
-		Match.when({ kind: "header" }, (header) =>
+		Match.when({ kind: "header", version: 1 }, (header) =>
 			JSON.stringify({
 				kind: "header",
 				format: header.format,
@@ -144,6 +163,17 @@ export function encodeRecordingRecord(record: RecordingRecord): Uint8Array {
 				profile: header.profile,
 				provenance: header.provenance,
 				redactionVersion: header.redactionVersion,
+			}),
+		),
+		Match.when({ kind: "header", version: 2 }, (header) =>
+			JSON.stringify({
+				kind: "header",
+				format: header.format,
+				version: header.version,
+				profile: header.profile,
+				provenance: header.provenance,
+				redactionVersion: header.redactionVersion,
+				packageTable: header.packageTable,
 			}),
 		),
 		Match.when({ kind: "chunk" }, (chunk) =>
@@ -266,6 +296,8 @@ export const base64ToBytes = decodeBase64Strict;
 
 export const RECORDING_PROFILE = "threadtime-epoch-usec-v1" as const;
 
+export const UID_RECORDING_PROFILE = "threadtime-epoch-usec-uid-v2" as const;
+
 export function syntheticRecordingHeader(): RecordingHeader {
 	return {
 		kind: "header",
@@ -274,6 +306,21 @@ export function syntheticRecordingHeader(): RecordingHeader {
 		profile: RECORDING_PROFILE,
 		provenance: "synthetic",
 		redactionVersion: null,
+	};
+}
+
+export function uidRecordingHeader(
+	packageTable: PackageTable | null,
+	provenance: RecordingHeader["provenance"] = "synthetic",
+): RecordingHeader {
+	return {
+		kind: "header",
+		format: "logview-recording",
+		version: 2,
+		profile: UID_RECORDING_PROFILE,
+		provenance,
+		redactionVersion: null,
+		packageTable,
 	};
 }
 

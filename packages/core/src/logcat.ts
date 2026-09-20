@@ -13,7 +13,10 @@ export type ParsedLine =
 
 const BUFFER_MARKER = /^-+ beginning of /;
 
-const HEADER =
+const UID_HEADER =
+	/^[ \t]*(\d{1,16})\.(\d{6})[ \t]+(\d{1,10})[ \t]+(\d{1,10})[ \t]+(\d{1,10})[ \t]([VDIWEF])[ \t]([^:]*):(.*)$/;
+
+const LEGACY_HEADER =
 	/^[ \t]*(\d{1,16})\.(\d{6})[ \t]+(\d{1,10})[ \t]+(\d{1,10})[ \t]([VDIWEF])[ \t]([^:]*):(.*)$/;
 
 type DecodedText = Readonly<{
@@ -38,14 +41,18 @@ function sliceOf(text: string, start: number, end: number): TextSlice {
 }
 
 function parseMetadata(rawText: string): LogMetadata | null {
-	const match = HEADER.exec(rawText);
+	const uidMatch = UID_HEADER.exec(rawText);
+	const match = uidMatch ?? LEGACY_HEADER.exec(rawText);
 
 	if (!match) return null;
 	const seconds = match[1]!;
 	const micros = match[2]!;
-	const pidText = match[3]!;
-	const tidText = match[4]!;
-	const levelText = match[5]!;
+	const uidText = uidMatch ? match[3]! : null;
+	const pidText = uidMatch ? match[4]! : match[3]!;
+	const tidText = uidMatch ? match[5]! : match[4]!;
+	const levelText = uidMatch ? match[6]! : match[5]!;
+	const tag = uidMatch ? match[7]! : match[6]!;
+	const message = uidMatch ? match[8]! : match[7]!;
 
 	if (!isLogLevel(levelText)) return null;
 
@@ -62,22 +69,25 @@ function parseMetadata(rawText: string): LogMetadata | null {
 
 	if (!Number.isSafeInteger(epochMicros)) return null;
 
+	const uid = uidText === null ? null : Number(uidText);
 	const pid = Number(pidText);
 	const tid = Number(tidText);
+
+	if (uid !== null && (!Number.isSafeInteger(uid) || uid < 0)) return null;
 
 	if (!Number.isSafeInteger(pid) || pid < 0) return null;
 
 	if (!Number.isSafeInteger(tid) || tid < 0) return null;
 
-	const prefixLength = rawText.length - (match[6]!.length + 1 + match[7]!.length);
+	const prefixLength = rawText.length - (tag.length + 1 + message.length);
 	const tagStart = prefixLength;
-	const tagEnd = tagStart + match[6]!.length;
+	const tagEnd = tagStart + tag.length;
 	const messageStart = tagEnd + 1;
-	const message = match[7]!;
 	const messageTrimStart = message.startsWith(" ") ? messageStart + 1 : messageStart;
 
 	return {
 		epochMicros,
+		uid,
 		pid,
 		tid,
 		level: levelText,

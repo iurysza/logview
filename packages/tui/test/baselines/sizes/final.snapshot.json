@@ -1,0 +1,184 @@
+{
+  "cols": 39,
+  "rows": 7,
+  "foreground": {
+    "r": 201,
+    "g": 209,
+    "b": 217
+  },
+  "background": {
+    "r": 13,
+    "g": 17,
+    "b": 23
+  },
+  "spans": [
+    {
+      "x": 0,
+      "y": 0,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Terminal too small. Resize to at least…"
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                       "
+    },
+    {
+      "x": 0,
+      "y": 2,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                       "
+    },
+    {
+      "x": 0,
+      "y": 3,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                       "
+    },
+    {
+      "x": 0,
+      "y": 4,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                       "
+    },
+    {
+      "x": 0,
+      "y": 5,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                       "
+    },
+    {
+      "x": 0,
+      "y": 6,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                       "
+    }
+  ]
+}

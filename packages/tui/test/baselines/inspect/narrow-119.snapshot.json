@@ -16,17 +16,17 @@
       "x": 0,
       "y": 0,
       "foreground": {
-        "r": 186,
-        "g": 194,
-        "b": 222
+        "r": 69,
+        "g": 150,
+        "b": 255
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
-        "bold": false,
+        "bold": true,
         "italic": false,
         "faint": false,
         "invisible": false,
@@ -40,14 +40,14 @@
       "x": 7,
       "y": 0,
       "foreground": {
-        "r": 108,
-        "g": 112,
-        "b": 134
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -58,23 +58,71 @@
         "overline": false,
         "underline": null
       },
-      "text": "   "
+      "text": "  "
     },
     {
-      "x": 10,
+      "x": 9,
       "y": 0,
       "foreground": {
-        "r": 127,
-        "g": 132,
-        "b": 156
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "sanitized-aosp-pattern.lvr.jsonl"
+    },
+    {
+      "x": 41,
+      "y": 0,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 43,
+      "y": 0,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
         "italic": false,
         "faint": false,
         "invisible": false,
@@ -85,17 +133,17 @@
       "text": "REPLAY • END"
     },
     {
-      "x": 22,
+      "x": 55,
       "y": 0,
       "foreground": {
-        "r": 108,
-        "g": 112,
-        "b": 134
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -106,20 +154,20 @@
         "overline": false,
         "underline": null
       },
-      "text": "   "
+      "text": "  15 events  "
     },
     {
-      "x": 25,
+      "x": 68,
       "y": 0,
       "foreground": {
-        "r": 127,
-        "g": 132,
-        "b": 156
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -130,20 +178,68 @@
         "overline": false,
         "underline": null
       },
-      "text": "sanitized-aosp-pattern.lvr.jsonl                                                    "
+      "text": "0 filters"
     },
     {
-      "x": 109,
+      "x": 77,
       "y": 0,
       "foreground": {
-        "r": 201,
-        "g": 209,
-        "b": 217
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                          "
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Level all "
+    },
+    {
+      "x": 11,
+      "y": 1,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -157,41 +253,17 @@
       "text": " "
     },
     {
-      "x": 110,
-      "y": 0,
-      "foreground": {
-        "r": 127,
-        "g": 132,
-        "b": 156
-      },
-      "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "15 events"
-    },
-    {
-      "x": 0,
+      "x": 12,
       "y": 1,
       "foreground": {
-        "r": 147,
-        "g": 153,
-        "b": 178
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -202,20 +274,20 @@
         "overline": false,
         "underline": null
       },
-      "text": "ALL"
+      "text": " Tag any "
     },
     {
-      "x": 3,
+      "x": 21,
       "y": 1,
       "foreground": {
-        "r": 201,
-        "g": 209,
-        "b": 217
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -226,116 +298,20 @@
         "overline": false,
         "underline": null
       },
-      "text": "   "
-    },
-    {
-      "x": 6,
-      "y": 1,
-      "foreground": {
-        "r": 147,
-        "g": 153,
-        "b": 178
-      },
-      "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "tag:*"
-    },
-    {
-      "x": 11,
-      "y": 1,
-      "foreground": {
-        "r": 201,
-        "g": 209,
-        "b": 217
-      },
-      "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "   "
-    },
-    {
-      "x": 14,
-      "y": 1,
-      "foreground": {
-        "r": 147,
-        "g": 153,
-        "b": 178
-      },
-      "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "pid:*"
-    },
-    {
-      "x": 19,
-      "y": 1,
-      "foreground": {
-        "r": 201,
-        "g": 209,
-        "b": 217
-      },
-      "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "   "
+      "text": " "
     },
     {
       "x": 22,
       "y": 1,
       "foreground": {
-        "r": 147,
-        "g": 153,
-        "b": 178
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -346,20 +322,20 @@
         "overline": false,
         "underline": null
       },
-      "text": "/"
+      "text": " PID any "
     },
     {
-      "x": 23,
+      "x": 31,
       "y": 1,
       "foreground": {
-        "r": 201,
-        "g": 209,
-        "b": 217
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -370,20 +346,140 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                                                "
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 1,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Package any "
+    },
+    {
+      "x": 45,
+      "y": 1,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 46,
+      "y": 1,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Text / "
+    },
+    {
+      "x": 54,
+      "y": 1,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                 "
     },
     {
       "x": 0,
       "y": 2,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 69,
+        "g": 150,
+        "b": 255
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Event Details"
+    },
+    {
+      "x": 13,
+      "y": 2,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -394,20 +490,20 @@
         "overline": false,
         "underline": null
       },
-      "text": "Event                                                                                                                  "
+      "text": "                                                                                                       #15"
     },
     {
       "x": 0,
       "y": 3,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -418,20 +514,44 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                                                                       "
+      "text": "Timestamp   "
+    },
+    {
+      "x": 12,
+      "y": 3,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "2025-10-09 08:55:00.004                                                                                    "
     },
     {
       "x": 0,
       "y": 4,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -442,20 +562,68 @@
         "overline": false,
         "underline": null
       },
-      "text": "08:55:00.004                                                                                                           "
+      "text": "Level       "
+    },
+    {
+      "x": 12,
+      "y": 4,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "INFO (I)"
+    },
+    {
+      "x": 20,
+      "y": 4,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                                   "
     },
     {
       "x": 0,
       "y": 5,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -466,20 +634,68 @@
         "overline": false,
         "underline": null
       },
-      "text": "I                                                                                                                      "
+      "text": "Process     "
+    },
+    {
+      "x": 12,
+      "y": 5,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "PID 4321 · TID 4321"
+    },
+    {
+      "x": 31,
+      "y": 5,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                        "
     },
     {
       "x": 0,
       "y": 6,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -490,20 +706,68 @@
         "overline": false,
         "underline": null
       },
-      "text": "PID 4321  TID 4321                                                                                                     "
+      "text": "Package     "
+    },
+    {
+      "x": 12,
+      "y": 6,
+      "foreground": {
+        "r": 244,
+        "g": 201,
+        "b": 93
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Not recorded"
+    },
+    {
+      "x": 24,
+      "y": 6,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                               "
     },
     {
       "x": 0,
       "y": 7,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -514,20 +778,92 @@
         "overline": false,
         "underline": null
       },
-      "text": "tag logview-demo                                                                                                       "
+      "text": "Tag         "
+    },
+    {
+      "x": 12,
+      "y": 7,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview-demo"
+    },
+    {
+      "x": 24,
+      "y": 7,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                               "
     },
     {
       "x": 0,
       "y": 8,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 69,
+        "g": 150,
+        "b": 255
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Message"
+    },
+    {
+      "x": 7,
+      "y": 8,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -538,20 +874,20 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                                                                       "
+      "text": " ───────────────────────────────────────────────────────────────────────────────────────────────────────────────"
     },
     {
       "x": 0,
       "y": 9,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 126,
+        "g": 231,
+        "b": 135
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -562,13 +898,112 @@
         "overline": false,
         "underline": null
       },
-      "text": "日本語 ok                                                                                                              ",
+      "text": "日本語 ok",
       "widths": [
         2,
         2,
         2,
         1,
         1,
+        1
+      ]
+    },
+    {
+      "x": 9,
+      "y": 9,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                                              "
+    },
+    {
+      "x": 0,
+      "y": 10,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Raw"
+    },
+    {
+      "x": 3,
+      "y": 10,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────"
+    },
+    {
+      "x": 0,
+      "y": 11,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "1760000100.004100  4321  4321 I logview-demo: 日本語 ok",
+      "widths": [
         1,
         1,
         1,
@@ -615,85 +1050,50 @@
         1,
         1,
         1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
+        2,
+        2,
+        2,
         1,
         1,
         1
       ]
     },
     {
-      "x": 0,
-      "y": 10,
+      "x": 55,
+      "y": 11,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                "
+    },
+    {
+      "x": 0,
+      "y": 12,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -708,182 +1108,16 @@
     },
     {
       "x": 0,
-      "y": 11,
-      "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
-      },
-      "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "Raw                                                                                                                    "
-    },
-    {
-      "x": 0,
-      "y": 12,
-      "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
-      },
-      "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "1760000100.004100  4321  4321 I logview-demo: 日本語 ok                                                                ",
-      "widths": [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        2,
-        2,
-        2,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "x": 0,
       "y": 13,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -900,14 +1134,14 @@
       "x": 0,
       "y": 14,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -924,14 +1158,14 @@
       "x": 0,
       "y": 15,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -948,14 +1182,14 @@
       "x": 0,
       "y": 16,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -972,14 +1206,38 @@
       "x": 0,
       "y": 17,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 69,
+        "g": 150,
+        "b": 255
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Actions"
+    },
+    {
+      "x": 7,
+      "y": 17,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -990,20 +1248,44 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                                                                       "
+      "text": " ───────────────────────────────────────────────────────────────────────────────────────────────────────────────"
     },
     {
       "x": 0,
       "y": 18,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " t "
+    },
+    {
+      "x": 3,
+      "y": 18,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -1014,20 +1296,188 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                                                                       "
+      "text": " filter by this tag"
+    },
+    {
+      "x": 22,
+      "y": 18,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " \"logview-demo\"                                                                                  "
     },
     {
       "x": 0,
       "y": 19,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " p "
+    },
+    {
+      "x": 3,
+      "y": 19,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " filter by this PID"
+    },
+    {
+      "x": 22,
+      "y": 19,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " 4321                                                                                            "
+    },
+    {
+      "x": 0,
+      "y": 20,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " y "
+    },
+    {
+      "x": 3,
+      "y": 20,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " copy event"
+    },
+    {
+      "x": 14,
+      "y": 20,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                                         "
+    },
+    {
+      "x": 0,
+      "y": 21,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -1042,64 +1492,40 @@
     },
     {
       "x": 0,
-      "y": 20,
-      "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
-      },
-      "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "t filter tag                                                                                                           "
-    },
-    {
-      "x": 0,
-      "y": 21,
-      "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
-      },
-      "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "p filter pid                                                                                                           "
-    },
-    {
-      "x": 0,
       "y": 22,
       "foreground": {
-        "r": 205,
-        "g": 214,
-        "b": 244
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " INSPECT "
+    },
+    {
+      "x": 9,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -1110,20 +1536,308 @@
         "overline": false,
         "underline": null
       },
-      "text": "Esc close                                                                                                              "
+      "text": "  "
+    },
+    {
+      "x": 11,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ↑↓ "
+    },
+    {
+      "x": 15,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Move"
+    },
+    {
+      "x": 20,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 22,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Esc "
+    },
+    {
+      "x": 27,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Close"
+    },
+    {
+      "x": 33,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 35,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ? "
+    },
+    {
+      "x": 38,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Help"
+    },
+    {
+      "x": 43,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 45,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " q "
+    },
+    {
+      "x": 48,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Quit"
+    },
+    {
+      "x": 53,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                  "
     },
     {
       "x": 0,
       "y": 23,
       "foreground": {
-        "r": 166,
-        "g": 173,
-        "b": 200
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
-        "r": 49,
-        "g": 50,
-        "b": 68
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": false,
@@ -1134,7 +1848,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "REPLAY   15/15 shown    ↑↓  Enter  /  f  G  ?  q quit                                                                  "
+      "text": "                                                                                                                       "
     }
   ]
 }

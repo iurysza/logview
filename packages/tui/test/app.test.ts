@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { INSPECT_FOCUS, LIST_FOCUS, NONE_CLASSIFICATION, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
+import { HELP_FOCUS, INSPECT_FOCUS, LIST_FOCUS, NONE_CLASSIFICATION, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
 import type { SessionSnapshot } from "@logview/engine";
 import { EMPTY_FILTER, EMPTY_VIEW } from "@logview/core";
 import {
@@ -15,7 +15,8 @@ import {
 	renderRowText,
 } from "../src/app.ts";
 import { paintStyleFromEnv } from "../src/color.ts";
-import { MOCHA, rgbSgr } from "../src/catppuccin.ts";
+import { rgbSgr } from "../src/catppuccin.ts";
+import { THEME } from "../src/theme.ts";
 import { paintLogList, visiblePoolSize } from "../src/log-list.ts";
 
 const snapshot: SessionSnapshot = {
@@ -29,8 +30,11 @@ const snapshot: SessionSnapshot = {
 	activeFilterRevision: 0,
 	pendingFilter: null,
 	view: EMPTY_VIEW,
+	lineDisplay: "clip",
+	searchMode: "text",
 	rows: [],
 	selectedEvent: null,
+	packageAttribution: { kind: "idle" },
 	stats: {
 		receivedBytes: 0,
 		admittedEvents: 0,
@@ -55,6 +59,7 @@ const selectedEvent: LogEvent = {
 	rawText: "1760000000.002800  4321  4321 W Database: Retry after lock timeout",
 	metadata: {
 		epochMicros: 1760000000002800,
+		uid: 10123,
 		pid: 4321,
 		tid: 4321,
 		level: "W",
@@ -71,12 +76,30 @@ const selectedEvent: LogEvent = {
 const inspectSnapshot: SessionSnapshot = {
 	...snapshot,
 	selectedEvent,
+	packageAttribution: { kind: "resolved", uid: 10123, packages: ["com.example.app", "com.example.shared"] },
 	stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 15 },
 };
+
+const longMessage = "Failed to parse a deliberately long authentication token while refreshing the user session; preserve this final diagnostic context";
+
+const longRawText = `1760000000.002800  4321  4321 W Database: ${longMessage}`;
+
+const longMessageEvent: LogEvent = {
+	...selectedEvent,
+	rawText: longRawText,
+	metadata: {
+		...selectedEvent.metadata!,
+		message: { start: longRawText.indexOf(longMessage), end: longRawText.length },
+	},
+	continuations: [],
+};
+
+const longMessageSnapshot: SessionSnapshot = { ...inspectSnapshot, selectedEvent: longMessageEvent };
 
 const jevSnapshot: SessionSnapshot = {
 	...snapshot,
 	activeFilter: { ...EMPTY_FILTER, text: "database failures" },
+	searchMode: "jev",
 	rows: [
 		{
 			id: 1,
@@ -152,10 +175,13 @@ function visibleText(text: string): string {
 describe("tui chrome", () => {
 	test("formats status, filters, footer, and hints without a renderer", () => {
 		expect(formatStatus(snapshot)).toContain("REPLAY • END");
-		expect(formatFilter(snapshot)).toContain("tag:*");
-		expect(formatFooter(snapshot)).toContain("REPLAY");
-		expect(formatHints()).toContain("q quit");
-		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("q quit");
+		expect(formatFilter(snapshot)).toContain("Tag: any");
+		expect(formatFooter(snapshot)).toContain("TAIL");
+		expect(formatHints()).toContain("q Quit");
+		expect(formatHints()).toContain("y Copy");
+		expect(formatHints()).not.toMatch(/\bw /);
+		expect(formatHints(LIST_FOCUS, "jev", true)).toContain("m Jev");
+		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("Quit");
 	});
 
 	test("layoutFrame paints exactly rows by columns in plain mode", () => {
@@ -165,6 +191,29 @@ describe("tui chrome", () => {
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(72);
 		}
+	});
+
+	test("footer has one blank bar row above and below its shortcuts", () => {
+		const frame = layoutFrame(snapshot, LIST_FOCUS, 72, 16, "plain");
+
+		expect(frame.at(-3)?.trim()).toBe("");
+		expect(frame.at(-2)).toContain("TAIL");
+		expect(frame.at(-1)?.trim()).toBe("");
+	});
+
+	test("fills unused list rows with the list surface by default", () => {
+		const filled = layoutFrame(snapshot, LIST_FOCUS, 72, 16, "ansi");
+		const transparent = layoutFrame(snapshot, LIST_FOCUS, 72, 16, "ansi", false);
+
+		expect(filled[3]).toContain(rgbSgr(THEME.canvas, "bg"));
+		expect(transparent[3]).not.toContain(rgbSgr(THEME.canvas, "bg"));
+	});
+
+	test("documents the list background toggle in Help, not the footer", () => {
+		const help = layoutFrame(snapshot, HELP_FOCUS, 72, 16, "plain").join("\n");
+
+		expect(help).toMatch(/h\s+fill empty list space/);
+		expect(formatHints()).not.toMatch(/\bh List background\b/);
 	});
 
 	test("ansi status fits 48 columns like the plain branch", () => {
@@ -181,25 +230,56 @@ describe("tui chrome", () => {
 
 	test("Enter inspect is a full-viewport overlay on a narrow frame", () => {
 		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 72, 16, "plain");
+		const text = frame.join("\n");
+
 		expect(frame).toHaveLength(16);
-		expect(frame.join("\n")).toContain("Event");
-		expect(frame.join("\n")).toContain("t filter tag");
-		expect(frame.join("\n")).toContain("p filter pid");
-		expect(frame.join("\n")).toContain("Esc close");
-		expect(frame.join("\n")).toContain("Retry after lock timeout");
-		expect(frame.join("\n")).toContain("Store.lock");
+		expect(text).toContain("Event Details");
+		expect(text).toContain("#7");
+		expect(text).toContain("Timestamp");
+		expect(text).toContain("WARN (W)");
+		expect(text).toContain("com.example.app, com.example.shared");
+		expect(text).toContain("Message");
+		expect(text).toContain("filter by this tag");
+		expect(text).toContain("filter by this PID");
+		expect(text).toContain("copy event");
+		expect(formatHints(INSPECT_FOCUS)).toContain("Esc Close");
+		expect(text).toContain("Retry after lock timeout");
+		expect(text).toContain("INSPECT");
 
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(72);
 		}
 	});
 
-	test("wide inspect splits the log list and the pane", () => {
-		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 120, 18, "plain");
-		expect(frame).toHaveLength(18);
-		expect(frame.join("\n")).toContain("│");
-		expect(frame.join("\n")).toContain("Event");
-		expect(frame.join("\n")).toContain("t filter tag");
+	test("inspect wraps the complete message before lower-priority sections", () => {
+		const frame = layoutFrame(longMessageSnapshot, INSPECT_FOCUS, 120, 24, "plain");
+		const text = frame.join("\n");
+		const visibleMessage = frame.slice(9, 12).map((line) => line.slice(72).trimEnd()).join("");
+
+		expect(visibleMessage).toBe(longMessage);
+		expect(text).toContain("copy event");
+
+		for (const line of frame) expect(displayWidth(line)).toBe(120);
+	});
+
+	test("wide inspect structures stack traces and raw content", () => {
+		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 120, 24, "plain");
+		const ansi = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 120, 24, "ansi");
+		const text = frame.join("\n");
+		const styled = ansi.join("\n");
+
+		expect(frame).toHaveLength(24);
+		expect(text).toContain("│");
+		expect(text).toContain("Event Details");
+		expect(text).toContain("Stack Trace (1 frame)");
+		expect(text).toContain("at com.example.logview.demo.db.Store.lock");
+		expect(text).toContain("Raw");
+		expect(text).toContain("Actions");
+		expect(text).toContain('filter by this tag "Database"');
+		expect(text).toContain("copy event");
+		expect(styled).toContain(rgbSgr(THEME.accent, "fg"));
+		expect(styled).toContain(rgbSgr(THEME.amber, "fg"));
+		expect(styled).toContain(rgbSgr(THEME.cyan, "fg"));
 
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(120);
@@ -221,8 +301,9 @@ describe("tui chrome", () => {
 		expect(rows).not.toContain("not requested");
 		expect(plain.join("\n")).toContain(" skipped");
 		expect(plain.join("\n")).not.toContain("Jev");
-		expect(ansi[2]).toContain(`${rgbSgr(MOCHA.overlay0, "fg")}low relevance`);
-		expect(ansi[3]).not.toContain(`${rgbSgr(MOCHA.overlay0, "fg")}high relevance`);
+		expect(ansi[3]).toContain(rgbSgr(THEME.subtle, "fg"));
+		expect(ansi[3]).toContain("low relevance");
+		expect(ansi[4]).toContain("high relevance");
 
 		for (const frame of [plain, ansi.map(visibleText)]) {
 			for (const line of frame) expect(displayWidth(line)).toBe(72);
@@ -279,7 +360,7 @@ describe("tui chrome", () => {
 
 		const ansi = renderRowText(row, "ansi");
 		expect(ansi).toContain("▸");
-		expect(ansi).toContain(`38;2;${MOCHA.red[0]};${MOCHA.red[1]};${MOCHA.red[2]}m`);
+		expect(ansi).toContain(`38;2;${THEME.red[0]};${THEME.red[1]};${THEME.red[2]}m`);
 		expect(ansi).toContain("E");
 		expect(renderRowText(row, "plain")).not.toContain("\u001b");
 		expect(paintStyleFromEnv("1", undefined)).toBe("plain");

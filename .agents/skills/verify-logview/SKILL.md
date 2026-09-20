@@ -84,7 +84,7 @@ Stable handles are visible strings and keys, not coordinates:
 | `REPLAY • BROWSE` | User left tail. Incoming events do not steal the selection. |
 | `Edit text:` | `/` opened the text-filter draft. |
 | `Edit minLevel:` | `f` opened the filter editor on the first field. |
-| `t filter tag` | Inspector is open. |
+| `filter by this tag` | Inspector is open. |
 | `Keys` | Help overlay is open. |
 | `N/15 shown` | Footer match count against the fixture's 15 admitted events. |
 | `Terminal too small` | Viewport is below 40×8. |

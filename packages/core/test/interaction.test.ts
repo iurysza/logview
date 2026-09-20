@@ -15,7 +15,7 @@ describe("reduceInteraction", () => {
 		expect(enter.state).toEqual(LIST_FOCUS);
 		expect(enter.command).toEqual({
 			kind: "set-filter",
-			filter: { minLevel: null, tag: null, pid: null, text: "database" },
+			filter: { minLevel: null, tag: null, pid: null, packageName: null, text: "database" },
 		});
 		expect(enter.quit).toBe(false);
 	});
@@ -67,6 +67,20 @@ describe("reduceInteraction", () => {
 		expect(pageDown.command).toEqual({ kind: "page", delta: 1 });
 	});
 
+	test("w toggles line wrapping", () => {
+		const lower = reduceInteraction(LIST_FOCUS, { kind: "key", key: "w", ctrl: false, shift: false }, EMPTY_FILTER);
+		const upper = reduceInteraction(LIST_FOCUS, { kind: "key", key: "W", ctrl: false, shift: false }, EMPTY_FILTER);
+
+		expect(lower.command).toEqual({ kind: "toggle-line-display" });
+		expect(upper.command).toEqual({ kind: "toggle-line-display" });
+	});
+
+	test("m toggles the search mode", () => {
+		const toggle = reduceInteraction(LIST_FOCUS, { kind: "key", key: "m", ctrl: false, shift: false }, EMPTY_FILTER);
+
+		expect(toggle.command).toEqual({ kind: "toggle-search-mode" });
+	});
+
 	test("Enter opens inspect and t filters the selected tag", () => {
 		const opened = reduceInteraction(LIST_FOCUS, { kind: "key", key: "enter", ctrl: false, shift: false }, EMPTY_FILTER);
 		expect(opened.state.focus).toBe("inspect");
@@ -81,7 +95,7 @@ describe("reduceInteraction", () => {
 		expect(filtered.state.focus).toBe("list");
 		expect(filtered.command).toEqual({
 			kind: "set-filter",
-			filter: { minLevel: null, tag: "Database", pid: null, text: "" },
+			filter: { minLevel: null, tag: "Database", pid: null, packageName: null, text: "" },
 		});
 	});
 });

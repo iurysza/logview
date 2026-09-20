@@ -42,11 +42,13 @@ export type {
 	EventId,
 	FilterRevision,
 	FilterSpec,
+	LineDisplay,
 	LogEvent,
 	LogLevel,
 	LogMetadata,
 	PreparedFilter,
 	Result,
+	SearchMode,
 	SessionId,
 	SourceKind,
 	TextSlice,
@@ -111,6 +113,7 @@ export {
 	MARKER_SELECTED,
 	MARKER_WIDTH,
 	MAX_LIST_CONTINUATIONS,
+	projectColumnHeader,
 	projectEventRows,
 	projectRows,
 	requiresResize,
@@ -118,4 +121,4 @@ export {
 	rowText,
 } from "./projection.ts";
 
-export type { ClassificationColumnLayout, ColumnLayout } from "./projection.ts";
+export type { ClassificationColumnLayout, ColumnLayout, ProcessColumn } from "./projection.ts";

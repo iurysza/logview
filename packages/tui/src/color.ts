@@ -1,6 +1,7 @@
 import { clipToWidth, displayWidth, markerFor, type LogLevel, type RowSpan, type ViewRow } from "@logview/core";
-import { fgBold, fgOnly, MOCHA, paintStyled, RESET, rgbSgr, styleOn, type Rgb } from "./catppuccin.ts";
+import { fgBold, fgOnly, paintStyled, RESET, rgbSgr, styleOn, type Rgb } from "./catppuccin.ts";
 import { highlightLogText } from "./highlight.ts";
+import { severityStyle, THEME } from "./theme.ts";
 
 export type PaintStyle = "plain" | "ansi";
 
@@ -13,19 +14,7 @@ export function paintStyleFromEnv(noColor: string | undefined, forceColor: strin
 }
 
 function levelStyle(level: LogLevel | null) {
-	if (level === "V") return fgOnly(MOCHA.overlay2);
-
-	if (level === "D") return fgOnly(MOCHA.overlay1);
-
-	if (level === "I") return fgOnly(MOCHA.subtext0);
-
-	if (level === "W") return fgOnly(MOCHA.yellow);
-
-	if (level === "E") return fgBold(MOCHA.red);
-
-	if (level === "F") return fgBold(MOCHA.maroon);
-
-	return fgOnly(MOCHA.overlay2);
+	return severityStyle(level);
 }
 
 export function paintSpan(
@@ -37,19 +26,21 @@ export function paintSpan(
 ): string {
 	if (style === "plain") return span.text;
 
-	if (dimmed) return paintStyled(span.text, styleOn(fgOnly(MOCHA.overlay0), bg));
+	if (dimmed) return paintStyled(span.text, styleOn(fgOnly(THEME.subtle), bg));
 
-	if (span.role === "timestamp" || span.role === "pid" || span.role === "gutter") {
-		return paintStyled(span.text, styleOn(fgOnly(MOCHA.overlay1), bg));
+	if (span.role === "timestamp" || span.role === "gutter") {
+		return paintStyled(span.text, styleOn(fgOnly(THEME.muted), bg));
 	}
+
+	if (span.role === "pid") return paintStyled(span.text, styleOn(fgOnly(THEME.accent), bg));
 
 	if (span.role === "level") return paintStyled(span.text, styleOn(levelStyle(level), bg));
 
-	if (span.role === "tag") return paintStyled(span.text, styleOn(fgOnly(MOCHA.overlay2), bg));
+	if (span.role === "tag") return paintStyled(span.text, styleOn(levelStyle(level), bg));
 
-	if (span.role === "warning") return paintStyled(span.text, styleOn(fgOnly(MOCHA.yellow), bg));
+	if (span.role === "warning") return paintStyled(span.text, styleOn(fgOnly(THEME.amber), bg));
 
-	if (span.text.trim().length === 0) return paintStyled(span.text, styleOn(fgOnly(MOCHA.text), bg));
+	if (span.text.trim().length === 0) return paintStyled(span.text, styleOn(fgOnly(THEME.text), bg));
 
 	return highlightLogText(span.text, bg);
 }
@@ -62,7 +53,7 @@ export function paintRow(
 ): string {
 	const width = columns === undefined ? Number.MAX_SAFE_INTEGER : Math.max(0, columns);
 	const dimmed = options.dimmed === true;
-	const bg = row.selected ? MOCHA.surface0 : null;
+	const bg = row.selected && row.kind === "header" ? THEME.selection : THEME.canvas;
 	const marker = markerFor(row);
 	const pieces: RowSpan[] = [{ text: marker, role: "gutter" }, ...row.spans];
 	let used = 0;
@@ -79,7 +70,10 @@ export function paintRow(
 
 		if (style === "plain") out += clipped.text;
 		else if (piece.role === "gutter" && piece.text === marker && row.selected && row.kind === "header" && !dimmed) {
-			out += paintStyled(clipped.text, styleOn(fgBold(MOCHA.lavender), bg));
+			out += paintStyled(clipped.text, styleOn(fgBold(THEME.accent), bg));
+		} else if (row.kind === "continuation") {
+			const continuationStyle = piece.role === "gutter" ? fgOnly(THEME.subtle) : fgOnly(THEME.muted);
+			out += paintStyled(clipped.text, styleOn(continuationStyle, bg));
 		} else {
 			out += paintSpan({ ...piece, text: clipped.text }, row.level, style, bg, dimmed);
 		}
@@ -90,11 +84,8 @@ export function paintRow(
 	if (used < width && width !== Number.MAX_SAFE_INTEGER) {
 		const pad = " ".repeat(width - used);
 
-		if (style === "ansi" && bg) {
-			out += paintStyled(pad, styleOn(fgOnly(dimmed ? MOCHA.overlay0 : MOCHA.text), bg));
-		} else {
-			out += pad;
-		}
+		if (style === "ansi") out += paintStyled(pad, styleOn(fgOnly(dimmed ? THEME.subtle : THEME.text), bg));
+		else out += pad;
 	}
 
 	if (style === "ansi") out += RESET;

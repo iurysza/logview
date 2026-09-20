@@ -10,7 +10,7 @@ export type InteractionState =
 	| {
 			focus: "filters";
 			field: FilterField;
-			draft: { minLevel: string; tag: string; pid: string; text: string };
+			draft: { minLevel: string; tag: string; pid: string; packageName: string; text: string };
 			error: CommandError | null;
 	  };
 
@@ -41,6 +41,7 @@ type FilterDraft = Readonly<{
 	minLevel: string;
 	tag: string;
 	pid: string;
+	packageName: string;
 	text: string;
 }>;
 
@@ -54,6 +55,7 @@ function draftFromFilter(filter: FilterSpec): FilterDraft {
 		minLevel: filter.minLevel ?? "ALL",
 		tag: filter.tag ?? "",
 		pid: filter.pid === null ? "" : String(filter.pid),
+		packageName: filter.packageName ?? "",
 		text: filter.text,
 	};
 }
@@ -82,6 +84,12 @@ function commitDraft(
 		minLevel: fieldLock && fieldLock !== "minLevel" ? activeFilter.minLevel : level.value,
 		tag: fieldLock && fieldLock !== "tag" ? activeFilter.tag : draft.tag.trim() === "" ? null : draft.tag.trim(),
 		pid: fieldLock && fieldLock !== "pid" ? activeFilter.pid : pid.value,
+		packageName:
+			fieldLock && fieldLock !== "packageName"
+				? activeFilter.packageName
+				: draft.packageName.trim() === ""
+					? null
+					: draft.packageName.trim(),
 		text: fieldLock && fieldLock !== "text" ? activeFilter.text : draft.text,
 	};
 
@@ -240,7 +248,7 @@ export function reduceInteraction(
 	}
 
 	if (key === "enter") {
-		return { state: INSPECT_FOCUS, command: null, quit: false };
+		return { state: INSPECT_FOCUS, command: { kind: "request-package-attribution" }, quit: false };
 	}
 
 	if (key === "?") {
@@ -269,6 +277,14 @@ export function reduceInteraction(
 
 	if (key === "end" || key === "G") {
 		return { state, command: { kind: "tail" }, quit: false };
+	}
+
+	if (key === "w" || key === "W") {
+		return { state, command: { kind: "toggle-line-display" }, quit: false };
+	}
+
+	if (key === "m" || key === "M") {
+		return { state, command: { kind: "toggle-search-mode" }, quit: false };
 	}
 
 	if (key === "/") {

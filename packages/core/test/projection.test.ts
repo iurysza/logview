@@ -5,6 +5,7 @@ import {
 	displayWidth,
 	eventChargeBytes,
 	logViewportHeight,
+	projectColumnHeader,
 	projectRows,
 	requiresResize,
 	rowDisplayText,
@@ -32,12 +33,24 @@ function event(
 }
 
 describe("projection", () => {
-	test("CHROME_ROWS leaves five visible log rows in an 8-row terminal", () => {
-		expect(CHROME_ROWS).toBe(3);
-		expect(logViewportHeight(8)).toBe(5);
+	test("CHROME_ROWS reserves padding around the footer", () => {
+		expect(CHROME_ROWS).toBe(6);
+		expect(logViewportHeight(8)).toBe(2);
 		expect(requiresResize(39, 8)).toBe(true);
 		expect(requiresResize(40, 7)).toBe(true);
 		expect(requiresResize(40, 8)).toBe(false);
+	});
+
+	test("projects an aligned column heading with PID:TID at wide widths", () => {
+		const header = projectColumnHeader(120);
+		const text = header.map((span) => span.text).join("");
+
+		expect(text).toContain("TIME");
+		expect(text).toContain("LVL");
+		expect(text).toContain("PID:TID");
+		expect(text).toContain("TAG");
+		expect(text).toContain("MESSAGE");
+		expect(displayWidth(text)).toBeLessThanOrEqual(120);
 	});
 
 	test("projects parsed rows with a selection marker and clips long messages", () => {
@@ -64,6 +77,35 @@ describe("projection", () => {
 		expect(rowText(rows[0]!)).not.toContain("\u001b");
 		expect(rows[0]!.clipped).toBe(true);
 		expect(displayWidth(rowDisplayText(rows[0]!))).toBeLessThanOrEqual(80);
+	});
+
+	test("wraps long messages into aligned continuation rows", () => {
+		const message = "retrying database connection after a transient network failure";
+		const raw = `1760000000.123456     1     1 W Database: ${message}`;
+
+		const rows = projectRows(
+			[
+				event(2, raw, {
+					epochMicros: 1760000000123456,
+					pid: 1,
+					tid: 1,
+					level: "W",
+					tag: { start: 34, end: 42 },
+					message: { start: raw.indexOf(message), end: raw.length },
+				}),
+			],
+			2,
+			48,
+			undefined,
+			"wrap",
+		);
+
+		expect(rows.length).toBeGreaterThan(1);
+		expect(rows[0]!.kind).toBe("header");
+		expect(rows.slice(1).every((row) => row.kind === "continuation")).toBe(true);
+		expect(rows.flatMap((row) => row.spans.filter((span) => span.role === "message")).map((span) => span.text).join("")).toBe(message);
+
+		for (const row of rows) expect(displayWidth(rowDisplayText(row))).toBeLessThanOrEqual(48);
 	});
 
 	test("escapes control bytes instead of emitting terminal sequences", () => {

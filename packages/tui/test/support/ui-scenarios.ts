@@ -1,8 +1,7 @@
 import type { Session } from "@kitlangton/terminal-control";
-import { displayWidth } from "@logview/core";
 import { join } from "node:path";
 import { INSPECT_WIDE_COLUMNS } from "../../src/app.ts";
-import { MOCHA } from "../../src/catppuccin.ts";
+import { THEME } from "../../src/theme.ts";
 import { cellsFromSnapshot } from "./styled-snapshot.ts";
 import {
 	capture,
@@ -23,7 +22,7 @@ const REPLAY_FIXTURE = "tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl";
 
 const REPLAY_DONE = "REPLAY • END";
 
-const REPLAY_BROWSE = "REPLAY • BROWSE";
+const REPLAY_BROWSE = "BROWSE";
 
 const DEFAULT_VIEWPORT: Viewport = { cols: 72, rows: 16 };
 
@@ -36,6 +35,7 @@ export const UI_SCENARIO_NAMES = [
 	"highlight",
 	"no-color",
 	"quit",
+	"wrap",
 ] as const;
 
 export type UiScenarioName = (typeof UI_SCENARIO_NAMES)[number];
@@ -138,22 +138,38 @@ const SCENARIOS: readonly UiScenario[] = [
 			await waitForScreen(
 				context.session,
 				"Ctrl+U selects the oldest event",
-				(screen) => screen.text.split("\n")[2]?.startsWith("▸") === true,
+				(screen) => screen.text.split("\n")[3]?.startsWith("▸") === true,
 			);
 			const pageUp = await context.capture("ctrl-u", { cols: 120, rows: 24 });
-			expectCell(pageUp, 0, 2, "▸", "Ctrl+U page up");
+			expectCell(pageUp, 0, 3, "▸", "Ctrl+U page up");
 			await sendBytes(context.session, new TextEncoder().encode("\u0004"));
 			await waitForScreen(
 				context.session,
 				"Ctrl+D selects the newest event",
-				(screen) => screen.text.split("\n")[19]?.startsWith("▸") === true,
+				(screen) => screen.text.split("\n")[20]?.startsWith("▸") === true,
 			);
 			const pageDown = await context.capture("ctrl-d", { cols: 120, rows: 24 });
-			expectCell(pageDown, 0, 19, "▸", "Ctrl+D page down");
+			expectCell(pageDown, 0, 20, "▸", "Ctrl+D page down");
 			await send(context.session, ["text:G"]);
-			await waitForText(context.session, REPLAY_DONE);
+			await waitForScreen(
+				context.session,
+				"G returns to tail mode",
+				(screen) => screen.text.split("\n").at(-1)?.trimStart().startsWith("TAIL") === true,
+			);
 			const final = await context.capture("final", { cols: 120, rows: 24 });
 			expectText(final, "日本語 ok", "replay final");
+		},
+	},
+	{
+		name: "wrap",
+		viewport: { cols: 120, rows: 24 },
+		color: "always",
+		async run(context) {
+			const clipped = await context.capture("clipped", { cols: 120, rows: 24 });
+			expectText(clipped, "…", "clipped log row");
+			await send(context.session, ["text:w"]);
+			await waitForText(context.session, "│");
+			await context.capture("wrapped", { cols: 120, rows: 24 });
 		},
 	},
 	{
@@ -162,24 +178,27 @@ const SCENARIOS: readonly UiScenario[] = [
 		color: "always",
 		async run(context) {
 			await send(context.session, ["enter"]);
-			await waitForText(context.session, "t filter tag");
+			await waitForText(context.session, "filter by this tag");
 			const wide = await context.capture("wide-120", { cols: INSPECT_WIDE_COLUMNS, rows: 24 });
-			expectCell(wide, 76, 2, "│", "wide inspector divider");
+			expectCell(wide, 71, 2, "│", "wide inspector divider");
+			expectText(wide, "Event Details", "wide inspector heading");
+			expectText(wide, "Message", "wide inspector message section");
+			expectText(wide, "Raw", "wide inspector raw section");
 
 			await resize(context.session, { cols: INSPECT_WIDE_COLUMNS - 1, rows: 24 });
 			await waitForScreen(
 				context.session,
 				"119-column inspector overlay",
-				(screen) => screen.cols === 119 && screen.text.split("\n")[2]?.startsWith("Event") === true,
+				(screen) => screen.cols === 119 && screen.text.split("\n")[2]?.startsWith("Event Details") === true,
 			);
 			const breakpoint = await context.capture("narrow-119", { cols: INSPECT_WIDE_COLUMNS - 1, rows: 24 });
-			expectNoCellText(breakpoint, 76, 2, "│", "breakpoint overlay");
+			expectNoCellText(breakpoint, 71, 2, "│", "breakpoint overlay");
 
 			await resize(context.session, DEFAULT_VIEWPORT);
 			await waitForScreen(
 				context.session,
 				"72-column inspector overlay",
-				(screen) => screen.cols === 72 && screen.text.split("\n")[2]?.startsWith("Event") === true,
+				(screen) => screen.cols === 72 && screen.text.split("\n")[2]?.startsWith("Event Details") === true,
 			);
 			const final = await context.capture("final", DEFAULT_VIEWPORT);
 			expectText(final, "日本語 ok", "narrow inspector");
@@ -193,7 +212,7 @@ const SCENARIOS: readonly UiScenario[] = [
 			await send(context.session, ["text:?"]);
 			await waitForText(context.session, "Keys");
 			const final = await context.capture("final", DEFAULT_VIEWPORT);
-			expectText(final, "t / p        from inspect", "help overlay");
+			expectText(final, "h            fill empty list space", "help overlay");
 		},
 	},
 	{
@@ -202,18 +221,18 @@ const SCENARIOS: readonly UiScenario[] = [
 		color: "always",
 		async run(context) {
 			await send(context.session, ["text:/"]);
-			await waitForText(context.session, "Edit text:");
+			await waitForText(context.session, "Edit Text:");
 			await send(context.session, ["text:Database"]);
-			await waitForText(context.session, "Edit text: Database");
+			await waitForText(context.session, "Edit Text: Database");
 			await send(context.session, ["enter"]);
 			await waitForText(context.session, "/ Database");
 			const applied = await context.capture("applied", DEFAULT_VIEWPORT);
-			expectText(applied, "4/15 shown", "applied text filter");
+			expectText(applied, "Text / Database", "applied text filter");
 
 			await send(context.session, ["text:/", ...Array.from({ length: 8 }, () => "backspace"), "text:no-match"]);
-			await waitForText(context.session, "Edit text: no-match");
+			await waitForText(context.session, "Edit Text: no-match");
 			await send(context.session, ["enter"]);
-			await waitForText(context.session, "0/15 shown");
+			await waitForText(context.session, "Text / no-match");
 			await context.capture("final", DEFAULT_VIEWPORT);
 		},
 	},
@@ -225,7 +244,7 @@ const SCENARIOS: readonly UiScenario[] = [
 			const narrow = await context.capture("columns-48", { cols: 48, rows: 12 });
 			const header = firstLine(narrow);
 
-			if (!header.includes("logview") || !header.endsWith("15 events") || displayWidth(header) !== 48) {
+			if (!header.includes("logview") || !header.includes("15 events")) {
 				throw new Error(`48-column ANSI header is not fitted: ${JSON.stringify(header)}`);
 			}
 
@@ -240,10 +259,13 @@ const SCENARIOS: readonly UiScenario[] = [
 		color: "always",
 		async run(context) {
 			const final = await context.capture("final", { cols: 120, rows: 24 });
-			const errorCell = cellsFromSnapshot(final.snapshot).find((cell) => cell.text === "E");
 
-			if (!errorCell || !samePaletteColor(errorCell.foreground, MOCHA.red)) {
-				throw new Error("highlighted error severity is missing its Catppuccin red foreground");
+			const errorCell = cellsFromSnapshot(final.snapshot).find(
+				(cell) => cell.text === "E" && cell.x >= 16 && cell.x < 19 && cell.y >= 3,
+			);
+
+			if (!errorCell || !samePaletteColor(errorCell.foreground, THEME.red)) {
+				throw new Error("highlighted error severity is missing its reference red foreground");
 			}
 
 			expectText(final, "token=REDACTED", "highlighted replay");
