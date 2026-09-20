@@ -14,7 +14,7 @@ export type ParsedLine =
 const BUFFER_MARKER = /^-+ beginning of /;
 
 const HEADER =
-	/^(\d{1,16})\.(\d{6})[ \t]+(\d{1,10})[ \t]+(\d{1,10})[ \t]([VDIWEF])[ \t]([^:]*):(.*)$/;
+	/^[ \t]*(\d{1,16})\.(\d{6})[ \t]+(\d{1,10})[ \t]+(\d{1,10})[ \t]([VDIWEF])[ \t]([^:]*):(.*)$/;
 
 type DecodedText = Readonly<{
 	text: string;

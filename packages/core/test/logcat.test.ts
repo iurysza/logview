@@ -27,6 +27,18 @@ describe("parseLogcatLine", () => {
 		);
 	});
 
+	test("parses the leading whitespace used by physical device Logcat output", () => {
+		const parsed = parseLogcatLine(line("         1760000000.123456  1234  1250 I Database: BEGIN TRANSACTION"));
+		expect(parsed.kind).toBe("event");
+
+		if (parsed.kind !== "event") return;
+		expect(parsed.metadata).not.toBeNull();
+		expect(parsed.rawText.slice(parsed.metadata!.tag.start, parsed.metadata!.tag.end)).toBe("Database");
+		expect(parsed.rawText.slice(parsed.metadata!.message.start, parsed.metadata!.message.end)).toBe(
+			"BEGIN TRANSACTION",
+		);
+	});
+
 	test("treats blank lines and buffer markers as control input", () => {
 		expect(parseLogcatLine(line(""))).toEqual({ kind: "control", control: "blank" });
 		expect(parseLogcatLine(line("--------- beginning of main"))).toEqual({
