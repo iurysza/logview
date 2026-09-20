@@ -4763,54 +4763,6 @@
       "x": 0,
       "y": 21,
       "foreground": {
-        "r": 201,
-        "g": 209,
-        "b": 217
-      },
-      "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "                                                                            "
-    },
-    {
-      "x": 76,
-      "y": 21,
-      "foreground": {
-        "r": 82,
-        "g": 98,
-        "b": 127
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "│"
-    },
-    {
-      "x": 77,
-      "y": 21,
-      "foreground": {
         "r": 195,
         "g": 205,
         "b": 232
@@ -4829,83 +4781,11 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": "                                                                                                                        "
     },
     {
       "x": 0,
       "y": 22,
-      "foreground": {
-        "r": 201,
-        "g": 209,
-        "b": 217
-      },
-      "background": {
-        "r": 13,
-        "g": 17,
-        "b": 23
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "                                                                            "
-    },
-    {
-      "x": 76,
-      "y": 22,
-      "foreground": {
-        "r": 82,
-        "g": 98,
-        "b": 127
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "│"
-    },
-    {
-      "x": 77,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "                                           "
-    },
-    {
-      "x": 0,
-      "y": 23,
       "foreground": {
         "r": 17,
         "g": 24,
@@ -4929,31 +4809,7 @@
     },
     {
       "x": 9,
-      "y": 23,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  15/15 shown"
-    },
-    {
-      "x": 22,
-      "y": 23,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -4973,11 +4829,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " "
+      "text": "  "
     },
     {
-      "x": 23,
-      "y": 23,
+      "x": 11,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5000,8 +4856,8 @@
       "text": " ↑↓ "
     },
     {
-      "x": 27,
-      "y": 23,
+      "x": 15,
+      "y": 22,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5024,8 +4880,8 @@
       "text": " Move"
     },
     {
-      "x": 32,
-      "y": 23,
+      "x": 20,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5045,11 +4901,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " "
+      "text": "  "
     },
     {
-      "x": 33,
-      "y": 23,
+      "x": 22,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5072,8 +4928,8 @@
       "text": " t "
     },
     {
-      "x": 36,
-      "y": 23,
+      "x": 25,
+      "y": 22,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5096,8 +4952,8 @@
       "text": " Tag"
     },
     {
-      "x": 40,
-      "y": 23,
+      "x": 29,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5117,11 +4973,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " "
+      "text": "  "
     },
     {
-      "x": 41,
-      "y": 23,
+      "x": 31,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5144,8 +5000,8 @@
       "text": " p "
     },
     {
-      "x": 44,
-      "y": 23,
+      "x": 34,
+      "y": 22,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5168,8 +5024,8 @@
       "text": " PID"
     },
     {
-      "x": 48,
-      "y": 23,
+      "x": 38,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5189,11 +5045,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " "
+      "text": "  "
     },
     {
-      "x": 49,
-      "y": 23,
+      "x": 40,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5216,8 +5072,8 @@
       "text": " Esc "
     },
     {
-      "x": 54,
-      "y": 23,
+      "x": 45,
+      "y": 22,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5240,8 +5096,8 @@
       "text": " Close"
     },
     {
-      "x": 60,
-      "y": 23,
+      "x": 51,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5261,11 +5117,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " "
+      "text": "  "
     },
     {
-      "x": 61,
-      "y": 23,
+      "x": 53,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5288,8 +5144,8 @@
       "text": " ? "
     },
     {
-      "x": 64,
-      "y": 23,
+      "x": 56,
+      "y": 22,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5312,8 +5168,8 @@
       "text": " Help"
     },
     {
-      "x": 69,
-      "y": 23,
+      "x": 61,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5333,11 +5189,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " "
+      "text": "  "
     },
     {
-      "x": 70,
-      "y": 23,
+      "x": 63,
+      "y": 22,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5360,8 +5216,8 @@
       "text": " q "
     },
     {
-      "x": 73,
-      "y": 23,
+      "x": 66,
+      "y": 22,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5384,7 +5240,31 @@
       "text": " Quit"
     },
     {
-      "x": 78,
+      "x": 71,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                 "
+    },
+    {
+      "x": 0,
       "y": 23,
       "foreground": {
         "r": 195,
@@ -5405,7 +5285,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                          "
+      "text": "                                                                                                                        "
     }
   ]
 }

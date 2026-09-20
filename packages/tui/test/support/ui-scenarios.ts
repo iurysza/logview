@@ -211,12 +211,12 @@ const SCENARIOS: readonly UiScenario[] = [
 			await send(context.session, ["enter"]);
 			await waitForText(context.session, "/ Database");
 			const applied = await context.capture("applied", DEFAULT_VIEWPORT);
-			expectText(applied, "4/15 shown", "applied text filter");
+			expectText(applied, "Text / Database", "applied text filter");
 
 			await send(context.session, ["text:/", ...Array.from({ length: 8 }, () => "backspace"), "text:no-match"]);
 			await waitForText(context.session, "Edit Text: no-match");
 			await send(context.session, ["enter"]);
-			await waitForText(context.session, "0/15 shown");
+			await waitForText(context.session, "Text / no-match");
 			await context.capture("final", DEFAULT_VIEWPORT);
 		},
 	},

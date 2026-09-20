@@ -234,7 +234,7 @@ describe("semantic classification", () => {
 
 		const scenario = await openScenario({
 			maxEvents: 50,
-			rows: 24,
+			rows: 26,
 			columns: 80,
 			classifier,
 			semantic: { flushDelayMs: 0, maxBatchItems: 100, threshold: 0.5 },

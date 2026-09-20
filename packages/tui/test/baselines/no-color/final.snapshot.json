@@ -441,7 +441,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                        "
+      "text": " TAIL    Enter  Inspect   /  Search   f  Filters   G  Tail   q  Quit    "
     },
     {
       "x": 0,
@@ -465,7 +465,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " TAIL   15/15 shown  ↑↓  Move  PgUp/PgDn  Page  Enter  Inspect  q  Quit "
+      "text": "                                                                        "
     }
   ]
 }

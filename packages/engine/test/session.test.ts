@@ -4,7 +4,7 @@ import { openScenario, tick } from "../../../tests/support/scenario.ts";
 
 describe("headless session", () => {
 	test("the PRD acceptance scenario: tail, browse, eviction, filter, resume", async () => {
-		const scenario = await openScenario({ maxEvents: 8, rows: 8, columns: 120 });
+		const scenario = await openScenario({ maxEvents: 8, rows: 10, columns: 120 });
 		const keep = new Set([8, 10, 14]);
 
 		await scenario.deliver([1, 2, 3, 4, 5, 6, 7, 8], (id) => ({
@@ -77,7 +77,7 @@ describe("headless session", () => {
 	});
 
 	test("down on the newest event stays in browse; only tail command resumes following", async () => {
-		const scenario = await openScenario({ maxEvents: 8, rows: 8, columns: 120 });
+		const scenario = await openScenario({ maxEvents: 8, rows: 10, columns: 120 });
 		await scenario.deliver([1, 2, 3, 4, 5, 6, 7, 8]);
 
 		scenario.session.dispatch({ kind: "move", delta: 1 });
@@ -101,7 +101,7 @@ describe("headless session", () => {
 	});
 
 	test("page navigation keeps the selected header visible across continuation rows", async () => {
-		const scenario = await openScenario({ maxEvents: 20, rows: 8, columns: 100 });
+		const scenario = await openScenario({ maxEvents: 20, rows: 10, columns: 100 });
 
 		for (let id = 1; id <= 12; id += 1) {
 			scenario.source.pushLine(threadtimeLine(id, { message: `event-${id}` }), id);

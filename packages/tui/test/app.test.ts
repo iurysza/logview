@@ -168,6 +168,14 @@ describe("tui chrome", () => {
 		}
 	});
 
+	test("footer has one blank bar row above and below its shortcuts", () => {
+		const frame = layoutFrame(snapshot, LIST_FOCUS, 72, 16, "plain");
+
+		expect(frame.at(-3)?.trim()).toBe("");
+		expect(frame.at(-2)).toContain("TAIL");
+		expect(frame.at(-1)?.trim()).toBe("");
+	});
+
 	test("ansi status fits 48 columns like the plain branch", () => {
 		const plain = layoutFrame(inspectSnapshot, LIST_FOCUS, 48, 12, "plain");
 		const ansi = layoutFrame(inspectSnapshot, LIST_FOCUS, 48, 12, "ansi");

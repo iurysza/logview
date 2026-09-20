@@ -4,9 +4,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 describe("headless quality gates", () => {
-	test("an 8-row terminal has four visible log rows", () => {
-		expect(CHROME_ROWS).toBe(4);
-		expect(logViewportHeight(8)).toBe(4);
+	test("an 8-row terminal reserves padded footer rows", () => {
+		expect(CHROME_ROWS).toBe(6);
+		expect(logViewportHeight(8)).toBe(2);
 		expect(MIN_TERMINAL_COLUMNS).toBe(40);
 		expect(MIN_TERMINAL_ROWS).toBe(8);
 	});

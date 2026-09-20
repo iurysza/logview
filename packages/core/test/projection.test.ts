@@ -33,9 +33,9 @@ function event(
 }
 
 describe("projection", () => {
-	test("CHROME_ROWS leaves four visible log rows in an 8-row terminal", () => {
-		expect(CHROME_ROWS).toBe(4);
-		expect(logViewportHeight(8)).toBe(4);
+	test("CHROME_ROWS reserves padding around the footer", () => {
+		expect(CHROME_ROWS).toBe(6);
+		expect(logViewportHeight(8)).toBe(2);
 		expect(requiresResize(39, 8)).toBe(true);
 		expect(requiresResize(40, 7)).toBe(true);
 		expect(requiresResize(40, 8)).toBe(false);

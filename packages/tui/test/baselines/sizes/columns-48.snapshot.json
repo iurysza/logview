@@ -376,294 +376,6 @@
       "x": 16,
       "y": 3,
       "foreground": {
-        "r": 244,
-        "g": 201,
-        "b": 93
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " W"
-    },
-    {
-      "x": 18,
-      "y": 3,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 20,
-      "y": 3,
-      "foreground": {
-        "r": 244,
-        "g": 201,
-        "b": 93
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "logvie…"
-    },
-    {
-      "x": 27,
-      "y": 3,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 29,
-      "y": 3,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "stray sequence ^[… "
-    },
-    {
-      "x": 0,
-      "y": 4,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  08:55:00.003  "
-    },
-    {
-      "x": 16,
-      "y": 4,
-      "foreground": {
-        "r": 126,
-        "g": 231,
-        "b": 135
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " I"
-    },
-    {
-      "x": 18,
-      "y": 4,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 20,
-      "y": 4,
-      "foreground": {
-        "r": 126,
-        "g": 231,
-        "b": 135
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "logvie…"
-    },
-    {
-      "x": 27,
-      "y": 4,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 29,
-      "y": 4,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "café already open  "
-    },
-    {
-      "x": 0,
-      "y": 5,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  08:55:00.003  "
-    },
-    {
-      "x": 16,
-      "y": 5,
-      "foreground": {
         "r": 255,
         "g": 103,
         "b": 120
@@ -686,7 +398,7 @@
     },
     {
       "x": 18,
-      "y": 5,
+      "y": 3,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -710,7 +422,7 @@
     },
     {
       "x": 20,
-      "y": 5,
+      "y": 3,
       "foreground": {
         "r": 255,
         "g": 103,
@@ -734,7 +446,7 @@
     },
     {
       "x": 27,
-      "y": 5,
+      "y": 3,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -758,7 +470,7 @@
     },
     {
       "x": 29,
-      "y": 5,
+      "y": 3,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -782,7 +494,7 @@
     },
     {
       "x": 42,
-      "y": 5,
+      "y": 3,
       "foreground": {
         "r": 53,
         "g": 212,
@@ -806,7 +518,7 @@
     },
     {
       "x": 44,
-      "y": 5,
+      "y": 3,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -830,7 +542,7 @@
     },
     {
       "x": 0,
-      "y": 6,
+      "y": 4,
       "foreground": {
         "r": 82,
         "g": 98,
@@ -854,7 +566,7 @@
     },
     {
       "x": 30,
-      "y": 6,
+      "y": 4,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -878,7 +590,7 @@
     },
     {
       "x": 47,
-      "y": 6,
+      "y": 4,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -902,7 +614,7 @@
     },
     {
       "x": 0,
-      "y": 7,
+      "y": 5,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -926,7 +638,7 @@
     },
     {
       "x": 29,
-      "y": 7,
+      "y": 5,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -950,7 +662,7 @@
     },
     {
       "x": 0,
-      "y": 8,
+      "y": 6,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -974,7 +686,7 @@
     },
     {
       "x": 16,
-      "y": 8,
+      "y": 6,
       "foreground": {
         "r": 126,
         "g": 231,
@@ -998,7 +710,7 @@
     },
     {
       "x": 18,
-      "y": 8,
+      "y": 6,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1022,7 +734,7 @@
     },
     {
       "x": 20,
-      "y": 8,
+      "y": 6,
       "foreground": {
         "r": 126,
         "g": 231,
@@ -1046,7 +758,7 @@
     },
     {
       "x": 27,
-      "y": 8,
+      "y": 6,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1070,7 +782,7 @@
     },
     {
       "x": 29,
-      "y": 8,
+      "y": 6,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -1094,7 +806,7 @@
     },
     {
       "x": 0,
-      "y": 9,
+      "y": 7,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1118,7 +830,7 @@
     },
     {
       "x": 16,
-      "y": 9,
+      "y": 7,
       "foreground": {
         "r": 126,
         "g": 231,
@@ -1142,7 +854,7 @@
     },
     {
       "x": 18,
-      "y": 9,
+      "y": 7,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1166,7 +878,7 @@
     },
     {
       "x": 20,
-      "y": 9,
+      "y": 7,
       "foreground": {
         "r": 126,
         "g": 231,
@@ -1190,7 +902,7 @@
     },
     {
       "x": 27,
-      "y": 9,
+      "y": 7,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1214,7 +926,7 @@
     },
     {
       "x": 32,
-      "y": 9,
+      "y": 7,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -1238,7 +950,7 @@
     },
     {
       "x": 33,
-      "y": 9,
+      "y": 7,
       "foreground": {
         "r": 53,
         "g": 212,
@@ -1262,7 +974,7 @@
     },
     {
       "x": 38,
-      "y": 9,
+      "y": 7,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -1286,7 +998,7 @@
     },
     {
       "x": 0,
-      "y": 10,
+      "y": 8,
       "foreground": {
         "r": 69,
         "g": 150,
@@ -1310,7 +1022,7 @@
     },
     {
       "x": 2,
-      "y": 10,
+      "y": 8,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1334,7 +1046,7 @@
     },
     {
       "x": 16,
-      "y": 10,
+      "y": 8,
       "foreground": {
         "r": 126,
         "g": 231,
@@ -1358,7 +1070,7 @@
     },
     {
       "x": 18,
-      "y": 10,
+      "y": 8,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1382,7 +1094,7 @@
     },
     {
       "x": 20,
-      "y": 10,
+      "y": 8,
       "foreground": {
         "r": 126,
         "g": 231,
@@ -1406,7 +1118,7 @@
     },
     {
       "x": 27,
-      "y": 10,
+      "y": 8,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1430,7 +1142,7 @@
     },
     {
       "x": 29,
-      "y": 10,
+      "y": 8,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -1472,7 +1184,31 @@
     },
     {
       "x": 0,
-      "y": 11,
+      "y": 9,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                "
+    },
+    {
+      "x": 0,
+      "y": 10,
       "foreground": {
         "r": 17,
         "g": 24,
@@ -1496,31 +1232,7 @@
     },
     {
       "x": 6,
-      "y": 11,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  15/15 shown"
-    },
-    {
-      "x": 19,
-      "y": 11,
+      "y": 10,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -1540,11 +1252,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " "
+      "text": "  "
     },
     {
-      "x": 20,
-      "y": 11,
+      "x": 8,
+      "y": 10,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -1564,11 +1276,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " ↑↓ "
+      "text": " Enter "
     },
     {
-      "x": 24,
-      "y": 11,
+      "x": 15,
+      "y": 10,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1588,11 +1300,11 @@
         "overline": false,
         "underline": null
       },
-      "text": " Move"
+      "text": " Inspect"
     },
     {
-      "x": 29,
-      "y": 11,
+      "x": 23,
+      "y": 10,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -1612,11 +1324,83 @@
         "overline": false,
         "underline": null
       },
-      "text": " "
+      "text": "  "
     },
     {
-      "x": 30,
-      "y": 11,
+      "x": 25,
+      "y": 10,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " / "
+    },
+    {
+      "x": 28,
+      "y": 10,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Search"
+    },
+    {
+      "x": 35,
+      "y": 10,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 37,
+      "y": 10,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -1639,8 +1423,8 @@
       "text": " q "
     },
     {
-      "x": 33,
-      "y": 11,
+      "x": 40,
+      "y": 10,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -1663,7 +1447,31 @@
       "text": " Quit"
     },
     {
-      "x": 38,
+      "x": 45,
+      "y": 10,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "   "
+    },
+    {
+      "x": 0,
       "y": 11,
       "foreground": {
         "r": 195,
@@ -1684,7 +1492,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "          "
+      "text": "                                                "
     }
   ]
 }

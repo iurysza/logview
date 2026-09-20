@@ -94,8 +94,6 @@ export function keyHints(interaction: InteractionState): readonly KeyHint[] {
 	if (interaction.focus === "help") return [{ key: "Esc", label: "Close" }, { key: "q", label: "Quit" }];
 
 	return [
-		{ key: "↑↓", label: "Move" },
-		{ key: "PgUp/PgDn", label: "Page" },
 		{ key: "Enter", label: "Inspect" },
 		{ key: "/", label: "Search" },
 		{ key: "f", label: "Filters" },
@@ -150,7 +148,7 @@ export function formatFooter(snapshot: Snapshot, interaction: InteractionState =
 	const badge = displayBadge(snapshot, interaction);
 	const unseen = snapshot.view.mode === "browse" && snapshot.view.newSincePause > 0 ? ` · ${snapshot.view.newSincePause} unseen` : "";
 
-	return `${badge}  ${snapshot.stats.matchedEvents}/${snapshot.stats.retainedEvents} shown${unseen}${footerNotice(snapshot)}  ${formatHints(interaction)}`;
+	return `${badge}${unseen}${footerNotice(snapshot)}  ${formatHints(interaction)}`;
 }
 
 function fitGroups(groups: readonly ChromeSpan[], columns: number): ChromeSpan[] {
@@ -239,24 +237,23 @@ export function paintFooter(snapshot: Snapshot, interaction: InteractionState, c
 	const badge = displayBadge(snapshot, interaction);
 	const badgeColor = badge === "BROWSE" ? THEME.amber : THEME.accent;
 	const badgeSpan = bold(` ${badge} `, THEME.canvas, badgeColor);
-	const details = plain(`  ${snapshot.stats.matchedEvents}/${snapshot.stats.retainedEvents} shown`, THEME.muted);
 	const hints = keyHints(interaction);
 	const quit = hints.at(-1)!;
 	const optional = hints.slice(0, -1);
 
 	const hintSpans = (values: readonly KeyHint[]): ChromeSpan[] => values.flatMap((hint) => [
-		plain(" "),
+		plain("  "),
 		bold(` ${hint.key} `, THEME.text, THEME.chip),
 		plain(` ${hint.label}`, THEME.muted),
 	]);
 
 	const fits = (spans: readonly ChromeSpan[]): boolean => displayWidth(spans.map((span) => span.text).join("")) <= columns;
 	let visibleOptional = optional;
-	let spans = [badgeSpan, details, ...hintSpans([...visibleOptional, quit])];
+	let spans = [badgeSpan, ...hintSpans([...visibleOptional, quit])];
 
 	while (visibleOptional.length > 0 && !fits(spans)) {
 		visibleOptional = visibleOptional.slice(0, -1);
-		spans = [badgeSpan, details, ...hintSpans([...visibleOptional, quit])];
+		spans = [badgeSpan, ...hintSpans([...visibleOptional, quit])];
 	}
 
 	if (!fits(spans)) spans = [badgeSpan, ...hintSpans([quit])];

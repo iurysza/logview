@@ -277,7 +277,8 @@ function layoutLines(
 		),
 	];
 
-	const footer = paintFooter(snapshot, interaction, columns, style);
+	const footerPadding = paintChromeLine([], columns, style, THEME.bar);
+	const footer = [footerPadding, paintFooter(snapshot, interaction, columns, style), footerPadding];
 	const viewport = Math.max(0, rows - CHROME_ROWS);
 	const inspectOpen = interaction.focus === "inspect";
 	const helpOpen = interaction.focus === "help";
@@ -294,7 +295,7 @@ function layoutLines(
 	} else if (inspectOpen && !wideInspect) {
 		header[2] = paintChromeLine([{ text: "Event", style: { fg: THEME.muted, bg: null, bold: true, italic: false } }], columns, style, THEME.bar);
 		body = fillPane(
-			inspectLines(snapshot.selectedEvent, columns, viewport, classification).slice(2),
+			inspectLines(snapshot.selectedEvent, columns, viewport + 2, classification).slice(2),
 			viewport,
 			columns,
 			style,
@@ -315,13 +316,13 @@ function layoutLines(
 		);
 		body = splitPane(
 			body,
-			inspectLines(snapshot.selectedEvent, inspectWidth(columns), viewport, classification).slice(2),
+			inspectLines(snapshot.selectedEvent, inspectWidth(columns), viewport + 2, classification).slice(2),
 			columns,
 			style,
 		);
 	}
 
-	const lines = [...header, ...body, footer];
+	const lines = [...header, ...body, ...footer];
 
 	while (lines.length < rows) lines.push(padToWidth("", columns));
 
