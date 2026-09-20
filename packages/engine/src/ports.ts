@@ -33,7 +33,28 @@ export type SourceNotice = Readonly<{
 	message: string;
 }>;
 
-export type SourceEvent = { kind: "ready" } | SourcePacket | SourceNotice | SourceTerminal;
+export type PackageTableEntry = Readonly<{
+	uid: number;
+	packages: readonly string[];
+}>;
+
+export type PackageTable = readonly PackageTableEntry[];
+
+export type RecordedPackageTable =
+	| { kind: "not-recorded" }
+	| { kind: "recorded"; table: PackageTable | null };
+
+export interface PackageResolver {
+	load(): Promise<Result<PackageTable, SourceError>>;
+	refresh?(): Promise<Result<PackageTable, SourceError>>;
+}
+
+export type SourceEvent =
+	| { kind: "ready" }
+	| { kind: "package-table"; packageTable: RecordedPackageTable }
+	| SourcePacket
+	| SourceNotice
+	| SourceTerminal;
 
 export type SourceStatus =
 	| { kind: "idle" }
@@ -80,7 +101,7 @@ export type RecordingError = Readonly<{
 	line?: number;
 }>;
 
-export type RecordingHeader = Readonly<{
+export type RecordingHeaderV1 = Readonly<{
 	kind: "header";
 	format: "logview-recording";
 	version: 1;
@@ -88,6 +109,18 @@ export type RecordingHeader = Readonly<{
 	provenance: "raw-capture" | "sanitized-real" | "synthetic";
 	redactionVersion: string | null;
 }>;
+
+export type RecordingHeaderV2 = Readonly<{
+	kind: "header";
+	format: "logview-recording";
+	version: 2;
+	profile: "threadtime-epoch-usec-uid-v2";
+	provenance: "raw-capture" | "sanitized-real" | "synthetic";
+	redactionVersion: string | null;
+	packageTable: PackageTable | null;
+}>;
+
+export type RecordingHeader = RecordingHeaderV1 | RecordingHeaderV2;
 
 export type RecordingChunk = Readonly<{
 	kind: "chunk";

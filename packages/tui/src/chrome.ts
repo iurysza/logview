@@ -53,7 +53,13 @@ export function paintChromeLine(
 }
 
 export function activeFilterCount(filter: FilterSpec): number {
-	return Number(filter.minLevel !== null) + Number(filter.tag !== null) + Number(filter.pid !== null) + Number(filter.text.length > 0);
+	return (
+		Number(filter.minLevel !== null) +
+		Number(filter.tag !== null) +
+		Number(filter.pid !== null) +
+		Number(filter.packageName != null) +
+		Number(filter.text.length > 0)
+	);
 }
 
 export function sourceStatusText(snapshot: Pick<Snapshot, "sourceKind" | "source">): string {
@@ -118,6 +124,7 @@ export function formatFilter(snapshot: Snapshot): string {
 		filter.minLevel ? `Level: ${filter.minLevel}+` : "Level: all",
 		filter.tag ? `Tag: ${filter.tag}` : "Tag: any",
 		filter.pid === null ? "PID: any" : `PID: ${filter.pid}`,
+		filter.packageName ? `Package: ${filter.packageName}` : "Package: any",
 		filter.text ? `Text: ${(snapshot.semantic ? "~" : "/")} ${filter.text}` : "Text: /",
 	].join("  ");
 }
@@ -204,7 +211,7 @@ function filterChip(label: string, active: boolean, color: Rgb = THEME.accent): 
 
 export function paintFilterLine(snapshot: Snapshot, interaction: InteractionState, columns: number, style: PaintStyle): string {
 	if (interaction.focus === "filters") {
-		const names = { minLevel: "Level", tag: "Tag", pid: "PID", text: "Text" } as const;
+		const names = { minLevel: "Level", tag: "Tag", pid: "PID", packageName: "Package", text: "Text" } as const;
 		const draft = interaction.draft[interaction.field];
 		const error = interaction.error ? `  ! ${interaction.error.message}` : "";
 
@@ -224,6 +231,8 @@ export function paintFilterLine(snapshot: Snapshot, interaction: InteractionStat
 		filterChip(filter.tag ? `Tag ${filter.tag}` : "Tag any", filter.tag !== null),
 		plain(" "),
 		filterChip(filter.pid === null ? "PID any" : `PID ${filter.pid}`, filter.pid !== null, THEME.cyan),
+		plain(" "),
+		filterChip(filter.packageName ? `Package ${filter.packageName}` : "Package any", filter.packageName !== null, THEME.green),
 		plain(" "),
 		filterChip(filter.text ? `Text ${(snapshot.semantic ? "~" : "/")} ${filter.text}` : "Text /", filter.text.length > 0, THEME.purple),
 	];

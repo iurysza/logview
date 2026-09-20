@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { EMPTY_FILTER, ok } from "@logview/core";
+import type { PackageResolver } from "@logview/engine";
 import { threadtimeLine } from "../../../tests/support/log-lines.ts";
 import { openScenario, tick } from "../../../tests/support/scenario.ts";
 
@@ -156,6 +158,46 @@ describe("headless session", () => {
 		}
 
 		expect(scenario.session.snapshot().view.selectedId).toBe(1);
+		await scenario.finish();
+		await scenario.session.stop();
+	});
+
+	test("resolves detail attribution lazily and filters by its UID set", async () => {
+		let loads = 0;
+
+		const packageResolver: PackageResolver = {
+			async load() {
+				loads += 1;
+
+				return ok([
+					{ uid: 10123, packages: ["com.example.app", "com.example.shared"] },
+					{ uid: 10124, packages: ["com.example.other"] },
+				]);
+			},
+		};
+
+		const scenario = await openScenario({ packageResolver, maxEvents: 8, rows: 8, columns: 100 });
+		await scenario.deliver([1, 2], (id) => ({ uid: id === 1 ? 10123 : 10124 }));
+
+		expect(scenario.session.snapshot().packageAttribution).toEqual({ kind: "idle" });
+		expect(scenario.session.dispatch({ kind: "request-package-attribution" }).ok).toBe(true);
+		const attributed = await scenario.waitUntil((snapshot) => snapshot.packageAttribution.kind === "resolved");
+		expect(attributed.packageAttribution).toEqual({
+			kind: "resolved",
+			uid: 10124,
+			packages: ["com.example.other"],
+		});
+
+		expect(
+			scenario.session.dispatch({
+				kind: "set-filter",
+				filter: { ...EMPTY_FILTER, packageName: "com.example.app" },
+			}).ok,
+		).toBe(true);
+		const filtered = await scenario.waitUntil((snapshot) => snapshot.pendingFilter === null && snapshot.activeFilter.packageName !== null);
+		expect(filtered.stats.matchedEvents).toBe(1);
+		expect(filtered.selectedEvent?.metadata?.uid).toBe(10123);
+		expect(loads).toBe(2);
 		await scenario.finish();
 		await scenario.session.stop();
 	});

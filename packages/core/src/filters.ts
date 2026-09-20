@@ -79,9 +79,12 @@ export function prepareFilter(spec: FilterSpec): Result<PreparedFilter, CommandE
 	return eitherToResult(
 		Either.gen(function* () {
 			const tag = spec.tag === null || spec.tag.trim() === "" ? null : spec.tag.trim();
+			const packageName = spec.packageName?.trim() || null;
 			const text = spec.text;
 
 			if (tag !== null) yield* validateFieldLength("tag", tag);
+
+			if (packageName !== null) yield* validateFieldLength("packageName", packageName);
 			yield* validateFieldLength("text", text);
 
 			if (spec.pid !== null && (!Number.isSafeInteger(spec.pid) || spec.pid < 1)) {
@@ -105,6 +108,7 @@ export function prepareFilter(spec: FilterSpec): Result<PreparedFilter, CommandE
 					minLevel: spec.minLevel,
 					tag,
 					pid: spec.pid,
+					packageName,
 					text,
 				},
 				foldedText: foldText(text),

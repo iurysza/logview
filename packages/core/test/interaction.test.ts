@@ -15,7 +15,7 @@ describe("reduceInteraction", () => {
 		expect(enter.state).toEqual(LIST_FOCUS);
 		expect(enter.command).toEqual({
 			kind: "set-filter",
-			filter: { minLevel: null, tag: null, pid: null, text: "database" },
+			filter: { minLevel: null, tag: null, pid: null, packageName: null, text: "database" },
 		});
 		expect(enter.quit).toBe(false);
 	});
@@ -89,7 +89,7 @@ describe("reduceInteraction", () => {
 		expect(filtered.state.focus).toBe("list");
 		expect(filtered.command).toEqual({
 			kind: "set-filter",
-			filter: { minLevel: null, tag: "Database", pid: null, text: "" },
+			filter: { minLevel: null, tag: "Database", pid: null, packageName: null, text: "" },
 		});
 	});
 });

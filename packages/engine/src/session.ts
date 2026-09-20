@@ -38,6 +38,7 @@ import {
 	defaultSessionOptions,
 	validateSessionOptions,
 	visibleLogRows,
+	type PackageAttribution,
 	type Session,
 	type SessionDependencies,
 	type SessionOptions,
@@ -46,7 +47,15 @@ import {
 } from "./contracts.ts";
 import { HistoryStore } from "./history.ts";
 import { drainFrameSlice, emptyFramerState, IngestQueue } from "./ingest.ts";
-import type { SourceEvent, SourceNotice, SourcePacket, SourceStatus, SourceTerminal } from "./ports.ts";
+import type {
+	PackageTable,
+	RecordedPackageTable,
+	SourceEvent,
+	SourceNotice,
+	SourcePacket,
+	SourceStatus,
+	SourceTerminal,
+} from "./ports.ts";
 import { isSourcePacket, isSourceTerminal } from "./ports.ts";
 import { FilterJob } from "./reindex.ts";
 import { VisibleIndexStore } from "./visible-index.ts";
@@ -95,6 +104,11 @@ class SessionImpl implements Session {
 	private sourceStatus: SourceStatus = { kind: "idle" };
 	private notices: SourceNotice[] = [];
 	private pendingJob: FilterJob | null = null;
+	private pendingPackageFilter: Readonly<{ revision: number; prepared: PreparedFilter }> | null = null;
+	private activePackageUids: readonly number[] | null = null;
+	private pendingPackageUids: readonly number[] | null = null;
+	private recordedPackageTable: RecordedPackageTable | null = null;
+	private packageAttribution: PackageAttribution = { kind: "idle" };
 	private requestedRevision = 0;
 	private activeFilterRevision = 0;
 	private activeFilter: FilterSpec;
@@ -167,6 +181,7 @@ class SessionImpl implements Session {
 				)
 			: null;
 
+
 		if (this.coordinator && options.initialFilter.text.length > 0) {
 			this.replaceSemanticQuery(options.initialFilter);
 		}
@@ -198,6 +213,7 @@ class SessionImpl implements Session {
 				return this.commandNavigate(tail);
 			}),
 			Match.when({ kind: "toggle-line-display" }, () => this.commandToggleLineDisplay()),
+			Match.when({ kind: "request-package-attribution" }, () => this.commandPackageAttribution()),
 			Match.when({ kind: "set-filter" }, (set) => this.commandFilter(set.filter)),
 			Match.when({ kind: "resize" }, (resize) => this.commandResize(resize.columns, resize.rows)),
 			Match.exhaustive,
@@ -251,16 +267,15 @@ class SessionImpl implements Session {
 		this.requestedRevision += 1;
 		this.filterCancel?.();
 		this.syncSemanticQuery(prepared.value.spec);
-
-		this.pendingJob = new FilterJob(
-			this.requestedRevision,
-			prepared.value,
-			this.history.bounds().lastId,
-			this.matcherFor(prepared.value),
-		);
-		this.runFilterSlice();
+		this.beginFilter(prepared.value, this.requestedRevision);
 		this.bump();
 		this.publishImmediate();
+
+		return ok(undefined);
+	}
+
+	private commandPackageAttribution(): Result<void, CommandError> {
+		void this.resolveSelectedPackageAttribution();
 
 		return ok(undefined);
 	}
@@ -346,6 +361,9 @@ class SessionImpl implements Session {
 				if (this.sourceStatus.kind === "starting" || this.sourceStatus.kind === "idle") {
 					this.sourceStatus = { kind: "running" };
 				}
+			}),
+			Match.when({ kind: "package-table" }, (event) => {
+				this.recordedPackageTable = event.packageTable;
 			}),
 			Match.when({ kind: "notice" }, (notice) => {
 				this.addNotice(notice);
@@ -457,7 +475,7 @@ class SessionImpl implements Session {
 	private refreshMatch(event: LogEvent): void {
 		this.coordinator?.forget(event.id);
 
-		const matchesActive = this.eventMatches(event, this.preparedActive);
+		const matchesActive = this.eventMatches(event, this.preparedActive, this.activePackageUids);
 		const semanticActive = this.semanticQueryActive();
 
 		if (matchesActive && this.activeIndex.locate(event.id).exactRank === null) {
@@ -466,7 +484,7 @@ class SessionImpl implements Session {
 		}
 
 		if (this.pendingJob) {
-			this.pendingJob.appendArrival(event.id, this.eventMatches(event, this.pendingJob.prepared));
+			this.pendingJob.appendArrival(event.id, this.eventMatches(event, this.pendingJob.prepared, this.pendingPackageUids));
 		}
 
 		if (semanticActive && matchesActive) this.enqueueSemantic([event.id], "arrival");
@@ -503,8 +521,8 @@ class SessionImpl implements Session {
 
 			if (!event) continue;
 
-			const activeMatches = this.eventMatches(event, this.preparedActive);
-			const pendingMatches = pending ? this.eventMatches(event, pending.prepared) : false;
+			const activeMatches = this.eventMatches(event, this.preparedActive, this.activePackageUids);
+			const pendingMatches = pending ? this.eventMatches(event, pending.prepared, this.pendingPackageUids) : false;
 			const newestMatches = pending ? pendingMatches : activeMatches;
 
 			if (activeMatches) matchingNew.push(id);
@@ -537,6 +555,50 @@ class SessionImpl implements Session {
 		this.schedulePublish();
 	}
 
+	private beginFilter(prepared: PreparedFilter, revision: number): void {
+		if (prepared.spec.packageName == null) {
+			this.startFilter(prepared, revision, null);
+
+			return;
+		}
+
+		this.pendingPackageFilter = { revision, prepared };
+		void this.resolvePackageFilter(revision, prepared);
+	}
+
+	private async resolvePackageFilter(revision: number, prepared: PreparedFilter): Promise<void> {
+		const table = await this.loadPackageTable();
+
+		if (revision !== this.requestedRevision || this.closed) return;
+
+		this.pendingPackageFilter = null;
+		const packageName = prepared.spec.packageName;
+		let uids = packageName == null || table === null ? [] : uidsForPackage(table, packageName);
+
+		if (uids.length === 0 && packageName !== null && packageName !== undefined && this.recordedPackageTable === null) {
+			const refreshed = await this.loadPackageTable(true);
+
+			if (revision !== this.requestedRevision || this.closed) return;
+			uids = refreshed === null ? [] : uidsForPackage(refreshed, packageName);
+		}
+
+		this.startFilter(prepared, revision, uids);
+		this.bump();
+		this.publishImmediate();
+	}
+
+	private startFilter(prepared: PreparedFilter, revision: number, packageUids: readonly number[] | null): void {
+		this.pendingPackageFilter = null;
+		this.pendingPackageUids = packageUids;
+		this.pendingJob = new FilterJob(
+			revision,
+			prepared,
+			this.history.bounds().lastId,
+			this.matcherFor(prepared, packageUids),
+		);
+		this.runFilterSlice();
+	}
+
 	private runFilterSlice(): void {
 		const job = this.pendingJob;
 
@@ -558,6 +620,8 @@ class SessionImpl implements Session {
 		this.preparedActive = job.prepared;
 		this.activeFilter = job.prepared.spec;
 		this.activeFilterRevision = job.revision;
+		this.activePackageUids = this.pendingPackageUids;
+		this.pendingPackageUids = null;
 		this.pendingJob = null;
 		this.historyExpired = false;
 		this.resetSemanticVisibleCounts();
@@ -570,14 +634,78 @@ class SessionImpl implements Session {
 		this.schedulePublish();
 	}
 
-	private eventMatches(event: LogEvent, prepared: PreparedFilter): boolean {
+	private eventMatches(event: LogEvent, prepared: PreparedFilter, packageUids: readonly number[] | null): boolean {
+		if (prepared.spec.packageName != null) {
+			if (!event.metadata || event.metadata.uid == null || packageUids === null || !packageUids.includes(event.metadata.uid)) {
+				return false;
+			}
+		}
+
 		if (this.semanticQueryActive(prepared.spec)) return matchesLocal(event, prepared);
 
 		return matches(event, prepared);
 	}
 
-	private matcherFor(prepared: PreparedFilter): (event: LogEvent) => boolean {
-		return (event) => this.eventMatches(event, prepared);
+	private matcherFor(prepared: PreparedFilter, packageUids: readonly number[] | null): (event: LogEvent) => boolean {
+		return (event) => this.eventMatches(event, prepared, packageUids);
+	}
+
+	private async resolveSelectedPackageAttribution(): Promise<void> {
+		const event = this.view.selectedId === null ? null : this.history.get(this.view.selectedId);
+
+		if (!event?.metadata || event.metadata.uid == null) {
+			this.packageAttribution = {
+				kind: "unavailable",
+				reason: this.recordedPackageTable?.kind === "not-recorded" ? "not-recorded" : "missing-uid",
+			};
+			this.bump();
+			this.publishImmediate();
+
+			return;
+		}
+
+		const expectedId = event.id;
+		const uid = event.metadata.uid;
+		this.packageAttribution = { kind: "resolving", uid };
+		this.bump();
+		this.publishImmediate();
+		const table = await this.loadPackageTable();
+
+		if (this.closed || this.view.selectedId !== expectedId) return;
+
+		if (table === null) {
+			this.packageAttribution = {
+				kind: "unavailable",
+				reason: this.recordedPackageTable?.kind === "not-recorded" ? "not-recorded" : "lookup-failed",
+			};
+		} else {
+			let packages = packagesForUid(table, uid);
+
+			if (packages.length === 0 && this.recordedPackageTable === null) {
+				const refreshed = await this.loadPackageTable(true);
+
+				if (this.closed || this.view.selectedId !== expectedId) return;
+				packages = refreshed === null ? [] : packagesForUid(refreshed, uid);
+			}
+
+			this.packageAttribution = { kind: "resolved", uid, packages };
+		}
+
+		this.bump();
+		this.publishImmediate();
+	}
+
+	private async loadPackageTable(refresh = false): Promise<PackageTable | null> {
+		if (this.recordedPackageTable !== null) {
+			return this.recordedPackageTable.kind === "recorded" ? this.recordedPackageTable.table : null;
+		}
+
+		const resolver = this.deps.packageResolver;
+
+		if (!resolver) return null;
+		const loaded = await (refresh && resolver.refresh ? resolver.refresh() : resolver.load());
+
+		return loaded.ok ? loaded.value : null;
 	}
 
 	private semanticQueryActive(spec: FilterSpec = this.activeFilter): boolean {
@@ -785,10 +913,11 @@ class SessionImpl implements Session {
 
 		const bounds = this.history.bounds();
 		const pending = this.pendingJob;
+		const pendingFilter = pending?.prepared ?? this.pendingPackageFilter?.prepared ?? null;
 		let notice: SessionSnapshot["notice"] = null;
 
 		if (requiresResize(this.columns, this.rows)) notice = "resize-required";
-		else if (pending) notice = "applying-filter";
+		else if (pendingFilter) notice = "applying-filter";
 		else if (this.historyExpired) notice = "history-expired";
 
 		const selectedEvent =
@@ -820,11 +949,12 @@ class SessionImpl implements Session {
 			sourceNotices: this.notices.slice(),
 			activeFilter: this.activeFilter,
 			activeFilterRevision: this.activeFilterRevision,
-			pendingFilter: pending ? pending.prepared.spec : null,
+			pendingFilter: pendingFilter?.spec ?? null,
 			view: this.view,
 			lineDisplay: this.lineDisplay,
 			rows: this.classifyRows(projectRows(events, this.view.selectedId, projectionColumns, height, this.lineDisplay)),
 			selectedEvent,
+			packageAttribution: this.packageAttribution,
 			stats,
 			semantic: this.semanticSnapshot(),
 			notice,
@@ -900,6 +1030,14 @@ class SessionImpl implements Session {
 
 		for (const listener of this.listeners) listener(snapshot);
 	}
+}
+
+function packagesForUid(table: PackageTable, uid: number): readonly string[] {
+	return table.find((entry) => entry.uid === uid)?.packages ?? [];
+}
+
+function uidsForPackage(table: PackageTable, packageName: string): readonly number[] {
+	return table.filter((entry) => entry.packages.includes(packageName)).map((entry) => entry.uid);
 }
 
 function truncateNotice(message: string): string {

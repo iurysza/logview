@@ -27,6 +27,16 @@ describe("parseLogcatLine", () => {
 		);
 	});
 
+	test("parses UID from the UID-enabled capture profile", () => {
+		const parsed = parseLogcatLine(line("1760000000.123456  10123  1234  1250 I Database: BEGIN TRANSACTION"));
+		expect(parsed.kind).toBe("event");
+
+		if (parsed.kind !== "event") return;
+		expect(parsed.metadata?.uid).toBe(10123);
+		expect(parsed.metadata?.pid).toBe(1234);
+		expect(parsed.metadata?.tid).toBe(1250);
+	});
+
 	test("parses the leading whitespace used by physical device Logcat output", () => {
 		const parsed = parseLogcatLine(line("         1760000000.123456  1234  1250 I Database: BEGIN TRANSACTION"));
 		expect(parsed.kind).toBe("event");

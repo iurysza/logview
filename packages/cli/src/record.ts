@@ -1,11 +1,12 @@
 import {
+	createAdbPackageResolver,
 	createAdbSource,
 	createProcessRunner,
 	createRecordingFiles,
 	createScheduler,
 	DEFAULT_MAX_RECORDING_BYTES,
 	recordSession,
-	syntheticRecordingHeader,
+	uidRecordingHeader,
 } from "@logview/engine";
 
 export type RecordCommand = Readonly<{
@@ -19,10 +20,17 @@ export type RecordCommand = Readonly<{
 export async function runRecord(command: RecordCommand, signal: AbortSignal): Promise<number> {
 	const scheduler = createScheduler();
 
+	const processes = createProcessRunner();
+
 	const source = createAdbSource(
 		{ adbPath: command.adbPath, serial: command.serial },
-		{ processes: createProcessRunner(), scheduler },
+		{ processes, scheduler },
 	);
+
+	const resolvedPackages = await createAdbPackageResolver(
+		{ adbPath: command.adbPath, serial: command.serial },
+		{ processes },
+	).load();
 
 	const result = await recordSession(
 		source,
@@ -30,7 +38,7 @@ export async function runRecord(command: RecordCommand, signal: AbortSignal): Pr
 			outPath: command.outPath,
 			durationMs: command.durationSec === null ? null : command.durationSec * 1000,
 			maxFileBytes: command.maxFileBytes,
-			header: { ...syntheticRecordingHeader(), provenance: "raw-capture" },
+			header: uidRecordingHeader(resolvedPackages.ok ? resolvedPackages.value : null, "raw-capture"),
 		},
 		{ files: createRecordingFiles(), scheduler },
 		signal,

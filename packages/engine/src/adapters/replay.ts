@@ -167,7 +167,19 @@ class ReplaySource implements LogSource {
 		signal: AbortSignal,
 	): Promise<SourceEvent | null> {
 		return Match.value(record).pipe(
-			Match.when({ kind: "header" }, () => Effect.runPromise(Effect.succeed<SourceEvent | null>(null))),
+			Match.when({ kind: "header", version: 1 }, () =>
+				Effect.runPromise(
+					Effect.succeed<SourceEvent | null>({ kind: "package-table", packageTable: { kind: "not-recorded" } }),
+				),
+			),
+			Match.when({ kind: "header", version: 2 }, (header) =>
+				Effect.runPromise(
+					Effect.succeed<SourceEvent | null>({
+						kind: "package-table",
+						packageTable: { kind: "recorded", table: header.packageTable },
+					}),
+				),
+			),
 			Match.when({ kind: "chunk" }, (chunk) => this.emitChunk(chunk, start, signal)),
 			Match.when({ kind: "end" }, (end) => Effect.runPromise(Effect.succeed<SourceEvent | null>(this.endEvent(end)))),
 			Match.exhaustive,

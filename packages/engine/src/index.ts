@@ -1,5 +1,6 @@
 export type {
 	HeadlessOutput,
+	PackageAttribution,
 	Session,
 	SessionDependencies,
 	SessionOptions,
@@ -18,6 +19,10 @@ export type {
 	ProcessExit,
 	ProcessRunner,
 	ProcessSpec,
+	PackageResolver,
+	PackageTable,
+	PackageTableEntry,
+	RecordedPackageTable,
 	RecordingChunk,
 	RecordingEnd,
 	RecordingError,
@@ -56,7 +61,9 @@ export {
 	encodeRecordingRecord,
 	packetFromChunk,
 	RECORDING_PROFILE,
+	UID_RECORDING_PROFILE,
 	syntheticRecordingHeader,
+	uidRecordingHeader,
 	sanitizedRecordingHeader,
 	SANITIZED_REDACTION_VERSION,
 	validateRecordingSequence,
@@ -72,6 +79,10 @@ export type { RecordFailure, RecordOptions, RecordOutcome } from "./recorder.ts"
 export { createAdbSource, LOGCAT_ARGS } from "./adapters/adb.ts";
 
 export type { AdbSourceOptions } from "./adapters/adb.ts";
+
+export { createAdbPackageResolver, parsePackageTable } from "./adapters/packages.ts";
+
+export type { AdbPackageResolverOptions } from "./adapters/packages.ts";
 
 export { createReplaySource } from "./adapters/replay.ts";
 

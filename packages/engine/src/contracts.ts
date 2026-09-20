@@ -28,7 +28,13 @@ import {
 	type ViewState,
 } from "@logview/core";
 import type { LogClassifier, SemanticOptions, SemanticStats } from "./semantic/contracts.ts";
-import type { LogSource, Scheduler, SourceNotice, SourceStatus, SourceTerminal } from "./ports.ts";
+import type { LogSource, PackageResolver, Scheduler, SourceNotice, SourceStatus, SourceTerminal } from "./ports.ts";
+
+export type PackageAttribution =
+	| { kind: "idle" }
+	| { kind: "resolving"; uid: number }
+	| { kind: "resolved"; uid: number; packages: readonly string[] }
+	| { kind: "unavailable"; reason: "lookup-failed" | "missing-uid" | "not-recorded" };
 
 export type SessionStats = Readonly<{
 	receivedBytes: number;
@@ -57,6 +63,7 @@ export type SessionSnapshot = Readonly<{
 	pendingFilter: FilterSpec | null;
 	view: ViewState;
 	lineDisplay: LineDisplay;
+	packageAttribution: PackageAttribution;
 	rows: readonly ViewRow[];
 	selectedEvent: LogEvent | null;
 	stats: SessionStats;
@@ -106,6 +113,7 @@ export type SessionDependencies = Readonly<{
 	scheduler: Scheduler;
 	classifier?: LogClassifier;
 	semantic?: Partial<SemanticOptions>;
+	packageResolver?: PackageResolver;
 }>;
 
 export function defaultSessionOptions(

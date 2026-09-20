@@ -91,8 +91,15 @@ async function runRecorder(
 	if (!created.ok) return created;
 
 	const writer = created.value;
-	const started = dependencies.scheduler.nowMs();
 	let written = encodeRecordingRecord(options.header).byteLength;
+
+	if (written + FOOTER_RESERVE_BYTES > options.maxFileBytes) {
+		await writer.abort();
+
+		return err({ kind: "invalid", message: "recording header exceeds the capture size limit" });
+	}
+
+	const started = dependencies.scheduler.nowMs();
 	let chunks = 0;
 	let sourceError: SourceError | null = null;
 	let outcome: RecordingEnd["outcome"] = "eof";

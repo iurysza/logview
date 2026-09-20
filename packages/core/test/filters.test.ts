@@ -52,7 +52,7 @@ describe("filters and interaction", () => {
 
 		expect(committed.command).toEqual({
 			kind: "set-filter",
-			filter: { minLevel: null, tag: null, pid: null, text: "database" },
+			filter: { minLevel: null, tag: null, pid: null, packageName: null, text: "database" },
 		});
 		expect(committed.state).toEqual(LIST_FOCUS);
 	});

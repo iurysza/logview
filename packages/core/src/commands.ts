@@ -7,6 +7,7 @@ export type SessionCommand =
 	| { kind: "oldest" }
 	| { kind: "tail" }
 	| { kind: "toggle-line-display" }
+	| { kind: "request-package-attribution" }
 	| { kind: "set-filter"; filter: FilterSpec }
 	| { kind: "resize"; columns: number; rows: number };
 
@@ -20,7 +21,7 @@ export type ConfigurationError = Readonly<{
 
 export type CommandError = Readonly<{
 	kind: "invalid-filter" | "invalid-size" | "stopped";
-	field?: "minLevel" | "tag" | "pid" | "text";
+	field?: "minLevel" | "tag" | "pid" | "packageName" | "text";
 	message: string;
 }>;
 
@@ -54,7 +55,7 @@ export function validateDimensions(
 
 export type FilterField = NonNullable<CommandError["field"]>;
 
-export const FILTER_FIELDS: readonly FilterField[] = ["minLevel", "tag", "pid", "text"];
+export const FILTER_FIELDS: readonly FilterField[] = ["minLevel", "tag", "pid", "packageName", "text"];
 
 export type RowSpan = Readonly<{
 	text: string;

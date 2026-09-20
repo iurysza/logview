@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { err, ok, type Result } from "@logview/core";
 import {
+	createAdbPackageResolver,
 	createAdbSource,
 	createProcessRunner,
 	createScheduler,
@@ -237,6 +238,36 @@ describe("adb source contract", () => {
 		await source.close();
 		controller.abort();
 		expect(terminated).toBe(true);
+	});
+});
+
+describe("adb package resolver", () => {
+	test("loads one UID table and preserves all shared-package matches", async () => {
+		const calls: ProcessSpec[] = [];
+
+		const processes: ProcessRunner = {
+			spawn(spec) {
+				calls.push(spec);
+
+				if (spec.args[0] === "devices") return ok(textHandle("List of devices attached\nABC\tdevice\n", ""));
+
+				if (spec.args.join(" ") === "-s ABC shell cmd package list packages -U") {
+					return ok(textHandle("package:com.example.shared uid:10123\npackage:com.example.app uid:10123\n", ""));
+				}
+
+				return err({ kind: "io", message: "unexpected command" });
+			},
+		};
+
+		const resolver = createAdbPackageResolver({ adbPath: "adb", serial: "ABC" }, { processes });
+		const [first, second] = await Promise.all([resolver.load(), resolver.load()]);
+
+		expect(first).toEqual({
+			ok: true,
+			value: [{ uid: 10123, packages: ["com.example.app", "com.example.shared"] }],
+		});
+		expect(second).toEqual(first);
+		expect(calls).toHaveLength(2);
 	});
 });
 

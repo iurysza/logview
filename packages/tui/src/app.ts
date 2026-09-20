@@ -228,7 +228,7 @@ function layoutLines(
 		body = fillPane(helpLines(columns).slice(1), viewport, columns, style);
 	} else if (inspectOpen && !wideInspect) {
 		header[2] = paintChromeLine(inspectorHeader(snapshot.selectedEvent, columns), columns, style, THEME.bar);
-		body = paintInspector(snapshot.selectedEvent, columns, viewport, style, classification);
+		body = paintInspector(snapshot.selectedEvent, columns, viewport, style, classification, snapshot.packageAttribution);
 	} else if (wideInspect) {
 		const paneWidth = inspectorWidth(columns);
 		const leftWidth = Math.max(1, columns - paneWidth - 1);
@@ -245,7 +245,7 @@ function layoutLines(
 		);
 		body = splitPane(
 			body,
-			paintInspector(snapshot.selectedEvent, paneWidth, viewport, style, classification),
+			paintInspector(snapshot.selectedEvent, paneWidth, viewport, style, classification, snapshot.packageAttribution),
 			columns,
 			style,
 		);

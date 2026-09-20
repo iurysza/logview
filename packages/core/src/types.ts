@@ -45,6 +45,7 @@ export function levelRank(level: LogLevel): number {
 
 export type LogMetadata = Readonly<{
 	epochMicros: number;
+	uid?: number | null;
 	pid: number;
 	tid: number;
 	level: LogLevel;
@@ -70,6 +71,7 @@ export type FilterSpec = Readonly<{
 	minLevel: LogLevel | null;
 	tag: string | null;
 	pid: number | null;
+	packageName?: string | null;
 	text: string;
 }>;
 
@@ -91,6 +93,7 @@ export const EMPTY_FILTER: FilterSpec = {
 	minLevel: null,
 	tag: null,
 	pid: null,
+	packageName: null,
 	text: "",
 };
 

@@ -7,6 +7,7 @@ import {
 	type LogEvent,
 	type LogLevel,
 } from "@logview/core";
+import type { PackageAttribution } from "@logview/engine";
 import type { Rgb } from "./catppuccin.ts";
 import { type ChromeLine, type ChromeSpan, paintChromeLine } from "./chrome.ts";
 import type { PaintStyle } from "./color.ts";
@@ -124,10 +125,25 @@ function action(key: string, label: string, value = ""): ChromeLine {
 	];
 }
 
+function packageLabel(attribution: PackageAttribution): string {
+	if (attribution.kind === "resolving") return "Resolving";
+
+	if (attribution.kind === "unavailable") return attribution.reason === "not-recorded" ? "Not recorded" : "Unavailable";
+
+	if (attribution.kind === "resolved") {
+		if (attribution.packages.length === 0) return `UID ${attribution.uid} (no package)`;
+
+		return attribution.packages.join(", ");
+	}
+
+	return "Unavailable";
+}
+
 function inspectorContent(
 	event: LogEvent | null,
 	width: number,
 	classification: string | null,
+	attribution: PackageAttribution,
 ): ChromeLine[] {
 	if (!event) return [[span("No event selected", THEME.muted)]];
 
@@ -142,8 +158,12 @@ function inspectorContent(
 			{ text: `${LEVEL_NAMES[metadata.level]} (${metadata.level})`, style: severityStyle(metadata.level) },
 		]);
 
-		lines.push(field("PID", String(metadata.pid), THEME.cyan));
-		lines.push(field("TID", String(metadata.tid), THEME.cyan));
+		const process = metadata.uid == null
+			? `PID ${metadata.pid} · TID ${metadata.tid}`
+			: `UID ${metadata.uid} · PID ${metadata.pid} · TID ${metadata.tid}`;
+
+		lines.push(field("Process", process, THEME.cyan));
+		lines.push(field("Package", packageLabel(attribution), attribution.kind === "unavailable" ? THEME.amber : THEME.text));
 		lines.push(field("Tag", sanitizeDisplay(tagText(event.rawText, metadata.tag)), THEME.green));
 
 		if (classification) lines.push(field("Jev", classification, THEME.purple));
@@ -217,12 +237,13 @@ export function paintInspector(
 	height: number,
 	style: PaintStyle,
 	classification: string | null = null,
+	attribution: PackageAttribution = { kind: "idle" },
 ): string[] {
 	const rows = Math.max(1, height);
 	const actions = inspectorActions(event, width, rows >= 16);
 	const actionRows = Math.min(actions.length, rows);
 	const contentRows = Math.max(0, rows - actionRows);
-	const content = inspectorContent(event, width, classification);
+	const content = inspectorContent(event, width, classification, attribution);
 	const lines: string[] = [];
 
 	for (let i = 0; i < contentRows; i += 1) {

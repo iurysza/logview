@@ -1,5 +1,6 @@
 import { EMPTY_FILTER, err, ok, type FilterSpec, type Result, type SourceKind } from "@logview/core";
 import {
+	createAdbPackageResolver,
 	createAdbSource,
 	createJevClassifier,
 	createProcessRunner,
@@ -78,7 +79,7 @@ Jev visual filter:
   Do not put API keys in the file.
 
 Capture profile:
-  adb -s <serial> logcat -b main -b system -b crash -v threadtime -v epoch -v usec *:V
+  adb -s <serial> logcat -b main -b system -b crash -v threadtime -v epoch -v usec -v uid *:V
 `;
 }
 
@@ -467,9 +468,16 @@ export async function main(argv = process.argv): Promise<number> {
 		const semantic = semanticSessionOptions(viewer.semantic);
 
 		if (request.command === "live") {
+			const processes = createProcessRunner();
+
 			const source = createAdbSource(
 				{ adbPath: request.adbPath, serial: request.serial },
-				{ processes: createProcessRunner(), scheduler },
+				{ processes, scheduler },
+			);
+
+			const packageResolver = createAdbPackageResolver(
+				{ adbPath: request.adbPath, serial: request.serial },
+				{ processes },
 			);
 
 			const created = createSession(
@@ -485,6 +493,7 @@ export async function main(argv = process.argv): Promise<number> {
 					scheduler,
 					classifier: classifier.value,
 					semantic,
+					packageResolver,
 				},
 			);
 
