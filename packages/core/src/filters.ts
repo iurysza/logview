@@ -114,7 +114,21 @@ export function prepareFilter(spec: FilterSpec): Result<PreparedFilter, CommandE
 }
 
 export function matches(event: LogEvent, filter: PreparedFilter): boolean {
-	const { spec, foldedText } = filter;
+	if (!matchesLocal(event, filter)) return false;
+
+	if (filter.foldedText.length === 0) return true;
+
+	if (foldText(event.rawText).includes(filter.foldedText)) return true;
+
+	for (const line of event.continuations) {
+		if (foldText(line).includes(filter.foldedText)) return true;
+	}
+
+	return false;
+}
+
+export function matchesLocal(event: LogEvent, filter: PreparedFilter): boolean {
+	const { spec } = filter;
 
 	if (spec.minLevel !== null) {
 		if (!event.metadata) return false;
@@ -134,19 +148,5 @@ export function matches(event: LogEvent, filter: PreparedFilter): boolean {
 		if (event.metadata.pid !== spec.pid) return false;
 	}
 
-	if (foldedText.length > 0) {
-		if (foldText(event.rawText).includes(foldedText)) return true;
-
-		for (const line of event.continuations) {
-			if (foldText(line).includes(foldedText)) return true;
-		}
-
-		return false;
-	}
-
 	return true;
-}
-
-export function matchesLocal(event: LogEvent, filter: PreparedFilter): boolean {
-	return matches(event, { spec: { ...filter.spec, text: "" }, foldedText: "" });
 }

@@ -50,7 +50,7 @@ import { isSourcePacket, isSourceTerminal } from "./ports.ts";
 import { FilterJob } from "./reindex.ts";
 import { VisibleIndexStore } from "./visible-index.ts";
 import { classifierItemFromEvent } from "./semantic/items.ts";
-import { SemanticCoordinator } from "./semantic/coordinator.ts";
+import { SemanticCoordinator, type SemanticMarkChange } from "./semantic/coordinator.ts";
 import {
 	defaultSemanticOptions,
 	type SemanticOptions,
@@ -61,6 +61,13 @@ import {
 export { defaultSessionOptions, validateSessionOptions };
 
 const DATA_PUBLISH_MS = 1000 / 30;
+
+type SemanticVisibleCounts = {
+	classifiedEvents: number;
+	pendingEvents: number;
+	skippedEvents: number;
+	failedEvents: number;
+};
 
 export function createSession(
 	options: SessionOptions,
@@ -117,6 +124,12 @@ class SessionImpl implements Session {
 	private readonly coordinator: SemanticCoordinator | null;
 	private readonly semanticOptions: SemanticOptions;
 	private queryRevision = 0;
+	private semanticVisibleCounts: SemanticVisibleCounts = {
+		classifiedEvents: 0,
+		pendingEvents: 0,
+		skippedEvents: 0,
+		failedEvents: 0,
+	};
 
 	constructor(options: SessionOptions, deps: SessionDependencies) {
 		this.options = options;
@@ -148,6 +161,7 @@ class SessionImpl implements Session {
 						return event ? classifierItemFromEvent(event) : null;
 					},
 					() => this.onSemanticApplied(),
+					(change) => this.onSemanticMarkChange(change),
 				)
 			: null;
 
@@ -436,6 +450,7 @@ class SessionImpl implements Session {
 
 		if (matchesActive && this.activeIndex.locate(event.id).exactRank === null) {
 			this.activeIndex.append([event.id]);
+			this.addVisibleSemanticCounts([event.id]);
 		}
 
 		if (this.pendingJob) {
@@ -461,32 +476,36 @@ class SessionImpl implements Session {
 		this.evictedEvents += outcome.evictedCount;
 		const firstId = this.history.bounds().firstId;
 
-		this.activeIndex.pruneBefore(firstId);
+		this.pruneActiveBefore(firstId);
 		this.pendingJob?.prefix.pruneBefore(firstId);
 		this.pendingJob?.tail.pruneBefore(firstId);
 		this.coordinator?.prune(firstId);
 
 		const matchingNew: number[] = [];
-		const newestPrepared = this.pendingJob?.prepared ?? this.preparedActive;
-		const semanticActive = this.semanticQueryActive(newestPrepared.spec);
-		const semanticNew: number[] = [];
+		const pending = this.pendingJob;
+		const newestPrepared = pending?.prepared ?? this.preparedActive;
+		const semanticNew: number[] | null = this.semanticQueryActive(newestPrepared.spec) ? [] : null;
 
 		for (const id of outcome.retainedNewIds) {
 			const event = this.history.get(id);
 
 			if (!event) continue;
 
-			if (this.eventMatches(event, this.preparedActive)) matchingNew.push(id);
+			const activeMatches = this.eventMatches(event, this.preparedActive);
+			const pendingMatches = pending ? this.eventMatches(event, pending.prepared) : false;
+			const newestMatches = pending ? pendingMatches : activeMatches;
 
-			if (this.pendingJob) {
-				this.pendingJob.appendArrival(id, this.eventMatches(event, this.pendingJob.prepared));
-			}
+			if (activeMatches) matchingNew.push(id);
 
-			if (semanticActive && this.eventMatches(event, newestPrepared)) semanticNew.push(id);
+			if (pending) pending.appendArrival(id, pendingMatches);
+
+			if (newestMatches && semanticNew) semanticNew.push(id);
 		}
 
 		this.activeIndex.append(matchingNew);
-		this.enqueueSemantic(semanticNew, "arrival");
+		this.addVisibleSemanticCounts(matchingNew);
+
+		if (semanticNew) this.enqueueSemantic(semanticNew, "arrival");
 
 		const selectedGone =
 			this.view.mode === "browse" &&
@@ -529,6 +548,7 @@ class SessionImpl implements Session {
 		this.activeFilterRevision = job.revision;
 		this.pendingJob = null;
 		this.historyExpired = false;
+		this.resetSemanticVisibleCounts();
 
 		const historyStart = Math.max(0, job.prefix.size - this.semanticOptions.historyEvents);
 		this.enqueueSemantic(job.prefix.window(historyStart, this.semanticOptions.historyEvents), "backfill");
@@ -556,6 +576,7 @@ class SessionImpl implements Session {
 		if (!this.coordinator) return;
 
 		if (spec.text.length === 0) {
+			this.clearSemanticVisibleCounts();
 			this.coordinator.setQuery(null);
 
 			return;
@@ -576,6 +597,7 @@ class SessionImpl implements Session {
 		};
 
 		this.queryRevision = next.revision;
+		this.clearSemanticVisibleCounts();
 		this.coordinator.setQuery({ ...next, revision: this.queryRevision });
 	}
 
@@ -623,14 +645,78 @@ class SessionImpl implements Session {
 		if (!this.coordinator) return null;
 
 		const query = this.coordinator.activeQuery();
-		const stats = this.coordinator.stats();
 
 		return {
-			...stats,
 			queryText: query?.text ?? this.activeFilter.text,
 			queryRevision: query?.revision ?? this.queryRevision,
 			threshold: query?.threshold ?? this.semanticOptions.threshold,
+			...this.semanticVisibleCounts,
+			inFlight: this.coordinator.inFlightCount,
 		};
+	}
+
+	private semanticDisplayActive(): boolean {
+		return this.coordinator !== null && this.activeFilter.text.length > 0;
+	}
+
+	private clearSemanticVisibleCounts(): void {
+		this.semanticVisibleCounts = {
+			classifiedEvents: 0,
+			pendingEvents: 0,
+			skippedEvents: 0,
+			failedEvents: 0,
+		};
+	}
+
+	private resetSemanticVisibleCounts(): void {
+		this.clearSemanticVisibleCounts();
+
+		if (!this.semanticDisplayActive()) return;
+
+		for (let rank = 0; rank < this.activeIndex.size; rank += 1) {
+			const id = this.activeIndex.at(rank);
+
+			if (id !== null) this.adjustSemanticCount(this.classificationMark(id), 1);
+		}
+	}
+
+	private addVisibleSemanticCounts(ids: readonly number[]): void {
+		if (!this.semanticDisplayActive()) return;
+
+		for (const id of ids) this.adjustSemanticCount(this.classificationMark(id), 1);
+	}
+
+	private pruneActiveBefore(firstRetainedId: number | null): void {
+		if (this.semanticDisplayActive()) {
+			for (let rank = 0; rank < this.activeIndex.size; rank += 1) {
+				const id = this.activeIndex.at(rank);
+
+				if (id === null || (firstRetainedId !== null && id >= firstRetainedId)) break;
+
+				this.adjustSemanticCount(this.classificationMark(id), -1);
+			}
+		}
+
+		this.activeIndex.pruneBefore(firstRetainedId);
+	}
+
+	private onSemanticMarkChange(change: SemanticMarkChange): void {
+		if (!this.semanticDisplayActive() || this.activeIndex.locate(change.eventId).exactRank === null) return;
+
+		this.adjustSemanticCount(change.before, -1);
+		this.adjustSemanticCount(change.after, 1);
+	}
+
+	private adjustSemanticCount(mark: ClassificationMark, direction: 1 | -1): void {
+		if (mark.kind === "scored") {
+			this.semanticVisibleCounts.classifiedEvents += direction;
+		} else if (mark.kind === "pending") {
+			this.semanticVisibleCounts.pendingEvents += direction;
+		} else if (mark.kind === "unknown" && mark.reason === "skipped") {
+			this.semanticVisibleCounts.skippedEvents += direction;
+		} else if (mark.kind === "unknown" && (mark.reason === "failed" || mark.reason === "too-large")) {
+			this.semanticVisibleCounts.failedEvents += direction;
+		}
 	}
 
 	private applyNavigation(

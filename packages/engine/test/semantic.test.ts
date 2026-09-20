@@ -216,6 +216,12 @@ describe("semantic classification", () => {
 			const snapshot = scenario.session.snapshot();
 			expect(snapshot.rows.map((row) => row.id)).toEqual([2, 4, 6]);
 			expect(snapshot.rows[0]?.classification).toEqual({ kind: "unrequested" });
+			expect(snapshot.semantic).toMatchObject({
+				classifiedEvents: 0,
+				pendingEvents: 2,
+				skippedEvents: 0,
+				failedEvents: 0,
+			});
 		} finally {
 			await scenario.session.stop();
 		}
@@ -392,7 +398,12 @@ describe("semantic classification", () => {
 			expect(snapshot.rows.map((row) => row.id)).toEqual([1]);
 			expect(snapshot.rows[0]?.classification).toEqual({ kind: "unknown", reason: "failed" });
 			expect(snapshot.stats.matchedEvents).toBe(1);
-			expect(snapshot.semantic?.pendingEvents).toBe(0);
+			expect(snapshot.semantic).toMatchObject({
+				classifiedEvents: 0,
+				pendingEvents: 0,
+				skippedEvents: 0,
+				failedEvents: 1,
+			});
 		} finally {
 			await scenario.session.stop();
 		}
@@ -475,7 +486,12 @@ describe("semantic classification", () => {
 		const snap = scenario.session.snapshot();
 		expect(snap.stats.admittedEvents).toBe(6);
 		expect(snap.stats.retainedEvents).toBe(6);
-		expect(snap.semantic?.skippedEvents ?? 0).toBeGreaterThan(0);
+		expect(snap.semantic).toMatchObject({
+			classifiedEvents: 0,
+			pendingEvents: 3,
+			skippedEvents: 3,
+			failedEvents: 0,
+		});
 		expect(snap.stats.matchedEvents).toBe(6);
 
 		await scenario.session.stop();
