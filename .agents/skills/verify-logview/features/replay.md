@@ -13,7 +13,7 @@ Replay opens a recording without a phone, lets the user leave the tail to inspec
 
 - Run `logview replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --speed instant`.
 - Press `↑` or `k` to leave tail.
-- Press `PageUp` or `PageDown` to page.
+- Press `PageUp` or `Ctrl+U` to page up, and `PageDown` or `Ctrl+D` to page down.
 - Press `G` or End to jump to the newest event.
 
 ## Driving it with ui:verify

@@ -59,6 +59,14 @@ describe("reduceInteraction", () => {
 		expect(quit.quit).toBe(true);
 	});
 
+	test("Ctrl+U and Ctrl+D page through the list", () => {
+		const pageUp = reduceInteraction(LIST_FOCUS, { kind: "key", key: "u", ctrl: true, shift: false }, EMPTY_FILTER);
+		const pageDown = reduceInteraction(LIST_FOCUS, { kind: "key", key: "d", ctrl: true, shift: false }, EMPTY_FILTER);
+
+		expect(pageUp.command).toEqual({ kind: "page", delta: -1 });
+		expect(pageDown.command).toEqual({ kind: "page", delta: 1 });
+	});
+
 	test("Enter opens inspect and t filters the selected tag", () => {
 		const opened = reduceInteraction(LIST_FOCUS, { kind: "key", key: "enter", ctrl: false, shift: false }, EMPTY_FILTER);
 		expect(opened.state.focus).toBe("inspect");

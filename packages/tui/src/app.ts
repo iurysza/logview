@@ -301,7 +301,7 @@ function helpLines(width: number): string[] {
 		"Keys",
 		"",
 		"↑↓ / j k     move between events",
-		"PgUp PgDn    page",
+		"PgUp PgDn / ^U ^D  page",
 		"G / End      jump to end",
 		"Home         oldest",
 		"Enter        inspect event",
@@ -486,6 +486,10 @@ function matchNextKey(
 	deferStandaloneEscape: boolean,
 ): Readonly<{ key: KeyCommand; size: number }> | "incomplete" {
 	if (slice.startsWith("\u0003")) return { key: { key: "c", ctrl: true, shift: false }, size: 1 };
+
+	if (slice.startsWith("\u0004")) return { key: { key: "d", ctrl: true, shift: false }, size: 1 };
+
+	if (slice.startsWith("\u0015")) return { key: { key: "u", ctrl: true, shift: false }, size: 1 };
 
 	if (slice.startsWith("\r") || slice.startsWith("\n")) return { key: { key: "enter", ...PLAIN_KEY }, size: 1 };
 

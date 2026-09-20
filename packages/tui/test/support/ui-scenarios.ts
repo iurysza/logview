@@ -134,7 +134,23 @@ const SCENARIOS: readonly UiScenario[] = [
 			await sendBytes(context.session, new TextEncoder().encode("A"));
 			await waitForText(context.session, REPLAY_BROWSE);
 			await context.capture("browse", { cols: 120, rows: 24 });
-			await send(context.session, ["page-up", "text:G"]);
+			await sendBytes(context.session, new TextEncoder().encode("\u0015"));
+			await waitForScreen(
+				context.session,
+				"Ctrl+U selects the oldest event",
+				(screen) => screen.text.split("\n")[2]?.startsWith("▸") === true,
+			);
+			const pageUp = await context.capture("ctrl-u", { cols: 120, rows: 24 });
+			expectCell(pageUp, 0, 2, "▸", "Ctrl+U page up");
+			await sendBytes(context.session, new TextEncoder().encode("\u0004"));
+			await waitForScreen(
+				context.session,
+				"Ctrl+D selects the newest event",
+				(screen) => screen.text.split("\n")[19]?.startsWith("▸") === true,
+			);
+			const pageDown = await context.capture("ctrl-d", { cols: 120, rows: 24 });
+			expectCell(pageDown, 0, 19, "▸", "Ctrl+D page down");
+			await send(context.session, ["text:G"]);
 			await waitForText(context.session, REPLAY_DONE);
 			const final = await context.capture("final", { cols: 120, rows: 24 });
 			expectText(final, "日本語 ok", "replay final");
