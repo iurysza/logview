@@ -35,6 +35,7 @@ export const UI_SCENARIO_NAMES = [
 	"highlight",
 	"no-color",
 	"quit",
+	"wrap",
 ] as const;
 
 export type UiScenarioName = (typeof UI_SCENARIO_NAMES)[number];
@@ -157,6 +158,20 @@ const SCENARIOS: readonly UiScenario[] = [
 			);
 			const final = await context.capture("final", { cols: 120, rows: 24 });
 			expectText(final, "日本語 ok", "replay final");
+		},
+	},
+	{
+		name: "wrap",
+		viewport: { cols: 120, rows: 24 },
+		color: "always",
+		async run(context) {
+			await send(context.session, ["text:w"]);
+			await waitForText(context.session, " w  Wrap");
+			const wrapped = await context.capture("wrapped", { cols: 120, rows: 24 });
+			expectText(wrapped, "│", "wrapped continuation guide");
+			await send(context.session, ["text:w"]);
+			await waitForText(context.session, " w  Clip");
+			await context.capture("clipped", { cols: 120, rows: 24 });
 		},
 	},
 	{

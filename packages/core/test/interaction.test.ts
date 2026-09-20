@@ -67,6 +67,14 @@ describe("reduceInteraction", () => {
 		expect(pageDown.command).toEqual({ kind: "page", delta: 1 });
 	});
 
+	test("w toggles line wrapping", () => {
+		const lower = reduceInteraction(LIST_FOCUS, { kind: "key", key: "w", ctrl: false, shift: false }, EMPTY_FILTER);
+		const upper = reduceInteraction(LIST_FOCUS, { kind: "key", key: "W", ctrl: false, shift: false }, EMPTY_FILTER);
+
+		expect(lower.command).toEqual({ kind: "toggle-line-display" });
+		expect(upper.command).toEqual({ kind: "toggle-line-display" });
+	});
+
 	test("Enter opens inspect and t filters the selected tag", () => {
 		const opened = reduceInteraction(LIST_FOCUS, { kind: "key", key: "enter", ctrl: false, shift: false }, EMPTY_FILTER);
 		expect(opened.state.focus).toBe("inspect");

@@ -78,6 +78,8 @@ export type PreparedFilter = Readonly<{
 	foldedText: string;
 }>;
 
+export type LineDisplay = "clip" | "wrap";
+
 export type ViewState = Readonly<{
 	mode: "tail" | "browse";
 	topId: EventId | null;

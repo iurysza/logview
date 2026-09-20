@@ -42,6 +42,7 @@ export type {
 	EventId,
 	FilterRevision,
 	FilterSpec,
+	LineDisplay,
 	LogEvent,
 	LogLevel,
 	LogMetadata,

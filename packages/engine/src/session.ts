@@ -23,6 +23,7 @@ import {
 	type CommandError,
 	type FilterSpec,
 	type FramerState,
+	type LineDisplay,
 	type LogEvent,
 	type PreparedFilter,
 	type Result,
@@ -99,6 +100,7 @@ class SessionImpl implements Session {
 	private activeFilter: FilterSpec;
 	private columns: number;
 	private rows: number;
+	private lineDisplay: LineDisplay = "clip";
 	private framer: FramerState = emptyFramerState();
 	private nextEventId = 1;
 	private revision = 0;
@@ -195,6 +197,7 @@ class SessionImpl implements Session {
 
 				return this.commandNavigate(tail);
 			}),
+			Match.when({ kind: "toggle-line-display" }, () => this.commandToggleLineDisplay()),
 			Match.when({ kind: "set-filter" }, (set) => this.commandFilter(set.filter)),
 			Match.when({ kind: "resize" }, (resize) => this.commandResize(resize.columns, resize.rows)),
 			Match.exhaustive,
@@ -256,6 +259,15 @@ class SessionImpl implements Session {
 			this.matcherFor(prepared.value),
 		);
 		this.runFilterSlice();
+		this.bump();
+		this.publishImmediate();
+
+		return ok(undefined);
+	}
+
+	private commandToggleLineDisplay(): Result<void, CommandError> {
+		this.lineDisplay = this.lineDisplay === "clip" ? "wrap" : "clip";
+		this.applyNavigation({ kind: "resize" }, 0);
 		this.bump();
 		this.publishImmediate();
 
@@ -724,6 +736,7 @@ class SessionImpl implements Session {
 		newMatchingArrivals: number,
 	): void {
 		const visibleHeight = Math.max(1, logViewportHeight(this.rows));
+		const projectionColumns = this.projectionColumns();
 
 		const plan = planNavigation(this.view, cause, {
 			count: this.activeIndex.size,
@@ -732,7 +745,7 @@ class SessionImpl implements Session {
 				const id = this.activeIndex.at(rank);
 				const event = id === null ? null : this.history.get(id);
 
-				return event ? eventScreenRows(event) : 1;
+				return event ? eventScreenRows(event, projectionColumns, this.lineDisplay) : 1;
 			},
 			top: this.activeIndex.locate(this.view.topId),
 			selected: this.activeIndex.locate(this.view.selectedId),
@@ -743,6 +756,10 @@ class SessionImpl implements Session {
 		const topId = plan.topRank === null ? null : this.activeIndex.at(plan.topRank);
 
 		this.view = materializeNavigation(plan, { topId, selectedId });
+	}
+
+	private projectionColumns(): number {
+		return this.semanticQueryActive() ? classificationColumnLayout(this.columns).listWidth : this.columns;
 	}
 
 	private buildSnapshot(): SessionSnapshot {
@@ -763,7 +780,7 @@ class SessionImpl implements Session {
 			if (!event) continue;
 
 			events.push(event);
-			used += eventScreenRows(event);
+			used += eventScreenRows(event, this.projectionColumns(), this.lineDisplay);
 		}
 
 		const bounds = this.history.bounds();
@@ -792,9 +809,7 @@ class SessionImpl implements Session {
 			upstreamLoss: "unknown",
 		};
 
-		const projectionColumns = this.semanticQueryActive()
-			? classificationColumnLayout(this.columns).listWidth
-			: this.columns;
+		const projectionColumns = this.projectionColumns();
 
 		return {
 			sessionId: this.options.sessionId,
@@ -807,7 +822,8 @@ class SessionImpl implements Session {
 			activeFilterRevision: this.activeFilterRevision,
 			pendingFilter: pending ? pending.prepared.spec : null,
 			view: this.view,
-			rows: this.classifyRows(projectRows(events, this.view.selectedId, projectionColumns, height)),
+			lineDisplay: this.lineDisplay,
+			rows: this.classifyRows(projectRows(events, this.view.selectedId, projectionColumns, height, this.lineDisplay)),
 			selectedEvent,
 			stats,
 			semantic: this.semanticSnapshot(),

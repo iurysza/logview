@@ -30,6 +30,7 @@ const snapshot: SessionSnapshot = {
 	activeFilterRevision: 0,
 	pendingFilter: null,
 	view: EMPTY_VIEW,
+	lineDisplay: "clip",
 	rows: [],
 	selectedEvent: null,
 	stats: {
@@ -156,6 +157,7 @@ describe("tui chrome", () => {
 		expect(formatFilter(snapshot)).toContain("Tag: any");
 		expect(formatFooter(snapshot)).toContain("TAIL");
 		expect(formatHints()).toContain("q Quit");
+		expect(formatHints(LIST_FOCUS, "wrap")).toContain("w Wrap");
 		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("Quit");
 	});
 

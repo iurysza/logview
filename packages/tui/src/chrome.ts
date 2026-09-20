@@ -1,4 +1,4 @@
-import { clipToWidth, displayWidth, LIST_FOCUS, type FilterSpec, type InteractionState } from "@logview/core";
+import { clipToWidth, displayWidth, LIST_FOCUS, type FilterSpec, type InteractionState, type LineDisplay } from "@logview/core";
 import { type SessionSnapshot as EngineSessionSnapshot } from "@logview/engine";
 import { paintStyled, rgbSgr, styleOn, type CellStyle, type Rgb } from "./catppuccin.ts";
 import { type PaintStyle } from "./color.ts";
@@ -70,7 +70,7 @@ export function sourceStatusText(snapshot: Pick<Snapshot, "sourceKind" | "source
 	return `${prefix} • IDLE`;
 }
 
-export function keyHints(interaction: InteractionState): readonly KeyHint[] {
+export function keyHints(interaction: InteractionState, lineDisplay: LineDisplay = "clip"): readonly KeyHint[] {
 	if (interaction.focus === "filters") {
 		return [
 			{ key: "Tab", label: "Next" },
@@ -98,13 +98,14 @@ export function keyHints(interaction: InteractionState): readonly KeyHint[] {
 		{ key: "/", label: "Search" },
 		{ key: "f", label: "Filters" },
 		{ key: "G", label: "Tail" },
+		{ key: "w", label: lineDisplay === "wrap" ? "Wrap" : "Clip" },
 		{ key: "?", label: "Help" },
 		{ key: "q", label: "Quit" },
 	];
 }
 
-export function formatHints(interaction: InteractionState = LIST_FOCUS): string {
-	return keyHints(interaction).map((hint) => `${hint.key} ${hint.label}`).join("  ");
+export function formatHints(interaction: InteractionState = LIST_FOCUS, lineDisplay: LineDisplay = "clip"): string {
+	return keyHints(interaction, lineDisplay).map((hint) => `${hint.key} ${hint.label}`).join("  ");
 }
 
 export function formatStatus(snapshot: Snapshot): string {
@@ -148,7 +149,7 @@ export function formatFooter(snapshot: Snapshot, interaction: InteractionState =
 	const badge = displayBadge(snapshot, interaction);
 	const unseen = snapshot.view.mode === "browse" && snapshot.view.newSincePause > 0 ? ` · ${snapshot.view.newSincePause} unseen` : "";
 
-	return `${badge}${unseen}${footerNotice(snapshot)}  ${formatHints(interaction)}`;
+	return `${badge}${unseen}${footerNotice(snapshot)}  ${formatHints(interaction, snapshot.lineDisplay)}`;
 }
 
 function fitGroups(groups: readonly ChromeSpan[], columns: number): ChromeSpan[] {
@@ -237,7 +238,7 @@ export function paintFooter(snapshot: Snapshot, interaction: InteractionState, c
 	const badge = displayBadge(snapshot, interaction);
 	const badgeColor = badge === "BROWSE" ? THEME.amber : THEME.accent;
 	const badgeSpan = bold(` ${badge} `, THEME.canvas, badgeColor);
-	const hints = keyHints(interaction);
+	const hints = keyHints(interaction, snapshot.lineDisplay);
 	const quit = hints.at(-1)!;
 	const optional = hints.slice(0, -1);
 

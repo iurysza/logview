@@ -17,6 +17,7 @@ import {
 	type ConfigurationError,
 	type FilterRevision,
 	type FilterSpec,
+	type LineDisplay,
 	type LogEvent,
 	type Result,
 	type SessionCommand,
@@ -55,6 +56,7 @@ export type SessionSnapshot = Readonly<{
 	activeFilterRevision: FilterRevision;
 	pendingFilter: FilterSpec | null;
 	view: ViewState;
+	lineDisplay: LineDisplay;
 	rows: readonly ViewRow[];
 	selectedEvent: LogEvent | null;
 	stats: SessionStats;

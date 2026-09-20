@@ -442,7 +442,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "G / End      jump to end                                                "
+      "text": "G / End      jump to end · Home oldest                                  "
     },
     {
       "x": 0,
@@ -466,7 +466,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "Home         oldest                                                     "
+      "text": "w            toggle line wrap                                           "
     },
     {
       "x": 0,

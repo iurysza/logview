@@ -6,6 +6,7 @@ export type SessionCommand =
 	| { kind: "page"; delta: -1 | 1 }
 	| { kind: "oldest" }
 	| { kind: "tail" }
+	| { kind: "toggle-line-display" }
 	| { kind: "set-filter"; filter: FilterSpec }
 	| { kind: "resize"; columns: number; rows: number };
 

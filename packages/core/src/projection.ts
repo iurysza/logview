@@ -1,5 +1,5 @@
 import { NONE_CLASSIFICATION, type ClassificationMark, type RowKind, type RowSpan, type ViewRow } from "./commands.ts";
-import { clipToWidth, displayWidth, padToWidth } from "./display-text.ts";
+import { clipToWidth, displayWidth, escapeDisplayText, padToWidth } from "./display-text.ts";
 import { messageText, tagText } from "./logcat.ts";
 import type { EventId, LogEvent, LogLevel } from "./types.ts";
 import { CHROME_ROWS, MIN_TERMINAL_COLUMNS, MIN_TERMINAL_ROWS } from "./types.ts";
@@ -144,9 +144,51 @@ function rowOf(
 	return { id: event.id, selected, level, kind, spans, clipped, classification };
 }
 
-function projectHeader(event: LogEvent, selected: boolean, columns: number, layout: ColumnLayout): ViewRow {
+type ProjectedText = Readonly<{ text: string; clipped: boolean }>;
+
+function projectText(text: string, width: number, lineDisplay: "clip" | "wrap"): readonly ProjectedText[] {
+	if (lineDisplay === "clip") {
+		const clipped = clipToWidth(text, width);
+
+		return [{ text: clipped.text, clipped: clipped.clipped }];
+	}
+
+	const lines: ProjectedText[] = [];
+	let line = "";
+	let used = 0;
+
+	for (const unit of escapeDisplayText(text)) {
+		if (used > 0 && used + unit.width > width) {
+			lines.push({ text: line, clipped: false });
+			line = "";
+			used = 0;
+		}
+
+		if (unit.width > width) {
+			if (line.length > 0) lines.push({ text: line, clipped: false });
+			lines.push({ text: clipToWidth(unit.display, width).text, clipped: false });
+			line = "";
+			used = 0;
+			continue;
+		}
+
+		line += unit.display;
+		used += unit.width;
+	}
+
+	if (line.length > 0 || lines.length === 0) lines.push({ text: line, clipped: false });
+
+	return lines;
+}
+
+function projectHeader(
+	event: LogEvent,
+	selected: boolean,
+	layout: ColumnLayout,
+	message: ProjectedText,
+): ViewRow {
 	const spans: RowSpan[] = [];
-	let clipped = false;
+	let clipped = message.clipped;
 	const level: LogLevel | null = event.metadata?.level ?? null;
 
 	if (event.metadata) {
@@ -172,15 +214,9 @@ function projectHeader(event: LogEvent, selected: boolean, columns: number, layo
 		clipped = clipped || tagField.clipped;
 		pushSpan(spans, tagField.text, "tag");
 		pushSpan(spans, "  ", "gutter");
-		const message = messageText(event.rawText, event.metadata.message);
-		const messageClip = clipToWidth(message, layout.messageWidth);
-		clipped = clipped || messageClip.clipped;
-		pushSpan(spans, messageClip.text, "message");
-	} else {
-		const rawClip = clipToWidth(event.rawText, Math.max(1, columns - MARKER_WIDTH));
-		clipped = rawClip.clipped;
-		pushSpan(spans, rawClip.text, "message");
 	}
+
+	pushSpan(spans, message.text, "message");
 
 	if (event.omittedBytes > 0) {
 		pushSpan(spans, " [truncated]", "warning");
@@ -205,45 +241,73 @@ function projectContinuation(
 	event: LogEvent,
 	selected: boolean,
 	layout: ColumnLayout,
-	text: string,
+	text: ProjectedText,
 ): ViewRow {
 	const spans: RowSpan[] = [];
-	const indent = continuationIndent(layout);
-	pushSpan(spans, indent, "gutter");
-	const remaining = Math.max(1, layout.messageWidth);
-	const clipped = clipToWidth(text, remaining);
-	pushSpan(spans, clipped.text, "message");
+	pushSpan(spans, continuationIndent(layout), "gutter");
+	pushSpan(spans, text.text, "message");
 
-	return rowOf(event, selected, event.metadata?.level ?? null, "continuation", spans, clipped.clipped);
+	return rowOf(event, selected, event.metadata?.level ?? null, "continuation", spans, text.clipped);
 }
 
 function projectMore(event: LogEvent, selected: boolean, layout: ColumnLayout, hidden: number): ViewRow {
 	const spans: RowSpan[] = [];
-	const indent = continuationIndent(layout);
-	pushSpan(spans, indent, "gutter");
+	pushSpan(spans, continuationIndent(layout), "gutter");
 	pushSpan(spans, `+${hidden} more`, "warning");
 
 	return rowOf(event, selected, event.metadata?.level ?? null, "more", spans, false);
 }
 
-export function eventScreenRows(event: LogEvent): number {
-	const extra = event.continuations.length;
-
-	if (extra === 0) return 1;
-
-	if (extra <= MAX_LIST_CONTINUATIONS) return 1 + extra;
-
-	return 1 + MAX_LIST_CONTINUATIONS + 1;
+function eventMessage(event: LogEvent): string {
+	return event.metadata ? messageText(event.rawText, event.metadata.message) : event.rawText;
 }
 
-export function projectEventRows(event: LogEvent, selectedId: EventId | null, columns: number): ViewRow[] {
+function messageWidth(event: LogEvent, columns: number, layout: ColumnLayout): number {
+	return event.metadata ? layout.messageWidth : Math.max(1, columns - MARKER_WIDTH);
+}
+
+export function eventScreenRows(event: LogEvent, columns = 80, lineDisplay: "clip" | "wrap" = "clip"): number {
+	if (lineDisplay === "clip") {
+		const extra = event.continuations.length;
+
+		if (extra === 0) return 1;
+
+		if (extra <= MAX_LIST_CONTINUATIONS) return 1 + extra;
+
+		return 1 + MAX_LIST_CONTINUATIONS + 1;
+	}
+
 	const layout = layoutColumns(Math.max(1, columns));
-	const selected = event.id === selectedId;
-	const rows: ViewRow[] = [projectHeader(event, selected, columns, layout)];
+	const width = messageWidth(event, columns, layout);
+	let rows = projectText(eventMessage(event), width, lineDisplay).length;
 	const limit = Math.min(event.continuations.length, MAX_LIST_CONTINUATIONS);
 
 	for (let i = 0; i < limit; i += 1) {
-		rows.push(projectContinuation(event, selected, layout, event.continuations[i]!));
+		rows += projectText(event.continuations[i]!, layout.messageWidth, lineDisplay).length;
+	}
+
+	return event.continuations.length > MAX_LIST_CONTINUATIONS ? rows + 1 : rows;
+}
+
+export function projectEventRows(
+	event: LogEvent,
+	selectedId: EventId | null,
+	columns: number,
+	lineDisplay: "clip" | "wrap" = "clip",
+): ViewRow[] {
+	const layout = layoutColumns(Math.max(1, columns));
+	const selected = event.id === selectedId;
+	const message = projectText(eventMessage(event), messageWidth(event, columns, layout), lineDisplay);
+	const rows: ViewRow[] = [projectHeader(event, selected, layout, message[0]!)];
+
+	for (const line of message.slice(1)) rows.push(projectContinuation(event, selected, layout, line));
+
+	const limit = Math.min(event.continuations.length, MAX_LIST_CONTINUATIONS);
+
+	for (let i = 0; i < limit; i += 1) {
+		for (const line of projectText(event.continuations[i]!, layout.messageWidth, lineDisplay)) {
+			rows.push(projectContinuation(event, selected, layout, line));
+		}
 	}
 
 	if (event.continuations.length > MAX_LIST_CONTINUATIONS) {
@@ -280,12 +344,13 @@ export function projectRows(
 	selectedId: EventId | null,
 	columns: number,
 	maxRows?: number,
+	lineDisplay: "clip" | "wrap" = "clip",
 ): readonly ViewRow[] {
 	const rows: ViewRow[] = [];
 	const limit = maxRows === undefined ? Number.POSITIVE_INFINITY : maxRows;
 
 	for (const event of events) {
-		const projected = projectEventRows(event, selectedId, columns);
+		const projected = projectEventRows(event, selectedId, columns, lineDisplay);
 
 		for (const row of projected) {
 			if (rows.length >= limit) return rows;

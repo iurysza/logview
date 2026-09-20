@@ -4519,7 +4519,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " ? "
+      "text": " w "
     },
     {
       "x": 63,
@@ -4543,7 +4543,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " Help"
+      "text": " Clip"
     },
     {
       "x": 68,
@@ -4591,7 +4591,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " q "
+      "text": " ? "
     },
     {
       "x": 73,
@@ -4615,7 +4615,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " Quit"
+      "text": " Help"
     },
     {
       "x": 78,
@@ -4639,7 +4639,79 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                          "
+      "text": "  "
+    },
+    {
+      "x": 80,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " q "
+    },
+    {
+      "x": 83,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Quit"
+    },
+    {
+      "x": 88,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                "
     },
     {
       "x": 0,

@@ -4,7 +4,7 @@ import { openScenario, tick } from "../../../tests/support/scenario.ts";
 
 describe("headless session", () => {
 	test("the PRD acceptance scenario: tail, browse, eviction, filter, resume", async () => {
-		const scenario = await openScenario({ maxEvents: 8, rows: 10, columns: 120 });
+		const scenario = await openScenario({ maxEvents: 8, rows: 8, columns: 120 });
 		const keep = new Set([8, 10, 14]);
 
 		await scenario.deliver([1, 2, 3, 4, 5, 6, 7, 8], (id) => ({
@@ -13,7 +13,7 @@ describe("headless session", () => {
 
 		let snap = scenario.session.snapshot();
 		expect(snap.view.mode).toBe("tail");
-		expect(snap.rows.map((row) => row.id)).toEqual([5, 6, 7, 8]);
+		expect(snap.rows.map((row) => row.id)).toEqual([7, 8]);
 		expect(snap.view.selectedId).toBe(8);
 
 		scenario.session.dispatch({ kind: "move", delta: -1 });
@@ -28,7 +28,7 @@ describe("headless session", () => {
 		}));
 		snap = scenario.session.snapshot();
 		expect(snap.stats.retainedEvents).toBe(8);
-		expect(snap.rows.map((row) => row.id)).toEqual([5, 6, 7, 8]);
+		expect(snap.rows.map((row) => row.id)).toEqual([5, 6]);
 		expect(snap.view.selectedId).toBe(6);
 		expect(snap.view.mode).toBe("browse");
 		expect(snap.view.newSincePause).toBe(2);
@@ -38,7 +38,7 @@ describe("headless session", () => {
 		}));
 		snap = scenario.session.snapshot();
 		expect(snap.stats.retainedEvents).toBe(8);
-		expect(snap.rows.map((row) => row.id)).toEqual([7, 8, 9, 10]);
+		expect(snap.rows.map((row) => row.id)).toEqual([7, 8]);
 		expect(snap.view.selectedId).toBe(7);
 		expect(snap.view.mode).toBe("browse");
 		expect(snap.notice).toBe("history-expired");
@@ -50,7 +50,7 @@ describe("headless session", () => {
 
 		expect(filtered.ok).toBe(true);
 		snap = await scenario.waitUntil((current) => current.pendingFilter === null && current.stats.matchedEvents === 3);
-		expect(snap.rows.map((row) => row.id)).toEqual([8, 10, 14]);
+		expect(snap.rows.map((row) => row.id)).toEqual([8, 10]);
 		expect(snap.view.selectedId).toBe(8);
 		expect(snap.view.mode).toBe("browse");
 		expect(snap.view.newSincePause).toBe(0);
@@ -59,6 +59,28 @@ describe("headless session", () => {
 		snap = scenario.session.snapshot();
 		expect(snap.view.mode).toBe("tail");
 		expect(snap.view.selectedId).toBe(14);
+
+		await scenario.finish();
+		await scenario.session.stop();
+	});
+
+	test("line display toggles between clipped and wrapped rows", async () => {
+		const scenario = await openScenario({ rows: 8, columns: 48 });
+		await scenario.deliver([1], () => ({ message: "retrying database connection after a transient network failure" }));
+
+		const clipped = scenario.session.snapshot();
+		expect(clipped.lineDisplay).toBe("clip");
+		expect(clipped.rows).toHaveLength(1);
+
+		expect(scenario.session.dispatch({ kind: "toggle-line-display" }).ok).toBe(true);
+		const wrapped = scenario.session.snapshot();
+		expect(wrapped.lineDisplay).toBe("wrap");
+		expect(wrapped.rows.length).toBeGreaterThan(1);
+		expect(wrapped.view.selectedId).toBe(1);
+
+		scenario.session.dispatch({ kind: "toggle-line-display" });
+		expect(scenario.session.snapshot().lineDisplay).toBe("clip");
+		expect(scenario.session.snapshot().rows).toHaveLength(1);
 
 		await scenario.finish();
 		await scenario.session.stop();
@@ -77,7 +99,7 @@ describe("headless session", () => {
 	});
 
 	test("down on the newest event stays in browse; only tail command resumes following", async () => {
-		const scenario = await openScenario({ maxEvents: 8, rows: 10, columns: 120 });
+		const scenario = await openScenario({ maxEvents: 8, rows: 8, columns: 120 });
 		await scenario.deliver([1, 2, 3, 4, 5, 6, 7, 8]);
 
 		scenario.session.dispatch({ kind: "move", delta: 1 });
@@ -101,7 +123,7 @@ describe("headless session", () => {
 	});
 
 	test("page navigation keeps the selected header visible across continuation rows", async () => {
-		const scenario = await openScenario({ maxEvents: 20, rows: 10, columns: 100 });
+		const scenario = await openScenario({ maxEvents: 20, rows: 8, columns: 100 });
 
 		for (let id = 1; id <= 12; id += 1) {
 			scenario.source.pushLine(threadtimeLine(id, { message: `event-${id}` }), id);
@@ -121,14 +143,14 @@ describe("headless session", () => {
 		scenario.session.dispatch({ kind: "oldest" });
 		assertSelectionVisible();
 
-		for (let i = 0; i < 6; i += 1) {
+		for (let i = 0; i < 12; i += 1) {
 			scenario.session.dispatch({ kind: "page", delta: 1 });
 			assertSelectionVisible();
 		}
 
 		expect(scenario.session.snapshot().view.selectedId).toBe(12);
 
-		for (let i = 0; i < 6; i += 1) {
+		for (let i = 0; i < 12; i += 1) {
 			scenario.session.dispatch({ kind: "page", delta: -1 });
 			assertSelectionVisible();
 		}
