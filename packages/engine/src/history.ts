@@ -135,20 +135,25 @@ export class HistoryStore implements History {
 
 	readAfter(after: EventId | null, through: EventId, limit: number): readonly LogEvent[] {
 		const out: LogEvent[] = [];
-		const count = this.liveCount();
+		let low = this.start;
+		let high = this.events.length;
 
-		for (let i = 0; i < count; i += 1) {
-			const event = this.events[this.start + i];
+		if (after !== null) {
+			while (low < high) {
+				const middle = low + Math.floor((high - low) / 2);
+				const event = this.events[middle];
 
-			if (!event) break;
+				if (!event || event.id <= after) low = middle + 1;
+				else high = middle;
+			}
+		}
 
-			if (after !== null && event.id <= after) continue;
+		for (let index = low; index < this.events.length && out.length < limit; index += 1) {
+			const event = this.events[index];
 
-			if (event.id > through) break;
+			if (!event || event.id > through) break;
 
 			out.push(event);
-
-			if (out.length >= limit) break;
 		}
 
 		return out;

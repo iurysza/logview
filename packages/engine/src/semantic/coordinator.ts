@@ -8,12 +8,19 @@ import type {
 	LogClassifier,
 	SemanticOptions,
 	SemanticQuery,
-	SemanticStats,
 } from "./contracts.ts";
 import { encodedItemBytes, encodedRequestBytes, validateClassifyResponse } from "./validate.ts";
 import { Match } from "effect";
 
 export type ItemLookup = (id: EventId) => ClassifierItem | null;
+
+export type SemanticMark = Annotation | { eventId: EventId; kind: "pending" | "unrequested" };
+
+export type SemanticMarkChange = Readonly<{
+	eventId: EventId;
+	before: SemanticMark;
+	after: SemanticMark;
+}>;
 
 export class SemanticCoordinator {
 	readonly annotations = new AnnotationTable();
@@ -22,8 +29,6 @@ export class SemanticCoordinator {
 	private generation = new AbortController();
 	private flushCancel: Cancel | null = null;
 	private inFlight = 0;
-	private skipped = 0;
-	private failed = 0;
 	private stopped = false;
 	private readonly urgent: EventId[] = [];
 	private readonly backfill: EventId[] = [];
@@ -39,7 +44,12 @@ export class SemanticCoordinator {
 		private readonly scheduler: Scheduler,
 		private readonly lookup: ItemLookup,
 		private readonly onApplied: () => void,
+		private readonly onMarkChange: (change: SemanticMarkChange) => void,
 	) {}
+
+	get inFlightCount(): number {
+		return this.inFlight;
+	}
 
 	activeQuery(): SemanticQuery | null {
 		return this.query;
@@ -56,8 +66,6 @@ export class SemanticCoordinator {
 		this.retried.clear();
 		this.inFlightRequests.clear();
 		this.annotations.clear();
-		this.skipped = 0;
-		this.failed = 0;
 		this.query = query;
 		this.notifyIdle();
 	}
@@ -70,14 +78,16 @@ export class SemanticCoordinator {
 		for (const id of ids) {
 			if (this.queued.has(id) || this.annotations.get(id) !== undefined) continue;
 
+			const before = this.markFor(id);
+
 			if (this.queued.size >= this.options.maxQueuedIds) {
-				this.annotations.set({ eventId: id, kind: "unknown", reason: "skipped" });
-				this.skipped += 1;
+				this.setAnnotation({ eventId: id, kind: "unknown", reason: "skipped" }, before);
 				continue;
 			}
 
 			target.push(id);
 			this.queued.add(id);
+			this.onMarkChange({ eventId: id, before, after: this.markFor(id) });
 		}
 
 		if (this.queued.size >= this.options.maxBatchItems) {
@@ -112,10 +122,15 @@ export class SemanticCoordinator {
 	}
 
 	forget(id: EventId): void {
+		const before = this.markFor(id);
+
+		if (before.kind === "pending" || before.kind === "unrequested") return;
+
 		this.annotations.delete(id);
+		this.onMarkChange({ eventId: id, before, after: this.markFor(id) });
 	}
 
-	markFor(id: EventId): Annotation | { eventId: EventId; kind: "pending" | "unrequested" } {
+	markFor(id: EventId): SemanticMark {
 		const stored = this.annotations.get(id);
 
 		if (stored) return stored;
@@ -123,30 +138,6 @@ export class SemanticCoordinator {
 		if (this.queued.has(id) || this.isInFlight(id)) return { eventId: id, kind: "pending" };
 
 		return { eventId: id, kind: "unrequested" };
-	}
-
-	stats(): SemanticStats {
-		const query = this.query;
-		let classifiedEvents = 0;
-
-		for (const mark of this.annotations.marks()) {
-			if (mark.kind === "scored") classifiedEvents += 1;
-		}
-
-		let pendingEvents = this.queued.size;
-
-		for (const ids of this.inFlightRequests.values()) pendingEvents += ids.size;
-
-		return {
-			queryText: query?.text ?? "",
-			queryRevision: query?.revision ?? 0,
-			threshold: query?.threshold ?? this.options.threshold,
-			classifiedEvents,
-			pendingEvents,
-			skippedEvents: this.skipped,
-			failedEvents: this.failed,
-			inFlight: this.inFlight,
-		};
 	}
 
 	flushNow(): void {
@@ -227,6 +218,7 @@ export class SemanticCoordinator {
 
 			if (id === undefined) break;
 
+			const before = this.markFor(id);
 			this.queued.delete(id);
 
 			if (this.annotations.get(id) !== undefined) continue;
@@ -236,8 +228,7 @@ export class SemanticCoordinator {
 			if (item === null) continue;
 
 			if (encodedItemBytes(item) > this.options.maxRequestBytes) {
-				this.annotations.set({ eventId: id, kind: "unknown", reason: "too-large" });
-				this.failed += 1;
+				this.setAnnotation({ eventId: id, kind: "unknown", reason: "too-large" }, before);
 				continue;
 			}
 
@@ -307,7 +298,7 @@ export class SemanticCoordinator {
 			return;
 		}
 
-		for (const item of validated.value.results) this.annotations.set(item);
+		for (const item of validated.value.results) this.setAnnotation(item);
 
 		this.onApplied();
 	}
@@ -340,11 +331,15 @@ export class SemanticCoordinator {
 		for (const item of request.items) {
 			if (this.annotations.get(item.eventId) !== undefined) continue;
 
-			this.annotations.set({ eventId: item.eventId, kind: "unknown", reason: "failed" });
-			this.failed += 1;
+			this.setAnnotation({ eventId: item.eventId, kind: "unknown", reason: "failed" });
 		}
 
 		this.onApplied();
+	}
+
+	private setAnnotation(annotation: Annotation, before = this.markFor(annotation.eventId)): void {
+		this.annotations.set(annotation);
+		this.onMarkChange({ eventId: annotation.eventId, before, after: this.markFor(annotation.eventId) });
 	}
 
 	private dropBelow(ids: EventId[], firstRetainedId: EventId | null): void {

@@ -661,21 +661,22 @@ export async function attachTui(
 		};
 	};
 
-	const paint = (): void => {
+	const paint = (published?: SessionSnapshot): void => {
 		if (closed || painting) return;
 
 		painting = true;
 
 		try {
 			const size = terminalSize();
+			const resized = size.columns !== lastColumns || size.rows !== lastRows;
 
-			if (size.columns !== lastColumns || size.rows !== lastRows) {
+			if (resized) {
 				lastColumns = size.columns;
 				lastRows = size.rows;
 				session.dispatch({ kind: "resize", columns: size.columns, rows: size.rows });
 			}
 
-			const current = session.snapshot();
+			const current = resized ? session.snapshot() : (published ?? session.snapshot());
 			const lines = layoutLines(current, interaction, style, size.columns, size.rows);
 			let frame = "\x1b[H\x1b[2J";
 
@@ -691,8 +692,8 @@ export async function attachTui(
 		}
 	};
 
-	const unsubscribe = session.subscribe(() => {
-		paint();
+	const unsubscribe = session.subscribe((snapshot) => {
+		paint(snapshot);
 	});
 
 	paint();
