@@ -52,6 +52,17 @@ export type ColumnLayout = Readonly<{
 	messageColumn: number;
 }>;
 
+export type ClassificationColumnLayout = Readonly<{
+	listWidth: number;
+	noteWidth: number;
+}>;
+
+export function classificationColumnLayout(columns: number): ClassificationColumnLayout {
+	const noteWidth = columns >= 64 ? 14 : 7;
+
+	return { listWidth: Math.max(1, columns - noteWidth - 1), noteWidth };
+}
+
 export function layoutColumns(columns: number): ColumnLayout {
 	const inner = Math.max(1, columns - MARKER_WIDTH);
 	const timestampWidth = 12;

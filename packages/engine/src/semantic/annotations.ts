@@ -35,8 +35,4 @@ export class AnnotationTable {
 	delete(id: EventId): void {
 		this.byId.delete(id);
 	}
-
-	marks(): IterableIterator<Annotation> {
-		return this.byId.values();
-	}
 }

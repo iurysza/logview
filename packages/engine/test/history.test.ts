@@ -34,6 +34,14 @@ describe("history", () => {
 		expect(history.bounds().firstId).toBe(2);
 	});
 
+	test("readAfter starts after its cursor within retained ordered history", () => {
+		const history = new HistoryStore(10, 10_000);
+		history.append([event(10), event(20), event(30), event(40), event(50)]);
+
+		expect(history.readAfter(20, 40, 10).map((entry) => entry.id)).toEqual([30, 40]);
+		expect(history.readAfter(35, 50, 1).map((entry) => entry.id)).toEqual([40]);
+	});
+
 	test("appendContinuation extends the last event without a new id", () => {
 		const history = new HistoryStore(10, 10_000);
 		history.append([event(1)]);

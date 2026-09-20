@@ -8,6 +8,8 @@ export const REDACTION_VERSION = "tag-level-message-v1";
 
 export const DEFAULT_SEMANTIC_BATCH_ITEMS = 100;
 
+export const DEFAULT_SEMANTIC_HISTORY_EVENTS = 100;
+
 export const DEFAULT_SEMANTIC_FLUSH_MS = 50;
 
 export const DEFAULT_SEMANTIC_MAX_IN_FLIGHT = 2;
@@ -67,6 +69,7 @@ export interface LogClassifier {
 
 export type SemanticOptions = Readonly<{
 	maxBatchItems: number;
+	historyEvents: number;
 	flushDelayMs: number;
 	maxInFlight: number;
 	maxQueuedIds: number;
@@ -91,6 +94,7 @@ export type SemanticStats = Readonly<{
 export function defaultSemanticOptions(): SemanticOptions {
 	return {
 		maxBatchItems: DEFAULT_SEMANTIC_BATCH_ITEMS,
+		historyEvents: DEFAULT_SEMANTIC_HISTORY_EVENTS,
 		flushDelayMs: DEFAULT_SEMANTIC_FLUSH_MS,
 		maxInFlight: DEFAULT_SEMANTIC_MAX_IN_FLIGHT,
 		maxQueuedIds: DEFAULT_SEMANTIC_MAX_QUEUED,

@@ -70,10 +70,11 @@ Usage:
   logview record --out PATH [--serial DEVICE] [--duration SEC]
   logview replay PATH [--speed N|instant] [--headless] [--allow-partial] [--semantic] [--config PATH]
 
-Jev text filter:
+Jev visual filter:
   Set TYPESAFE_API_KEY. Enable with --semantic or semantic.enabled in logview.json.
   The / text field is then a natural-language query. Eligible logs are classified
-  in batches. Pending rows stay visible until scored. Flags override the config file.
+  in batches. The list shows each result and dims scores below the threshold.
+  Flags override the config file.
   Do not put API keys in the file.
 
 Capture profile:
@@ -459,7 +460,7 @@ export async function main(argv = process.argv): Promise<number> {
 		}
 
 		if (classifier.value) {
-			process.stderr.write("Jev semantic filter enabled. The text field is classified in batches.\n");
+			process.stderr.write("Jev visual filter enabled. The text field is classified in batches.\n");
 		}
 
 		const filter = { ...EMPTY_FILTER, text: viewer.filterText };

@@ -1,12 +1,13 @@
 # Filter logs
 
-Filters hide events that do not match the active level, tag, PID, and text. The list keeps retained history. The footer shows `matched/retained`.
+Filters hide events that do not match the active level, tag, PID, or literal text. When Jev is enabled, the text field is a natural-language query. The list keeps every event that matches the level, tag, and PID filters. A new query classifies only the newest 100 locally eligible retained events by default. Older eligible rows show an unrequested icon. The classification column dims scores below the threshold. The footer shows `matched/retained`.
 
 ## Sub-features
 
 - `filter-text-open` opens the text draft from `/`.
 - `filter-text-apply` commits a literal substring and updates the shown count.
 - `filter-zero` shows `0/15 shown` when nothing matches.
+- `filter-jev` keeps eligible rows visible and shows their Jev classifications.
 - `filter-editor` opens the four-field editor from `f`.
 - `filter-cancel` discards a draft with Escape.
 
@@ -39,4 +40,4 @@ Preconditions:
 - Sending `Database` as one unacknowledged burst can leave `Edit text:` empty or partial. Wait for each visible acknowledgement, or use the named scenario, which already types through Terminal Control and waits.
 - `q` typed in the editor inserts `q`. It does not quit. Quit from list or inspect focus, or send Ctrl+C.
 - An invalid PID or overlong field keeps the current filter and shows `!` plus the field error. The named scenario does not cover that error.
-- `--semantic` turns `/` into `~` on the filter line. Do not treat `~` as proof of a literal substring filter.
+- `--semantic` turns `/` into `~` on the filter line. The production scenario does not enable Jev because it must not call the external classifier. Use deterministic semantic engine and renderer tests for the 100-event history window, live arrivals, visibility, notes, and dimming.

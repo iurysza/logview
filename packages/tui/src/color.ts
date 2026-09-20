@@ -28,8 +28,16 @@ function levelStyle(level: LogLevel | null) {
 	return fgOnly(MOCHA.overlay2);
 }
 
-export function paintSpan(span: RowSpan, level: LogLevel | null, style: PaintStyle, bg: Rgb | null = null): string {
+export function paintSpan(
+	span: RowSpan,
+	level: LogLevel | null,
+	style: PaintStyle,
+	bg: Rgb | null = null,
+	dimmed = false,
+): string {
 	if (style === "plain") return span.text;
+
+	if (dimmed) return paintStyled(span.text, styleOn(fgOnly(MOCHA.overlay0), bg));
 
 	if (span.role === "timestamp" || span.role === "pid" || span.role === "gutter") {
 		return paintStyled(span.text, styleOn(fgOnly(MOCHA.overlay1), bg));
@@ -46,8 +54,14 @@ export function paintSpan(span: RowSpan, level: LogLevel | null, style: PaintSty
 	return highlightLogText(span.text, bg);
 }
 
-export function paintRow(row: ViewRow, style: PaintStyle, columns?: number): string {
+export function paintRow(
+	row: ViewRow,
+	style: PaintStyle,
+	columns?: number,
+	options: Readonly<{ dimmed?: boolean }> = {},
+): string {
 	const width = columns === undefined ? Number.MAX_SAFE_INTEGER : Math.max(0, columns);
+	const dimmed = options.dimmed === true;
 	const bg = row.selected ? MOCHA.surface0 : null;
 	const marker = markerFor(row);
 	const pieces: RowSpan[] = [{ text: marker, role: "gutter" }, ...row.spans];
@@ -64,10 +78,10 @@ export function paintRow(row: ViewRow, style: PaintStyle, columns?: number): str
 		const clipped = clipToWidth(piece.text, remaining);
 
 		if (style === "plain") out += clipped.text;
-		else if (piece.role === "gutter" && piece.text === marker && row.selected && row.kind === "header") {
+		else if (piece.role === "gutter" && piece.text === marker && row.selected && row.kind === "header" && !dimmed) {
 			out += paintStyled(clipped.text, styleOn(fgBold(MOCHA.lavender), bg));
 		} else {
-			out += paintSpan({ ...piece, text: clipped.text }, row.level, style, bg);
+			out += paintSpan({ ...piece, text: clipped.text }, row.level, style, bg, dimmed);
 		}
 
 		used += clipped.width;
@@ -76,8 +90,11 @@ export function paintRow(row: ViewRow, style: PaintStyle, columns?: number): str
 	if (used < width && width !== Number.MAX_SAFE_INTEGER) {
 		const pad = " ".repeat(width - used);
 
-		if (style === "ansi" && bg) out += paintStyled(pad, styleOn(fgOnly(MOCHA.text), bg));
-		else out += pad;
+		if (style === "ansi" && bg) {
+			out += paintStyled(pad, styleOn(fgOnly(dimmed ? MOCHA.overlay0 : MOCHA.text), bg));
+		} else {
+			out += pad;
+		}
 	}
 
 	if (style === "ansi") out += RESET;

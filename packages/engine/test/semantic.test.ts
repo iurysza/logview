@@ -146,7 +146,88 @@ describe("semantic classification", () => {
 		expect(missing.ok).toBe(false);
 	});
 
-	test("a shuffled batch admits only confirmed high-relevance rows in source order", async () => {
+	test("does not classify a replay before the user applies a query", async () => {
+		const classifier = new ScriptedClassifier();
+		const scenario = await openScenario({ maxEvents: 20, classifier });
+
+		try {
+			await scenario.deliver([1, 2, 3, 4]);
+			await scenario.finish();
+
+			expect(classifier.pending).toHaveLength(0);
+			expect(scenario.session.snapshot().semantic?.pendingEvents).toBe(0);
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
+	test("a query classifies only the newest 100 locally eligible retained events", async () => {
+		const classifier = new ScriptedClassifier();
+		const ids = Array.from({ length: 10_000 }, (_, index) => index + 1);
+
+		const scenario = await openScenario({
+			maxEvents: 10_000,
+			rows: 12,
+			columns: 80,
+			classifier,
+			semantic: { flushDelayMs: 10_000 },
+		});
+
+		try {
+			await scenario.deliver(ids, (id) => ({ message: `event-${id}` }));
+			await scenario.waitUntil((current) => current.stats.retainedEvents === 10_000);
+
+			scenario.session.dispatch({
+				kind: "set-filter",
+				filter: { minLevel: null, tag: null, pid: null, text: "database locks" },
+			});
+			await scenario.waitUntil(() => classifier.pending.length === 1);
+
+			expect(classifier.pending[0]?.request.items.map((item) => item.eventId)).toEqual(ids.slice(-100));
+
+			const snapshot = scenario.session.snapshot();
+			expect(snapshot.stats.retainedEvents).toBe(10_000);
+			expect(snapshot.stats.matchedEvents).toBe(10_000);
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
+	test("a query backfills the newest locally eligible events", async () => {
+		const classifier = new ScriptedClassifier();
+
+		const scenario = await openScenario({
+			maxEvents: 20,
+			rows: 12,
+			columns: 80,
+			classifier,
+			semantic: { flushDelayMs: 10_000, maxBatchItems: 2, historyEvents: 2 },
+		});
+
+		try {
+			await scenario.deliver([1, 2, 3, 4, 5, 6], (id) => ({ tag: id % 2 === 0 ? "Keep" : "Other" }));
+			scenario.session.dispatch({
+				kind: "set-filter",
+				filter: { minLevel: null, tag: "Keep", pid: null, text: "database locks" },
+			});
+			await scenario.waitUntil(() => classifier.pending.length === 1);
+
+			expect(classifier.pending[0]?.request.items.map((item) => item.eventId)).toEqual([4, 6]);
+			const snapshot = scenario.session.snapshot();
+			expect(snapshot.rows.map((row) => row.id)).toEqual([2, 4, 6]);
+			expect(snapshot.rows[0]?.classification).toEqual({ kind: "unrequested" });
+			expect(snapshot.semantic).toMatchObject({
+				classifiedEvents: 0,
+				pendingEvents: 2,
+				skippedEvents: 0,
+				failedEvents: 0,
+			});
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
+	test("a shuffled batch keeps locally matched rows in source order", async () => {
 		const ids = Array.from({ length: 20 }, (_, i) => i + 1);
 		const keep = new Set([3, 8, 15]);
 		const classifier = scoringClassifier((eventId) => (keep.has(eventId) ? 0.91 : 0.05));
@@ -169,8 +250,8 @@ describe("semantic classification", () => {
 			(current) => current.pendingFilter === null && current.semantic !== null && current.semantic.pendingEvents === 0,
 		);
 
-		expect(snap.rows.map((row) => row.id)).toEqual([3, 8, 15]);
-		expect(snap.stats.matchedEvents).toBe(3);
+		expect(snap.rows.map((row) => row.id)).toEqual(ids);
+		expect(snap.stats.matchedEvents).toBe(20);
 		expect(snap.stats.retainedEvents).toBe(20);
 		expect(snap.semantic?.classifiedEvents).toBe(20);
 
@@ -178,7 +259,42 @@ describe("semantic classification", () => {
 		await scenario.session.stop();
 	});
 
-	test("a retained candidate stays hidden until classification", async () => {
+	test("Jev mode preserves level, tag, and PID filtering", async () => {
+		const classifier = scoringClassifier(() => 0.1);
+
+		const scenario = await openScenario({
+			maxEvents: 20,
+			rows: 12,
+			columns: 80,
+			classifier,
+			semantic: { flushDelayMs: 0, maxBatchItems: 100, threshold: 0.5 },
+		});
+
+		try {
+			await scenario.deliver([1, 2, 3, 4], (id) => {
+				if (id === 1) return { level: "W", tag: "Keep", pid: 11 };
+
+				if (id === 2) return { level: "W", tag: "Other", pid: 11 };
+
+				if (id === 3) return { level: "W", tag: "Keep", pid: 22 };
+
+				return { level: "I", tag: "Keep", pid: 11 };
+			});
+			scenario.session.dispatch({
+				kind: "set-filter",
+				filter: { minLevel: "W", tag: "Keep", pid: 11, text: "important warnings" },
+			});
+
+			const snapshot = await scenario.waitUntil((current) => current.semantic?.pendingEvents === 0);
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1]);
+			expect(snapshot.rows[0]?.classification).toEqual({ kind: "scored", relevance: 0.1 });
+			expect(snapshot.stats.matchedEvents).toBe(1);
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
+	test("retained candidates stay visible while Jev classification is pending", async () => {
 		const classifier = new ScriptedClassifier();
 
 		const scenario = await openScenario({
@@ -198,21 +314,24 @@ describe("semantic classification", () => {
 			await tick(scenario.scheduler);
 
 			let snapshot = scenario.session.snapshot();
-			expect(snapshot.rows).toEqual([]);
-			expect(snapshot.stats.matchedEvents).toBe(0);
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1, 2]);
+			expect(snapshot.stats.matchedEvents).toBe(2);
 			expect(snapshot.semantic?.pendingEvents).toBe(2);
 
 			classifier.resolveShuffled((eventId) => (eventId === 1 ? 0.9 : 0.1));
-			snapshot = await scenario.waitUntil((current) => current.stats.matchedEvents === 1);
+			snapshot = await scenario.waitUntil((current) => current.semantic?.pendingEvents === 0);
 
-			expect(snapshot.rows.map((row) => row.id)).toEqual([1]);
-			expect(snapshot.rows[0]?.classification).toEqual({ kind: "scored", relevance: 0.9 });
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1, 2]);
+			expect(snapshot.rows.map((row) => row.classification)).toEqual([
+				{ kind: "scored", relevance: 0.9 },
+				{ kind: "scored", relevance: 0.1 },
+			]);
 		} finally {
 			await scenario.session.stop();
 		}
 	});
 
-	test("a low-scored live arrival stays hidden and a high-scored arrival appears once", async () => {
+	test("low-scored live arrivals stay visible after Jev classification", async () => {
 		const classifier = new ScriptedClassifier();
 
 		const scenario = await openScenario({
@@ -237,21 +356,24 @@ describe("semantic classification", () => {
 			await tick(scenario.scheduler);
 
 			let snapshot = scenario.session.snapshot();
-			expect(snapshot.rows.map((row) => row.id)).toEqual([1, 2]);
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1, 2, 3, 4]);
 			expect(snapshot.semantic?.pendingEvents).toBe(2);
 
 			classifier.resolveShuffled((eventId) => (eventId === 4 ? 0.9 : 0.1));
-			snapshot = await scenario.waitUntil((current) => current.stats.matchedEvents === 3);
+			snapshot = await scenario.waitUntil((current) => current.semantic?.pendingEvents === 0);
 
-			expect(snapshot.rows.map((row) => row.id)).toEqual([1, 2, 4]);
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1, 2, 3, 4]);
 			expect(snapshot.rows.filter((row) => row.id === 4)).toHaveLength(1);
-			expect(snapshot.rows.some((row) => row.id === 3)).toBe(false);
+			expect(snapshot.rows.find((row) => row.id === 3)?.classification).toEqual({
+				kind: "scored",
+				relevance: 0.1,
+			});
 		} finally {
 			await scenario.session.stop();
 		}
 	});
 
-	test("a failed batch records failure without admitting its candidates", async () => {
+	test("a failed batch keeps candidates visible with a failure classification", async () => {
 		const classifier = new ScriptedClassifier();
 
 		const scenario = await openScenario({
@@ -273,9 +395,15 @@ describe("semantic classification", () => {
 
 			const snapshot = await scenario.waitUntil((current) => current.semantic?.failedEvents === 1);
 
-			expect(snapshot.rows).toEqual([]);
-			expect(snapshot.stats.matchedEvents).toBe(0);
-			expect(snapshot.semantic?.pendingEvents).toBe(0);
+			expect(snapshot.rows.map((row) => row.id)).toEqual([1]);
+			expect(snapshot.rows[0]?.classification).toEqual({ kind: "unknown", reason: "failed" });
+			expect(snapshot.stats.matchedEvents).toBe(1);
+			expect(snapshot.semantic).toMatchObject({
+				classifiedEvents: 0,
+				pendingEvents: 0,
+				skippedEvents: 0,
+				failedEvents: 1,
+			});
 		} finally {
 			await scenario.session.stop();
 		}
@@ -332,7 +460,7 @@ describe("semantic classification", () => {
 		);
 
 		expect(snap.activeFilter.text).toBe("query-b");
-		expect(snap.rows.map((row) => row.id)).toEqual([2, 4]);
+		expect(snap.rows.map((row) => row.id)).toEqual([1, 2, 3, 4]);
 
 		await scenario.session.stop();
 	});
@@ -358,8 +486,13 @@ describe("semantic classification", () => {
 		const snap = scenario.session.snapshot();
 		expect(snap.stats.admittedEvents).toBe(6);
 		expect(snap.stats.retainedEvents).toBe(6);
-		expect(snap.semantic?.skippedEvents ?? 0).toBeGreaterThan(0);
-		expect(snap.stats.matchedEvents).toBe(0);
+		expect(snap.semantic).toMatchObject({
+			classifiedEvents: 0,
+			pendingEvents: 3,
+			skippedEvents: 3,
+			failedEvents: 0,
+		});
+		expect(snap.stats.matchedEvents).toBe(6);
 
 		await scenario.session.stop();
 	});
