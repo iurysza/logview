@@ -15,7 +15,8 @@ import {
 	renderRowText,
 } from "../src/app.ts";
 import { paintStyleFromEnv } from "../src/color.ts";
-import { MOCHA, rgbSgr } from "../src/catppuccin.ts";
+import { rgbSgr } from "../src/catppuccin.ts";
+import { THEME } from "../src/theme.ts";
 import { paintLogList, visiblePoolSize } from "../src/log-list.ts";
 
 const snapshot: SessionSnapshot = {
@@ -152,10 +153,10 @@ function visibleText(text: string): string {
 describe("tui chrome", () => {
 	test("formats status, filters, footer, and hints without a renderer", () => {
 		expect(formatStatus(snapshot)).toContain("REPLAY • END");
-		expect(formatFilter(snapshot)).toContain("tag:*");
-		expect(formatFooter(snapshot)).toContain("REPLAY");
-		expect(formatHints()).toContain("q quit");
-		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("q quit");
+		expect(formatFilter(snapshot)).toContain("Tag: any");
+		expect(formatFooter(snapshot)).toContain("TAIL");
+		expect(formatHints()).toContain("q Quit");
+		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("Quit");
 	});
 
 	test("layoutFrame paints exactly rows by columns in plain mode", () => {
@@ -187,7 +188,7 @@ describe("tui chrome", () => {
 		expect(frame.join("\n")).toContain("p filter pid");
 		expect(frame.join("\n")).toContain("Esc close");
 		expect(frame.join("\n")).toContain("Retry after lock timeout");
-		expect(frame.join("\n")).toContain("Store.lock");
+		expect(frame.join("\n")).toContain("INSPECT");
 
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(72);
@@ -221,8 +222,9 @@ describe("tui chrome", () => {
 		expect(rows).not.toContain("not requested");
 		expect(plain.join("\n")).toContain(" skipped");
 		expect(plain.join("\n")).not.toContain("Jev");
-		expect(ansi[2]).toContain(`${rgbSgr(MOCHA.overlay0, "fg")}low relevance`);
-		expect(ansi[3]).not.toContain(`${rgbSgr(MOCHA.overlay0, "fg")}high relevance`);
+		expect(ansi[3]).toContain(rgbSgr(THEME.subtle, "fg"));
+		expect(ansi[3]).toContain("low relevance");
+		expect(ansi[4]).toContain("high relevance");
 
 		for (const frame of [plain, ansi.map(visibleText)]) {
 			for (const line of frame) expect(displayWidth(line)).toBe(72);
@@ -279,7 +281,7 @@ describe("tui chrome", () => {
 
 		const ansi = renderRowText(row, "ansi");
 		expect(ansi).toContain("▸");
-		expect(ansi).toContain(`38;2;${MOCHA.red[0]};${MOCHA.red[1]};${MOCHA.red[2]}m`);
+		expect(ansi).toContain(`38;2;${THEME.red[0]};${THEME.red[1]};${THEME.red[2]}m`);
 		expect(ansi).toContain("E");
 		expect(renderRowText(row, "plain")).not.toContain("\u001b");
 		expect(paintStyleFromEnv("1", undefined)).toBe("plain");

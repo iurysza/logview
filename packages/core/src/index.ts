@@ -111,6 +111,7 @@ export {
 	MARKER_SELECTED,
 	MARKER_WIDTH,
 	MAX_LIST_CONTINUATIONS,
+	projectColumnHeader,
 	projectEventRows,
 	projectRows,
 	requiresResize,
@@ -118,4 +119,4 @@ export {
 	rowText,
 } from "./projection.ts";
 
-export type { ClassificationColumnLayout, ColumnLayout } from "./projection.ts";
+export type { ClassificationColumnLayout, ColumnLayout, ProcessColumn } from "./projection.ts";

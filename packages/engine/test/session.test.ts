@@ -13,14 +13,14 @@ describe("headless session", () => {
 
 		let snap = scenario.session.snapshot();
 		expect(snap.view.mode).toBe("tail");
-		expect(snap.rows.map((row) => row.id)).toEqual([4, 5, 6, 7, 8]);
+		expect(snap.rows.map((row) => row.id)).toEqual([5, 6, 7, 8]);
 		expect(snap.view.selectedId).toBe(8);
 
 		scenario.session.dispatch({ kind: "move", delta: -1 });
 		scenario.session.dispatch({ kind: "move", delta: -1 });
 		snap = scenario.session.snapshot();
 		expect(snap.view.mode).toBe("browse");
-		expect(snap.view.topId).toBe(4);
+		expect(snap.view.topId).toBe(5);
 		expect(snap.view.selectedId).toBe(6);
 
 		await scenario.deliver([9, 10], (id) => ({
@@ -28,7 +28,7 @@ describe("headless session", () => {
 		}));
 		snap = scenario.session.snapshot();
 		expect(snap.stats.retainedEvents).toBe(8);
-		expect(snap.rows.map((row) => row.id)).toEqual([4, 5, 6, 7, 8]);
+		expect(snap.rows.map((row) => row.id)).toEqual([5, 6, 7, 8]);
 		expect(snap.view.selectedId).toBe(6);
 		expect(snap.view.mode).toBe("browse");
 		expect(snap.view.newSincePause).toBe(2);
@@ -38,7 +38,7 @@ describe("headless session", () => {
 		}));
 		snap = scenario.session.snapshot();
 		expect(snap.stats.retainedEvents).toBe(8);
-		expect(snap.rows.map((row) => row.id)).toEqual([7, 8, 9, 10, 11]);
+		expect(snap.rows.map((row) => row.id)).toEqual([7, 8, 9, 10]);
 		expect(snap.view.selectedId).toBe(7);
 		expect(snap.view.mode).toBe("browse");
 		expect(snap.notice).toBe("history-expired");

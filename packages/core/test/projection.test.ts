@@ -5,6 +5,7 @@ import {
 	displayWidth,
 	eventChargeBytes,
 	logViewportHeight,
+	projectColumnHeader,
 	projectRows,
 	requiresResize,
 	rowDisplayText,
@@ -32,12 +33,24 @@ function event(
 }
 
 describe("projection", () => {
-	test("CHROME_ROWS leaves five visible log rows in an 8-row terminal", () => {
-		expect(CHROME_ROWS).toBe(3);
-		expect(logViewportHeight(8)).toBe(5);
+	test("CHROME_ROWS leaves four visible log rows in an 8-row terminal", () => {
+		expect(CHROME_ROWS).toBe(4);
+		expect(logViewportHeight(8)).toBe(4);
 		expect(requiresResize(39, 8)).toBe(true);
 		expect(requiresResize(40, 7)).toBe(true);
 		expect(requiresResize(40, 8)).toBe(false);
+	});
+
+	test("projects an aligned column heading with PID:TID at wide widths", () => {
+		const header = projectColumnHeader(120);
+		const text = header.map((span) => span.text).join("");
+
+		expect(text).toContain("TIME");
+		expect(text).toContain("LVL");
+		expect(text).toContain("PID:TID");
+		expect(text).toContain("TAG");
+		expect(text).toContain("MESSAGE");
+		expect(displayWidth(text)).toBeLessThanOrEqual(120);
 	});
 
 	test("projects parsed rows with a selection marker and clips long messages", () => {

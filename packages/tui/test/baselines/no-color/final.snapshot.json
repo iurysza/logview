@@ -1,0 +1,471 @@
+{
+  "cols": 72,
+  "rows": 16,
+  "foreground": {
+    "r": 201,
+    "g": 209,
+    "b": 217
+  },
+  "background": {
+    "r": 13,
+    "g": 17,
+    "b": 23
+  },
+  "spans": [
+    {
+      "x": 0,
+      "y": 0,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview  REPLAY • END  15 events                                        "
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Level all   Tag any   PID any   Text /                                 "
+    },
+    {
+      "x": 0,
+      "y": 2,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  TIME          LVL    PID TAG           MESSAGE                        "
+    },
+    {
+      "x": 0,
+      "y": 3,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003   I   4321 Database      Transaction committed           "
+    },
+    {
+      "x": 0,
+      "y": 4,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003   E   4321 logview-demo  failed to parse token=REDACTED  "
+    },
+    {
+      "x": 0,
+      "y": 5,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003   W   4321 logview-demo  stray sequence ^[[31m in paylo… "
+    },
+    {
+      "x": 0,
+      "y": 6,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003   I   4321 logview-demo  café already open               "
+    },
+    {
+      "x": 0,
+      "y": 7,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003   F      1 libc          Fatal signal 11 (SIGSEGV), cod… "
+    },
+    {
+      "x": 0,
+      "y": 8,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  │                                      not a header line              "
+    },
+    {
+      "x": 0,
+      "y": 9,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003   V   4321 logview-demo  verbose heartbeat               "
+    },
+    {
+      "x": 0,
+      "y": 10,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:54:59.999   I   4321 logview-demo  clock went backward             "
+    },
+    {
+      "x": 0,
+      "y": 11,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.004   I   1001 chatty        uid=10042(u0_a42) expire 4 lin… "
+    },
+    {
+      "x": 0,
+      "y": 12,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "▸ 08:55:00.004   I   4321 logview-demo  日本語 ok                       ",
+      "widths": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "x": 0,
+      "y": 13,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                        "
+    },
+    {
+      "x": 0,
+      "y": 14,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                        "
+    },
+    {
+      "x": 0,
+      "y": 15,
+      "foreground": {
+        "r": 201,
+        "g": 209,
+        "b": 217
+      },
+      "background": {
+        "r": 13,
+        "g": 17,
+        "b": 23
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " TAIL   15/15 shown  ↑↓  Move  PgUp/PgDn  Page  Enter  Inspect  q  Quit "
+    }
+  ]
+}

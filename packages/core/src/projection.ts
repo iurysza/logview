@@ -45,8 +45,14 @@ function pushSpan(spans: RowSpan[], text: string, role: RowSpan["role"]): void {
 	spans.push({ text, role });
 }
 
+export type ProcessColumn =
+	| Readonly<{ kind: "none"; width: 0 }>
+	| Readonly<{ kind: "pid"; width: 5 }>
+	| Readonly<{ kind: "pid-tid"; width: 11 }>;
+
 export type ColumnLayout = Readonly<{
 	showPid: boolean;
+	process: ProcessColumn;
 	tagWidth: number;
 	messageWidth: number;
 	messageColumn: number;
@@ -63,41 +69,53 @@ export function classificationColumnLayout(columns: number): ClassificationColum
 	return { listWidth: Math.max(1, columns - noteWidth - 1), noteWidth };
 }
 
+const TIMESTAMP_WIDTH = 12;
+
+const LEVEL_WIDTH = 3;
+
+const GAP_AFTER_TIMESTAMP = 2;
+
+const GAP_AFTER_LEVEL = 2;
+
+const GAP_AFTER_PROCESS = 1;
+
+const GAP_AFTER_TAG = 2;
+
 export function layoutColumns(columns: number): ColumnLayout {
 	const inner = Math.max(1, columns - MARKER_WIDTH);
-	const timestampWidth = 12;
-	const levelWidth = 1;
-	const gapTs = 2;
-	const gapLevel = 2;
-	const gapTag = 2;
-	const pidWidth = 5;
-	const pidGap = 1;
-	const prefix = timestampWidth + gapTs + levelWidth + gapLevel;
-	let remaining = inner - prefix;
-	let showPid = inner >= 56;
-	const tagMax = inner >= 88 ? 16 : inner >= 56 ? 12 : 8;
+	const prefix = TIMESTAMP_WIDTH + GAP_AFTER_TIMESTAMP + LEVEL_WIDTH + GAP_AFTER_LEVEL;
 
-	if (showPid) remaining -= pidWidth + pidGap;
+	let process: ProcessColumn =
+		columns >= 90
+			? { kind: "pid-tid", width: 11 }
+			: columns >= 58
+				? { kind: "pid", width: 5 }
+				: { kind: "none", width: 0 };
+
+	let remaining = inner - prefix;
+
+	if (process.kind !== "none") remaining -= process.width + GAP_AFTER_PROCESS;
 
 	if (remaining < 8) {
-		showPid = false;
+		process = { kind: "none", width: 0 };
 		remaining = inner - prefix;
 	}
 
+	const tagMax = columns >= 90 ? 16 : columns >= 58 ? 12 : 8;
 	let tagWidth = Math.max(0, Math.min(tagMax, Math.floor(remaining * 0.28)));
-	let messageWidth = remaining - tagWidth - gapTag;
+	let messageWidth = remaining - tagWidth - GAP_AFTER_TAG;
 
 	if (messageWidth < 8 && tagWidth > 0) {
 		const need = 8 - messageWidth;
 		tagWidth = Math.max(0, tagWidth - need);
-		messageWidth = remaining - tagWidth - gapTag;
+		messageWidth = remaining - tagWidth - GAP_AFTER_TAG;
 	}
 
 	messageWidth = Math.max(1, messageWidth);
-	const pidCols = showPid ? pidWidth + pidGap : 0;
-	const messageColumn = MARKER_WIDTH + prefix + pidCols + tagWidth + gapTag;
+	const processColumns = process.kind === "none" ? 0 : process.width + GAP_AFTER_PROCESS;
+	const messageColumn = MARKER_WIDTH + prefix + processColumns + tagWidth + GAP_AFTER_TAG;
 
-	return { showPid, tagWidth, messageWidth, messageColumn };
+	return { showPid: process.kind !== "none", process, tagWidth, messageWidth, messageColumn };
 }
 
 type PaddedField = Readonly<{
@@ -134,11 +152,18 @@ function projectHeader(event: LogEvent, selected: boolean, columns: number, layo
 	if (event.metadata) {
 		pushSpan(spans, formatTimestamp(event.metadata.epochMicros), "timestamp");
 		pushSpan(spans, "  ", "gutter");
-		pushSpan(spans, event.metadata.level, "level");
+		pushSpan(spans, event.metadata.level.padStart(2, " "), "level");
 		pushSpan(spans, "  ", "gutter");
 
-		if (layout.showPid) {
-			pushSpan(spans, String(event.metadata.pid).padStart(5, " "), "pid");
+		if (layout.process.kind !== "none") {
+			const process =
+				layout.process.kind === "pid-tid"
+					? `${event.metadata.pid}:${event.metadata.tid}`
+					: String(event.metadata.pid);
+
+			const processField = padField(process.padStart(layout.process.width, " "), layout.process.width);
+			clipped = clipped || processField.clipped;
+			pushSpan(spans, processField.text, "pid");
 			pushSpan(spans, " ", "gutter");
 		}
 
@@ -226,6 +251,28 @@ export function projectEventRows(event: LogEvent, selectedId: EventId | null, co
 	}
 
 	return rows;
+}
+
+export function projectColumnHeader(columns: number): readonly RowSpan[] {
+	const layout = layoutColumns(Math.max(1, columns));
+	const spans: RowSpan[] = [];
+	pushSpan(spans, " ".repeat(MARKER_WIDTH), "gutter");
+	pushSpan(spans, "TIME".padEnd(TIMESTAMP_WIDTH, " "), "timestamp");
+	pushSpan(spans, " ".repeat(GAP_AFTER_TIMESTAMP), "gutter");
+	pushSpan(spans, "LVL", "level");
+	pushSpan(spans, " ".repeat(GAP_AFTER_LEVEL), "gutter");
+
+	if (layout.process.kind !== "none") {
+		const label = layout.process.kind === "pid-tid" ? "PID:TID" : "PID";
+		pushSpan(spans, label.padStart(layout.process.width, " "), "pid");
+		pushSpan(spans, " ".repeat(GAP_AFTER_PROCESS), "gutter");
+	}
+
+	pushSpan(spans, padField("TAG", layout.tagWidth).text, "tag");
+	pushSpan(spans, " ".repeat(GAP_AFTER_TAG), "gutter");
+	pushSpan(spans, clipToWidth("MESSAGE", layout.messageWidth).text, "message");
+
+	return spans;
 }
 
 export function projectRows(

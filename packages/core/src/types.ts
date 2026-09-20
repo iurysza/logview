@@ -129,7 +129,7 @@ export const MIN_TERMINAL_COLUMNS = 40;
 
 export const MIN_TERMINAL_ROWS = 8;
 
-export const CHROME_ROWS = 3;
+export const CHROME_ROWS = 4;
 
 export function eventChargeBytes(rawText: string, continuations: readonly string[] = []): number {
 	let chars = rawText.length;
