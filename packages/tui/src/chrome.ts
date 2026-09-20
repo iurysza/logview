@@ -83,8 +83,6 @@ export function keyHints(interaction: InteractionState, lineDisplay: LineDisplay
 	if (interaction.focus === "inspect") {
 		return [
 			{ key: "↑↓", label: "Move" },
-			{ key: "t", label: "Tag" },
-			{ key: "p", label: "PID" },
 			{ key: "Esc", label: "Close" },
 			{ key: "?", label: "Help" },
 			{ key: "q", label: "Quit" },
@@ -99,6 +97,7 @@ export function keyHints(interaction: InteractionState, lineDisplay: LineDisplay
 		{ key: "f", label: "Filters" },
 		{ key: "G", label: "Tail" },
 		{ key: "w", label: lineDisplay === "wrap" ? "Wrap" : "Clip" },
+		{ key: "y", label: "Copy" },
 		{ key: "?", label: "Help" },
 		{ key: "q", label: "Quit" },
 	];

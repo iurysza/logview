@@ -76,6 +76,22 @@ const inspectSnapshot: SessionSnapshot = {
 	stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 15 },
 };
 
+const longMessage = "Failed to parse a deliberately long authentication token while refreshing the user session; preserve this final diagnostic context";
+
+const longRawText = `1760000000.002800  4321  4321 W Database: ${longMessage}`;
+
+const longMessageEvent: LogEvent = {
+	...selectedEvent,
+	rawText: longRawText,
+	metadata: {
+		...selectedEvent.metadata!,
+		message: { start: longRawText.indexOf(longMessage), end: longRawText.length },
+	},
+	continuations: [],
+};
+
+const longMessageSnapshot: SessionSnapshot = { ...inspectSnapshot, selectedEvent: longMessageEvent };
+
 const jevSnapshot: SessionSnapshot = {
 	...snapshot,
 	activeFilter: { ...EMPTY_FILTER, text: "database failures" },
@@ -157,6 +173,7 @@ describe("tui chrome", () => {
 		expect(formatFilter(snapshot)).toContain("Tag: any");
 		expect(formatFooter(snapshot)).toContain("TAIL");
 		expect(formatHints()).toContain("q Quit");
+		expect(formatHints()).toContain("y Copy");
 		expect(formatHints(LIST_FOCUS, "wrap")).toContain("w Wrap");
 		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("Quit");
 	});
@@ -178,6 +195,7 @@ describe("tui chrome", () => {
 		expect(frame.at(-1)?.trim()).toBe("");
 	});
 
+
 	test("ansi status fits 48 columns like the plain branch", () => {
 		const plain = layoutFrame(inspectSnapshot, LIST_FOCUS, 48, 12, "plain");
 		const ansi = layoutFrame(inspectSnapshot, LIST_FOCUS, 48, 12, "ansi");
@@ -192,25 +210,55 @@ describe("tui chrome", () => {
 
 	test("Enter inspect is a full-viewport overlay on a narrow frame", () => {
 		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 72, 16, "plain");
+		const text = frame.join("\n");
+
 		expect(frame).toHaveLength(16);
-		expect(frame.join("\n")).toContain("Event");
-		expect(frame.join("\n")).toContain("t filter tag");
-		expect(frame.join("\n")).toContain("p filter pid");
-		expect(frame.join("\n")).toContain("Esc close");
-		expect(frame.join("\n")).toContain("Retry after lock timeout");
-		expect(frame.join("\n")).toContain("INSPECT");
+		expect(text).toContain("Event Details");
+		expect(text).toContain("#7");
+		expect(text).toContain("Timestamp");
+		expect(text).toContain("WARN (W)");
+		expect(text).toContain("Message");
+		expect(text).toContain("filter by this tag");
+		expect(text).toContain("filter by this PID");
+		expect(text).toContain("copy event");
+		expect(formatHints(INSPECT_FOCUS)).toContain("Esc Close");
+		expect(text).toContain("Retry after lock timeout");
+		expect(text).toContain("INSPECT");
 
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(72);
 		}
 	});
 
-	test("wide inspect splits the log list and the pane", () => {
-		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 120, 18, "plain");
-		expect(frame).toHaveLength(18);
-		expect(frame.join("\n")).toContain("│");
-		expect(frame.join("\n")).toContain("Event");
-		expect(frame.join("\n")).toContain("t filter tag");
+	test("inspect wraps the complete message before lower-priority sections", () => {
+		const frame = layoutFrame(longMessageSnapshot, INSPECT_FOCUS, 120, 24, "plain");
+		const text = frame.join("\n");
+		const visibleMessage = frame.slice(9, 12).map((line) => line.slice(72).trimEnd()).join("");
+
+		expect(visibleMessage).toBe(longMessage);
+		expect(text).toContain("copy event");
+
+		for (const line of frame) expect(displayWidth(line)).toBe(120);
+	});
+
+	test("wide inspect structures stack traces and raw content", () => {
+		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 120, 24, "plain");
+		const ansi = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 120, 24, "ansi");
+		const text = frame.join("\n");
+		const styled = ansi.join("\n");
+
+		expect(frame).toHaveLength(24);
+		expect(text).toContain("│");
+		expect(text).toContain("Event Details");
+		expect(text).toContain("Stack Trace (1 frame)");
+		expect(text).toContain("at com.example.logview.demo.db.Store.lock");
+		expect(text).toContain("Raw");
+		expect(text).toContain("Actions");
+		expect(text).toContain('filter by this tag "Database"');
+		expect(text).toContain("copy event");
+		expect(styled).toContain(rgbSgr(THEME.accent, "fg"));
+		expect(styled).toContain(rgbSgr(THEME.amber, "fg"));
+		expect(styled).toContain(rgbSgr(THEME.cyan, "fg"));
 
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(120);

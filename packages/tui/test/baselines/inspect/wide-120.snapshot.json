@@ -418,10 +418,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "  TIME          LVL      PID:TID TAG               MESSAGE                  "
+      "text": "  TIME          LVL      PID:TID TAG               MESSAGE             "
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 2,
       "foreground": {
         "r": 82,
@@ -445,12 +445,12 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 2,
       "foreground": {
-        "r": 135,
+        "r": 69,
         "g": 150,
-        "b": 181
+        "b": 255
       },
       "background": {
         "r": 29,
@@ -466,15 +466,15 @@
         "overline": false,
         "underline": null
       },
-      "text": "Event"
+      "text": "Event Details"
     },
     {
-      "x": 82,
+      "x": 85,
       "y": 2,
       "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
         "r": 29,
@@ -490,7 +490,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                      "
+      "text": "                                #15"
     },
     {
       "x": 0,
@@ -730,10 +730,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " created for …"
+      "text": " created…"
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 3,
       "foreground": {
         "r": 82,
@@ -757,7 +757,31 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 3,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Timestamp   "
+    },
+    {
+      "x": 84,
       "y": 3,
       "foreground": {
         "r": 195,
@@ -778,7 +802,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "08:55:00.004                               "
+      "text": "2025-10-09 08:55:00.004             "
     },
     {
       "x": 0,
@@ -1018,10 +1042,10 @@
         "overline": false,
         "underline": null
       },
-      "text": ":com.examp…"
+      "text": ":com.…"
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 4,
       "foreground": {
         "r": 82,
@@ -1045,7 +1069,55 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 4,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Level       "
+    },
+    {
+      "x": 84,
+      "y": 4,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "INFO (I)"
+    },
+    {
+      "x": 92,
       "y": 4,
       "foreground": {
         "r": 195,
@@ -1066,7 +1138,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "I                                          "
+      "text": "                            "
     },
     {
       "x": 0,
@@ -1258,10 +1330,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "session opened            "
+      "text": "session opened       "
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 5,
       "foreground": {
         "r": 82,
@@ -1285,7 +1357,55 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 5,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "PID         "
+    },
+    {
+      "x": 84,
+      "y": 5,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "4321"
+    },
+    {
+      "x": 88,
       "y": 5,
       "foreground": {
         "r": 195,
@@ -1306,7 +1426,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "PID 4321  TID 4321                         "
+      "text": "                                "
     },
     {
       "x": 0,
@@ -1498,10 +1618,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "Opening connection        "
+      "text": "Opening connection   "
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 6,
       "foreground": {
         "r": 82,
@@ -1525,7 +1645,55 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 6,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "TID         "
+    },
+    {
+      "x": 84,
+      "y": 6,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "4321"
+    },
+    {
+      "x": 88,
       "y": 6,
       "foreground": {
         "r": 195,
@@ -1546,7 +1714,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "tag logview-demo                           "
+      "text": "                                "
     },
     {
       "x": 0,
@@ -1738,58 +1906,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "SELECT completed in "
+      "text": "SELECT completed in …"
     },
     {
-      "x": 70,
-      "y": 7,
-      "foreground": {
-        "r": 53,
-        "g": 212,
-        "b": 234
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "12"
-    },
-    {
-      "x": 72,
-      "y": 7,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " ms "
-    },
-    {
-      "x": 76,
+      "x": 71,
       "y": 7,
       "foreground": {
         "r": 82,
@@ -1813,7 +1933,55 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 7,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Tag         "
+    },
+    {
+      "x": 84,
+      "y": 7,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview-demo"
+    },
+    {
+      "x": 96,
       "y": 7,
       "foreground": {
         "r": 195,
@@ -1834,7 +2002,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": "                        "
     },
     {
       "x": 0,
@@ -2026,10 +2194,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "Retry after lock timeout  "
+      "text": "Retry after lock tim…"
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 8,
       "foreground": {
         "r": 82,
@@ -2053,12 +2221,36 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 8,
       "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Message"
+    },
+    {
+      "x": 79,
+      "y": 8,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
       },
       "background": {
         "r": 29,
@@ -2074,124 +2266,114 @@
         "overline": false,
         "underline": null
       },
-      "text": "日本語 ok                                  ",
+      "text": " ────────────────────────────────────────"
+    },
+    {
+      "x": 0,
+      "y": 9,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  │                                                "
+    },
+    {
+      "x": 51,
+      "y": 9,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "    at com.example.…"
+    },
+    {
+      "x": 71,
+      "y": 9,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│"
+    },
+    {
+      "x": 72,
+      "y": 9,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "日本語 ok",
       "widths": [
         2,
         2,
         2,
         1,
         1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
         1
       ]
     },
     {
-      "x": 0,
-      "y": 9,
-      "foreground": {
-        "r": 82,
-        "g": 98,
-        "b": 127
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  │                                                "
-    },
-    {
-      "x": 51,
-      "y": 9,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "    at com.example.logvi…"
-    },
-    {
-      "x": 76,
-      "y": 9,
-      "foreground": {
-        "r": 82,
-        "g": 98,
-        "b": 127
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "│"
-    },
-    {
-      "x": 77,
+      "x": 81,
       "y": 9,
       "foreground": {
         "r": 195,
@@ -2212,7 +2394,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": "                                       "
     },
     {
       "x": 0,
@@ -2260,10 +2442,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "    at com.example.logvi…"
+      "text": "    at com.example.…"
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 10,
       "foreground": {
         "r": 82,
@@ -2287,12 +2469,36 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 10,
       "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Raw"
+    },
+    {
+      "x": 75,
+      "y": 10,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
       },
       "background": {
         "r": 29,
@@ -2308,7 +2514,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "Raw                                        "
+      "text": " ────────────────────────────────────────────"
     },
     {
       "x": 0,
@@ -2500,10 +2706,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "Transaction committed     "
+      "text": "Transaction committed"
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 11,
       "foreground": {
         "r": 82,
@@ -2527,7 +2733,31 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 11,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "1760000100.004100  4321  4321 I logview-demo: …"
+    },
+    {
+      "x": 119,
       "y": 11,
       "foreground": {
         "r": 195,
@@ -2548,7 +2778,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "1760000100.004100  4321  4321 I logview-de…"
+      "text": " "
     },
     {
       "x": 0,
@@ -2740,58 +2970,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "failed to parse "
-    },
-    {
-      "x": 66,
-      "y": 12,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "token"
+      "text": "failed to parse toke…"
     },
     {
       "x": 71,
-      "y": 12,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "=RED…"
-    },
-    {
-      "x": 76,
       "y": 12,
       "foreground": {
         "r": 82,
@@ -2815,7 +2997,7 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 12,
       "foreground": {
         "r": 195,
@@ -2836,7 +3018,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": "                                                "
     },
     {
       "x": 0,
@@ -3034,9 +3216,9 @@
       "x": 68,
       "y": 13,
       "foreground": {
-        "r": 69,
-        "g": 150,
-        "b": 255
+        "r": 53,
+        "g": 212,
+        "b": 234
       },
       "background": {
         "r": 17,
@@ -3058,30 +3240,6 @@
       "x": 70,
       "y": 13,
       "foreground": {
-        "r": 199,
-        "g": 146,
-        "b": 234
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": true,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "m"
-    },
-    {
-      "x": 71,
-      "y": 13,
-      "foreground": {
         "r": 195,
         "g": 205,
         "b": 232
@@ -3100,10 +3258,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " in …"
+      "text": "…"
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 13,
       "foreground": {
         "r": 82,
@@ -3127,7 +3285,7 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 13,
       "foreground": {
         "r": 195,
@@ -3148,7 +3306,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": "                                                "
     },
     {
       "x": 0,
@@ -3340,10 +3498,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "café already open         "
+      "text": "café already open    "
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 14,
       "foreground": {
         "r": 82,
@@ -3367,7 +3525,7 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 14,
       "foreground": {
         "r": 195,
@@ -3388,7 +3546,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": "                                                "
     },
     {
       "x": 0,
@@ -3628,10 +3786,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " (SIGSEGV)…"
+      "text": " (SIG…"
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 15,
       "foreground": {
         "r": 82,
@@ -3655,7 +3813,7 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 15,
       "foreground": {
         "r": 195,
@@ -3676,7 +3834,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": "                                                "
     },
     {
       "x": 0,
@@ -3748,10 +3906,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "        "
+      "text": "   "
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 16,
       "foreground": {
         "r": 82,
@@ -3775,7 +3933,7 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 16,
       "foreground": {
         "r": 195,
@@ -3796,7 +3954,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": "                                                "
     },
     {
       "x": 0,
@@ -3892,10 +4050,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "verbose heartbeat         "
+      "text": "verbose heartbeat    "
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 17,
       "foreground": {
         "r": 82,
@@ -3919,12 +4077,36 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
       "y": 17,
       "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Actions"
+    },
+    {
+      "x": 79,
+      "y": 17,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
       },
       "background": {
         "r": 29,
@@ -3940,7 +4122,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                           "
+      "text": " ────────────────────────────────────────"
     },
     {
       "x": 0,
@@ -4132,10 +4314,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "clock went backward       "
+      "text": "clock went backward  "
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 18,
       "foreground": {
         "r": 82,
@@ -4159,7 +4341,55 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 18,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " t "
+    },
+    {
+      "x": 75,
+      "y": 18,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " filter by this tag"
+    },
+    {
+      "x": 94,
       "y": 18,
       "foreground": {
         "r": 195,
@@ -4180,7 +4410,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "t filter tag                               "
+      "text": " \"logview-demo\"           "
     },
     {
       "x": 0,
@@ -4420,10 +4650,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "(u0_a42) expire …"
+      "text": "(u0_a42) ex…"
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 19,
       "foreground": {
         "r": 82,
@@ -4447,7 +4677,55 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 19,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " p "
+    },
+    {
+      "x": 75,
+      "y": 19,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " filter by this PID"
+    },
+    {
+      "x": 94,
       "y": 19,
       "foreground": {
         "r": 195,
@@ -4468,7 +4746,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "p filter pid                               "
+      "text": " 4321                     "
     },
     {
       "x": 0,
@@ -4684,7 +4962,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "日本語 ok                 ",
+      "text": "日本語 ok            ",
       "widths": [
         2,
         2,
@@ -4703,16 +4981,11 @@
         1,
         1,
         1,
-        1,
-        1,
-        1,
-        1,
-        1,
         1
       ]
     },
     {
-      "x": 76,
+      "x": 71,
       "y": 20,
       "foreground": {
         "r": 82,
@@ -4736,7 +5009,55 @@
       "text": "│"
     },
     {
-      "x": 77,
+      "x": 72,
+      "y": 20,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " y "
+    },
+    {
+      "x": 75,
+      "y": 20,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " copy event"
+    },
+    {
+      "x": 86,
       "y": 20,
       "foreground": {
         "r": 195,
@@ -4757,7 +5078,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "Esc close                                  "
+      "text": "                                  "
     },
     {
       "x": 0,
@@ -4925,154 +5246,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " t "
-    },
-    {
-      "x": 25,
-      "y": 22,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " Tag"
-    },
-    {
-      "x": 29,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 31,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 39,
-        "g": 52,
-        "b": 71
-      },
-      "attributes": {
-        "bold": true,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " p "
-    },
-    {
-      "x": 34,
-      "y": 22,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " PID"
-    },
-    {
-      "x": 38,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 40,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 39,
-        "g": 52,
-        "b": 71
-      },
-      "attributes": {
-        "bold": true,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
       "text": " Esc "
     },
     {
-      "x": 45,
+      "x": 27,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -5096,7 +5273,7 @@
       "text": " Close"
     },
     {
-      "x": 51,
+      "x": 33,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -5120,7 +5297,7 @@
       "text": "  "
     },
     {
-      "x": 53,
+      "x": 35,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -5144,7 +5321,7 @@
       "text": " ? "
     },
     {
-      "x": 56,
+      "x": 38,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -5168,7 +5345,7 @@
       "text": " Help"
     },
     {
-      "x": 61,
+      "x": 43,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -5192,7 +5369,7 @@
       "text": "  "
     },
     {
-      "x": 63,
+      "x": 45,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -5216,7 +5393,7 @@
       "text": " q "
     },
     {
-      "x": 66,
+      "x": 48,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -5240,7 +5417,7 @@
       "text": " Quit"
     },
     {
-      "x": 71,
+      "x": 53,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -5261,7 +5438,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                 "
+      "text": "                                                                   "
     },
     {
       "x": 0,

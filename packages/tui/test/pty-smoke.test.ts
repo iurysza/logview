@@ -1,3 +1,4 @@
+import { stripANSI } from "bun";
 import { describe, expect, test } from "bun:test";
 import { dirname, join } from "node:path";
 import { sanitizedRecordingPath } from "../../../tests/fixtures/real/build-recording.ts";
@@ -29,12 +30,13 @@ describe("tui pty smoke", () => {
 		const stdout = await new Response(proc.stdout).text();
 		const stderr = await new Response(proc.stderr).text();
 		const code = await proc.exited;
+		const visible = stripANSI(stdout);
 
 		expect(code).toBe(0);
-		expect(stdout.includes("logview")).toBe(true);
-		expect(stdout.includes("q Quit") || stdout.includes("REPLAY")).toBe(true);
-		expect(stdout.includes("日本語")).toBe(true);
-		expect(stdout.includes("t filter tag")).toBe(true);
+		expect(visible.includes("logview")).toBe(true);
+		expect(visible.includes("q Quit") || visible.includes("REPLAY")).toBe(true);
+		expect(visible.includes("日本語")).toBe(true);
+		expect(visible.includes("filter by this tag")).toBe(true);
 		expect(stdout.includes("\u001b[31m")).toBe(false);
 		expect(stdout.includes("\n.M") || stdout.includes("\r.M")).toBe(false);
 		expect(stderr).not.toContain("Traceback");

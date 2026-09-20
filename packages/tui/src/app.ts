@@ -3,16 +3,12 @@ import {
 	EMPTY_SELECTION,
 	LIST_FOCUS,
 	classificationColumnLayout,
-	formatTimestamp,
-	messageText,
 	padToWidth,
 	projectColumnHeader,
 	reduceInteraction,
-	sanitizeDisplay,
 	tagText,
 	type InteractionSelection,
 	type InteractionState,
-	type LogEvent,
 	err,
 	ok,
 	type Result,
@@ -29,6 +25,8 @@ import {
 	paintFooter,
 	paintStatus,
 } from "./chrome.ts";
+import { copyToClipboard, formatClipboardEvent } from "./clipboard.ts";
+import { inspectorHeader, inspectorWidth, paintInspector } from "./inspect.ts";
 import { THEME } from "./theme.ts";
 
 export { formatFilter, formatFooter, formatHints, formatStatus };
@@ -36,10 +34,6 @@ export { formatFilter, formatFooter, formatHints, formatStatus };
 export const ROW_POOL_OVERSCAN = 2;
 
 export const INSPECT_WIDE_COLUMNS = 120;
-
-function inspectWidth(columns: number): number {
-	return Math.min(48, Math.max(32, Math.floor(columns * 0.36)));
-}
 
 function selectedHeaderRow(snapshot: SessionSnapshot): SessionSnapshot["rows"][number] | undefined {
 	for (const row of snapshot.rows) {
@@ -65,63 +59,6 @@ function classificationLabel(row: SessionSnapshot["rows"][number] | undefined): 
 	return row.classification.reason;
 }
 
-function inspectLines(
-	event: LogEvent | null,
-	width: number,
-	height: number,
-	classification: string | null = null,
-): string[] {
-	const actions = ["t filter tag", "p filter pid", "Esc close"];
-	const content: string[] = [];
-
-	if (!event) {
-		content.push("No event selected");
-	} else {
-		content.push("Event", "");
-
-		if (event.metadata) {
-			content.push(formatTimestamp(event.metadata.epochMicros));
-			content.push(event.metadata.level);
-			content.push(`PID ${event.metadata.pid}  TID ${event.metadata.tid}`);
-			content.push(`tag ${tagText(event.rawText, event.metadata.tag)}`);
-			content.push("");
-			content.push(sanitizeDisplay(messageText(event.rawText, event.metadata.message)));
-		} else {
-			content.push(sanitizeDisplay(event.rawText));
-		}
-
-		if (classification) {
-			content.push("");
-			content.push(classification);
-		}
-
-		if (event.continuations.length > 0) {
-			content.push("");
-
-			for (const line of event.continuations) content.push(sanitizeDisplay(line));
-		}
-
-		content.push("");
-		content.push("Raw");
-		content.push(sanitizeDisplay(event.rawText));
-
-		for (const line of event.continuations) content.push(sanitizeDisplay(line));
-	}
-
-	const fitted: string[] = [];
-	const rows = Math.max(1, height);
-	const actionRows = Math.min(actions.length, rows);
-	const contentRows = Math.max(0, rows - actionRows);
-
-	for (let i = 0; i < contentRows; i += 1) fitted.push(padToWidth(content[i] ?? "", width));
-
-	for (let i = actions.length - actionRows; i < actions.length; i += 1) {
-		fitted.push(padToWidth(actions[i]!, width));
-	}
-
-	return fitted;
-}
-
 function helpLines(width: number): string[] {
 	const lines = [
 		"Keys",
@@ -129,11 +66,11 @@ function helpLines(width: number): string[] {
 		"↑↓ / j k     move between events",
 		"PgUp PgDn / ^U ^D  page",
 		"G / End      jump to end · Home oldest",
-		"w            toggle line wrap",
+		"w wrap · y copy selected event",
 		"Enter        inspect event",
 		"/            text filter (Jev when enabled)",
 		"f            filter editor",
-		"t / p        from inspect: filter tag or pid",
+		"t / p / y    from inspect: filter tag, pid, or copy",
 		"?            this help",
 		"q            quit",
 	];
@@ -224,19 +161,16 @@ function splitPane(
 	columns: number,
 	style: PaintStyle,
 ): string[] {
-	const width = inspectWidth(columns);
+	const width = inspectorWidth(columns);
 	const leftWidth = Math.max(1, columns - width - 1);
 	const out: string[] = [];
 
 	for (let i = 0; i < logLines.length; i += 1) {
 		const left = logLines[i] ?? padToWidth("", leftWidth);
-		const right = pane[i] ?? padToWidth("", width);
+		const right = pane[i] ?? paintChromeLine([], width, style, THEME.bar);
 		const divider = style === "plain" ? "│" : paintChromeLine([{ text: "│", style: { fg: THEME.subtle, bg: null, bold: false, italic: false } }], 1, style, THEME.canvas);
 
-		const rightPainted =
-			style === "plain" ? right : paintFilled(right.trimEnd(), width, style, THEME.text, THEME.bar);
-
-		out.push(`${left}${divider}${rightPainted}`);
+		out.push(`${left}${divider}${right}`);
 	}
 
 	return out;
@@ -283,7 +217,7 @@ function layoutLines(
 	const inspectOpen = interaction.focus === "inspect";
 	const helpOpen = interaction.focus === "help";
 	const wideInspect = inspectOpen && columns >= INSPECT_WIDE_COLUMNS;
-	const logWidth = wideInspect ? Math.max(1, columns - inspectWidth(columns) - 1) : columns;
+	const logWidth = wideInspect ? Math.max(1, columns - inspectorWidth(columns) - 1) : columns;
 	const semantic = snapshot.semantic !== null && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
 	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic);
 	const selectedRow = selectedHeaderRow(snapshot);
@@ -293,22 +227,17 @@ function layoutLines(
 		header[2] = paintChromeLine([{ text: "Keys", style: { fg: THEME.muted, bg: null, bold: true, italic: false } }], columns, style, THEME.bar);
 		body = fillPane(helpLines(columns).slice(1), viewport, columns, style);
 	} else if (inspectOpen && !wideInspect) {
-		header[2] = paintChromeLine([{ text: "Event", style: { fg: THEME.muted, bg: null, bold: true, italic: false } }], columns, style, THEME.bar);
-		body = fillPane(
-			inspectLines(snapshot.selectedEvent, columns, viewport + 2, classification).slice(2),
-			viewport,
-			columns,
-			style,
-		);
+		header[2] = paintChromeLine(inspectorHeader(snapshot.selectedEvent, columns), columns, style, THEME.bar);
+		body = paintInspector(snapshot.selectedEvent, columns, viewport, style, classification);
 	} else if (wideInspect) {
-		const paneWidth = inspectWidth(columns);
+		const paneWidth = inspectorWidth(columns);
 		const leftWidth = Math.max(1, columns - paneWidth - 1);
 		const headingText = projectColumnHeader(columns).map((span) => span.text).join("");
 		header[2] = paintChromeLine(
 			[
 				{ text: padToWidth(headingText, leftWidth), style: { fg: THEME.muted, bg: null, bold: true, italic: false } },
 				{ text: "│", style: { fg: THEME.subtle, bg: null, bold: false, italic: false } },
-				{ text: "Event", style: { fg: THEME.muted, bg: null, bold: true, italic: false } },
+				...inspectorHeader(snapshot.selectedEvent, paneWidth),
 			],
 			columns,
 			style,
@@ -316,7 +245,7 @@ function layoutLines(
 		);
 		body = splitPane(
 			body,
-			inspectLines(snapshot.selectedEvent, inspectWidth(columns), viewport + 2, classification).slice(2),
+			paintInspector(snapshot.selectedEvent, paneWidth, viewport, style, classification),
 			columns,
 			style,
 		);
@@ -553,6 +482,12 @@ export async function attachTui(
 			if (closed) return;
 
 			const snapshot = session.snapshot();
+
+			if ((interaction.focus === "list" || interaction.focus === "inspect") && (mapped.key === "y" || mapped.key === "Y")) {
+				if (snapshot.selectedEvent) void copyToClipboard(formatClipboardEvent(snapshot.selectedEvent));
+				paint();
+				continue;
+			}
 
 			const result = reduceInteraction(
 				interaction,

@@ -180,24 +180,27 @@ const SCENARIOS: readonly UiScenario[] = [
 		color: "always",
 		async run(context) {
 			await send(context.session, ["enter"]);
-			await waitForText(context.session, "t filter tag");
+			await waitForText(context.session, "filter by this tag");
 			const wide = await context.capture("wide-120", { cols: INSPECT_WIDE_COLUMNS, rows: 24 });
-			expectCell(wide, 76, 2, "│", "wide inspector divider");
+			expectCell(wide, 71, 2, "│", "wide inspector divider");
+			expectText(wide, "Event Details", "wide inspector heading");
+			expectText(wide, "Message", "wide inspector message section");
+			expectText(wide, "Raw", "wide inspector raw section");
 
 			await resize(context.session, { cols: INSPECT_WIDE_COLUMNS - 1, rows: 24 });
 			await waitForScreen(
 				context.session,
 				"119-column inspector overlay",
-				(screen) => screen.cols === 119 && screen.text.split("\n")[2]?.startsWith("Event") === true,
+				(screen) => screen.cols === 119 && screen.text.split("\n")[2]?.startsWith("Event Details") === true,
 			);
 			const breakpoint = await context.capture("narrow-119", { cols: INSPECT_WIDE_COLUMNS - 1, rows: 24 });
-			expectNoCellText(breakpoint, 76, 2, "│", "breakpoint overlay");
+			expectNoCellText(breakpoint, 71, 2, "│", "breakpoint overlay");
 
 			await resize(context.session, DEFAULT_VIEWPORT);
 			await waitForScreen(
 				context.session,
 				"72-column inspector overlay",
-				(screen) => screen.cols === 72 && screen.text.split("\n")[2]?.startsWith("Event") === true,
+				(screen) => screen.cols === 72 && screen.text.split("\n")[2]?.startsWith("Event Details") === true,
 			);
 			const final = await context.capture("final", DEFAULT_VIEWPORT);
 			expectText(final, "日本語 ok", "narrow inspector");
@@ -211,7 +214,7 @@ const SCENARIOS: readonly UiScenario[] = [
 			await send(context.session, ["text:?"]);
 			await waitForText(context.session, "Keys");
 			const final = await context.capture("final", DEFAULT_VIEWPORT);
-			expectText(final, "t / p        from inspect", "help overlay");
+			expectText(final, "t / p / y    from inspect", "help overlay");
 		},
 	},
 	{
