@@ -85,40 +85,53 @@ class AdbSource implements LogSource {
 		}
 
 		this.child = spawned.value;
-		yield { kind: "ready" };
 
-		const merged = mergeStreams(spawned.value.stdout, spawned.value.stderr, this.deps.scheduler, signal);
-
-		for await (const packet of merged) {
-			if (this.closed || signal.aborted) break;
-			yield packet;
-		}
-
-		const exit = await spawned.value.exit;
-
-		if (this.closed || signal.aborted) {
-			yield { kind: "ended", reason: "stopped" };
-
-			return;
-		}
-
-		if (exit.code === 0) {
-			yield { kind: "ended", reason: "eof" };
-
-			return;
-		}
-
-		yield {
-			kind: "failed",
-			error: {
-				kind: "process-exit",
-				message: `adb logcat exited with code ${exit.code ?? "null"}`,
-				exitCode: exit.code ?? undefined,
-			},
+		const onAbort = (): void => {
+			void this.close().catch(() => undefined);
 		};
+
+		signal.addEventListener("abort", onAbort, { once: true });
+
+		try {
+			yield { kind: "ready" };
+
+			const merged = mergeStreams(spawned.value.stdout, spawned.value.stderr, this.deps.scheduler, signal);
+
+			for await (const packet of merged) {
+				if (this.closed || signal.aborted) break;
+				yield packet;
+			}
+
+			const exit = await spawned.value.exit;
+
+			if (this.closed || signal.aborted) {
+				yield { kind: "ended", reason: "stopped" };
+
+				return;
+			}
+
+			if (exit.code === 0) {
+				yield { kind: "ended", reason: "eof" };
+
+				return;
+			}
+
+			yield {
+				kind: "failed",
+				error: {
+					kind: "process-exit",
+					message: `adb logcat exited with code ${exit.code ?? "null"}`,
+					exitCode: exit.code ?? undefined,
+				},
+			};
+		} finally {
+			signal.removeEventListener("abort", onAbort);
+		}
 	}
 
 	async close(): Promise<void> {
+		if (this.closed) return;
+
 		this.closed = true;
 
 		if (this.child) await this.child.terminate(1000);

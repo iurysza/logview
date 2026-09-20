@@ -170,6 +170,41 @@ describe("adb source contract", () => {
 		expect(kinds.at(-1)).toBe("ended");
 	});
 
+	test("abort signal stops a live capture before the child exits", async () => {
+		let terminated = false;
+
+		const hanging: ProcessRunner = {
+			spawn(spec: ProcessSpec): Result<ChildProcessHandle, SourceError> {
+				if (spec.args[0] === "devices") {
+					return ok(textHandle("List of devices attached\nABC\tdevice\n", ""));
+				}
+
+				return ok({
+					stdout: hangStream(),
+					stderr: once(""),
+					exit: new Promise(() => undefined),
+					terminate: async () => {
+						terminated = true;
+					},
+				});
+			},
+		};
+
+		const source = createAdbSource(
+			{ adbPath: "adb", serial: "ABC" },
+			{ processes: hanging, scheduler: new ManualScheduler() },
+		);
+
+		const controller = new AbortController();
+		const iter = source.open(controller.signal)[Symbol.asyncIterator]();
+		const first = await iter.next();
+		expect(first.value).toMatchObject({ kind: "ready" });
+
+		controller.abort();
+		await Promise.resolve();
+		expect(terminated).toBe(true);
+	});
+
 	test("close stops a live capture before the child exits", async () => {
 		let terminated = false;
 

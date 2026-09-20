@@ -73,6 +73,35 @@ describe("recording", () => {
 		await session.value.stop();
 	});
 
+	test("stops at the duration limit while the source waits idle", async () => {
+		const dir = mkdtempSync(join(tmpdir(), "logview-record-"));
+		const path = join(dir, "duration.lvr.jsonl");
+		const source = new ScriptedSource();
+		const scheduler = new ManualScheduler();
+
+		const run = recordSession(
+			source,
+			{
+				outPath: path,
+				durationMs: 10,
+				maxFileBytes: 1024 * 1024,
+				header: syntheticRecordingHeader(),
+			},
+			{ files: new BunRecordingFiles(), scheduler },
+			new AbortController().signal,
+		);
+
+		await scheduler.runUntilIdle();
+		scheduler.now = 10;
+		await scheduler.runUntilIdle();
+
+		const recorded = await run;
+		expect(recorded.ok).toBe(true);
+
+		if (!recorded.ok) return;
+		expect(recorded.value.end.outcome).toBe("user-stop");
+	});
+
 	test("refuses to overwrite an existing destination", async () => {
 		const dir = mkdtempSync(join(tmpdir(), "logview-record-"));
 		const path = join(dir, "exists.lvr.jsonl");
