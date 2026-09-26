@@ -2,7 +2,7 @@ import type { CommandError, SessionCommand } from "./commands.ts";
 import { FILTER_FIELDS, type FilterField } from "./commands.ts";
 import { parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
 import { acceptCompletion, completeQuery, EMPTY_CANDIDATES, type QueryCandidates } from "./completion.ts";
-import { formatFilterQuery, formatQuery, parseQuery, type QueryError } from "./query.ts";
+import { formatQuery, parseQuery, type QueryError } from "./query.ts";
 import { EMPTY_FILTER, type FilterSpec, type SearchMode } from "./types.ts";
 
 const MEMORY_LIMIT = 20;

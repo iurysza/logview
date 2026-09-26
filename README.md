@@ -29,11 +29,15 @@ bun run logview replay sessions/example.lvr.jsonl --config logview.json
 bun run logview query sessions/example.lvr.jsonl 'level:W tag:Database lock' --limit 20
 bun run logview query --live 'pid:4321' --serial DEVICE --timeout 5s
 bun run logview query --check 'level:w tag:Database'
+bun run logview query sessions/example.lvr.jsonl '~database locks' --limit 5
+bun run logview query sessions/example.lvr.jsonl 'level:W database locks' --semantic
 ```
 
-Terms `level:`, `tag:`, `pid:`, and `pkg:` filter events. Other terms search text. Run `logview query --help` for the full grammar. `--since` accepts an ISO-8601 time with timezone or epoch seconds; live queries also accept a relative duration such as `30s`. Live queries time out after 10 seconds unless you set `--timeout`.
+Terms `level:`, `tag:`, `pid:`, and `pkg:` filter events. Other terms search text. Put `~` before the text to ask Jev instead, as in `level:W ~database locks`; `--semantic` does the same for plain text. Run `logview query --help` for the full grammar. `--since` accepts an ISO-8601 time with timezone or epoch seconds; live queries also accept a relative duration such as `30s`. Live queries time out after 10 seconds unless you set `--timeout`.
 
 Default output is NDJSON: one event per line, then one summary line. An event has `v`, `type`, `id`, `time` (ISO), `epochMicros`, `level`, `pid`, `tid`, `uid`, `tag`, `message`, `raw`, and `continuations`. Events without parsed metadata have null metadata fields. The summary has `query`, `emitted`, `matched`, `stop`, `terminal`, `evictedBeforeRead`, and `timeout_ms` (for live queries). `evictedBeforeRead` estimates unread eviction from the eviction count and last-read ID; it can include nonmatching events. `--format text` sends raw lines and continuations to stdout and the JSON summary to stderr. Exit codes: `0` success, `1` source failure, `2` invalid arguments or query.
+
+A Jev query reads a recording to the end, waits for Jev to score it, and then prints only relevant events. Each event gains `score` (0 to 1) and `verdict` (`relevant`). The summary gains `jev`: `threshold`, `relevant`, `belowThreshold`, `unscored`, and `error`. It uses the same engine `Session` and classifier as the TUI. It needs `TYPESAFE_API_KEY`; without it the command exits `2` with kind `missing-api-key`. If Jev fails and scores nothing, it exits `1` with kind `jev-failure`. Jev queries do not run with `--live`.
 
 ## Config file
 
@@ -131,7 +135,7 @@ bun run ui:update --scenario inspect
 
 `ui:verify` reads the committed styled-cell baseline. It always saves the final PNG, visible text, terminal cells, compact styled snapshot, and metadata to `--out`. Missing or changed baselines fail and save expected cells plus a property-level diff. It never changes a baseline. Run `ui:update` only after you review the generated PNGs and snapshot diff. `ui:update` is the only command that writes `packages/tui/test/baselines/`. Generated evidence stays under the ignored `generated/ui/` directory.
 
-The TUI inherits the terminal background and uses **Catppuccin Mocha** for accents. Header and footer stay fixed. Messages get Tailspin-style highlights after control characters are sanitized. Selection uses a `▸` marker and a full-row fill. Enter inspects the selected event. Set `NO_COLOR=1` for a plain dump.
+The TUI inherits the terminal background and uses **Catppuccin Mocha** for accents. Header and footer stay fixed. Messages get Tailspin-style highlights after control characters are sanitized. Selection uses a `▸` marker and a full-row fill. Enter inspects the selected event. In the query line, Tab (or Right at the end) accepts the grey fish-style completion for keys and for tag, PID, package, and level values seen in the session. Set `NO_COLOR=1` for a plain dump.
 
 ## Fixtures
 
@@ -161,7 +165,7 @@ Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). 
 
 Read [the architecture reference](ai-artifacts/architecture.md) for the implemented package boundaries, session lifecycle, recordings, filtering, semantic queries, terminal rendering, and test seams. `specs/2026-09-18-logview-technical-design.md` remains the original design handoff; source and tests define current contracts.
 
-Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or `semantic.enabled` in `logview.json`, and set `TYPESAFE_API_KEY`. The `/` text field becomes a query. When you apply a query, Jev classifies the newest `semantic.historyEvents` locally eligible retained logs, which defaults to 100. New locally eligible arrivals continue to be classified while the query is active. Older rows stay visible with an unrequested icon. Rows scored below the threshold are dimmed. Headless tests never call Jev.
+Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or `semantic.enabled` in `logview.json`, and set `TYPESAFE_API_KEY`. In the `/` query line, plain text filters live as you type; `~question` asks Jev when you press Enter, because each question is a paid call. A purple ` ✦ Jev ` badge marks Jev in the query line, the filter chips, and the status bar. `m` switches the current text between literal and Jev. `v` hides or dims rows scored below the threshold. When you apply a query, Jev classifies the newest `semantic.historyEvents` locally eligible retained logs, which defaults to 100. New locally eligible arrivals continue to be classified while the query is active. Older rows stay visible with an unrequested icon. Rows scored below the threshold are dimmed. Headless tests never call Jev.
 
 ## Scripts
 
