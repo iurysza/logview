@@ -1,18 +1,23 @@
 import type { FilterField } from "./commands.ts";
 import { foldText, parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
-import type { FilterSpec, Result, TextSlice } from "./types.ts";
+import type { FilterSpec, Result, SearchMode, TextSlice } from "./types.ts";
 import { err, ok } from "./types.ts";
 
 /**
  * Filter query language shared by the TUI `/` editor and `logview query`.
  *
  *   query = term*            (terms separated by whitespace)
- *   term  = key ":" value | value
+ *   term  = key ":" value | ["~"] value
  *   key   = level | tag | pid | pkg   (lowercase)
  *   value = bare | '"' (char | \" | \\)* '"'
  *
  * Non-key terms are text. Text terms are joined with one space.
+ * A `~` before the first text term (or as its own term) asks Jev: the text
+ * becomes a natural-language query instead of a literal search. A `~` later
+ * in the text is literal.
  */
+
+export type ParsedQuery = Readonly<{ filter: FilterSpec; searchMode: SearchMode }>;
 
 export type QueryError = Readonly<{
 	kind: "invalid-filter";
@@ -32,7 +37,7 @@ const KEY_FIELD: Readonly<Record<QueryKey, FilterField>> = {
 	pkg: "packageName",
 };
 
-type Token = Readonly<{ key: QueryKey | null; value: string; quoted: boolean; offset: number }>;
+type Token = Readonly<{ key: QueryKey | null; value: string; quoted: boolean; offset: number; semantic: boolean }>;
 
 function isQueryKey(value: string): value is QueryKey {
 	return value === "level" || value === "tag" || value === "pid" || value === "pkg";
@@ -99,19 +104,30 @@ function tokenize(query: string): Result<readonly Token[], QueryError> {
 		const offset = index;
 		const keyMatch = /^([a-z]+):/.exec(query.slice(index));
 		const key = keyMatch && isQueryKey(keyMatch[1]!) ? keyMatch[1] : null;
-		const valueStart = key === null ? index : index + key.length + 1;
+		const semantic = key === null && query[index] === "~";
+		let valueStart = key === null ? index : index + key.length + 1;
+
+		if (semantic) valueStart += 1;
+
+		if (semantic && (valueStart >= query.length || isSpace(query[valueStart]!))) {
+			tokens.push({ key: null, value: "", quoted: false, offset, semantic: true });
+			index = valueStart;
+			continue;
+		}
+
 		const scanned = scanValue(query, valueStart);
 
 		if (!scanned.ok) return scanned;
 
-		tokens.push({ key, value: scanned.value.value, quoted: scanned.value.quoted, offset });
+		tokens.push({ key, value: scanned.value.value, quoted: scanned.value.quoted, offset, semantic });
 		index = scanned.value.end;
 	}
 
 	return ok(tokens);
 }
 
-export function parseFilterQuery(query: string): Result<FilterSpec, QueryError> {
+/** Parses a query that may ask Jev with `~`. */
+export function parseQuery(query: string): Result<ParsedQuery, QueryError> {
 	const tokens = tokenize(query);
 
 	if (!tokens.ok) return tokens;
@@ -119,11 +135,21 @@ export function parseFilterQuery(query: string): Result<FilterSpec, QueryError> 
 	const seen = new Map<QueryKey, Token>();
 	const textParts: string[] = [];
 	let textOffset = 0;
+	let semanticOffset: number | null = null;
 
 	for (const token of tokens.value) {
 		if (token.key === null) {
-			if (textParts.length === 0) textOffset = token.offset;
-			textParts.push(token.value);
+			if (token.semantic && textParts.length === 0 && semanticOffset === null) {
+				semanticOffset = token.offset;
+				textOffset = token.offset;
+
+				if (token.value.length > 0 || token.quoted) textParts.push(token.value);
+
+				continue;
+			}
+
+			if (textParts.length === 0 && semanticOffset === null) textOffset = token.offset;
+			textParts.push(token.semantic ? `~${token.value}` : token.value);
 			continue;
 		}
 
@@ -146,12 +172,18 @@ export function parseFilterQuery(query: string): Result<FilterSpec, QueryError> 
 
 	if (!pid.ok) return queryError("pid", pid.error.message, pidToken?.offset ?? 0);
 
+	const text = textParts.join(" ");
+
+	if (semanticOffset !== null && text.length === 0) {
+		return queryError("text", "~ needs a question for Jev", semanticOffset);
+	}
+
 	const prepared = prepareFilter({
 		minLevel: level.value,
 		tag: seen.get("tag")?.value ?? null,
 		pid: pid.value,
 		packageName: seen.get("pkg")?.value ?? null,
-		text: textParts.join(" "),
+		text,
 	});
 
 	if (!prepared.ok) {
@@ -162,7 +194,20 @@ export function parseFilterQuery(query: string): Result<FilterSpec, QueryError> 
 		return queryError(field, prepared.error.message, offset);
 	}
 
-	return ok(prepared.value.spec);
+	return ok({ filter: prepared.value.spec, searchMode: semanticOffset === null ? "text" : "jev" });
+}
+
+/** Parses a literal filter query. A Jev query (`~`) is rejected. */
+export function parseFilterQuery(query: string): Result<FilterSpec, QueryError> {
+	const parsed = parseQuery(query);
+
+	if (!parsed.ok) return parsed;
+
+	if (parsed.value.searchMode === "jev") {
+		return queryError("text", "~ asks Jev, which this command does not support", query.indexOf("~"));
+	}
+
+	return ok(parsed.value.filter);
 }
 
 function quote(value: string): string {
@@ -179,11 +224,27 @@ function looksLikeKey(word: string): boolean {
 	return match !== null && isQueryKey(match[1]!);
 }
 
-function formatText(text: string): string {
+function formatSemanticText(text: string): string {
 	const words = text.split(" ");
 	const bare = /^[^\s"]+( [^\s"]+)*$/.test(text) && !words.some(looksLikeKey);
 
 	return bare ? text : quote(text);
+}
+
+/** Literal text that starts with `~` is quoted so it does not ask Jev. */
+function formatText(text: string): string {
+	return text.startsWith("~") ? quote(text) : formatSemanticText(text);
+}
+
+/** Canonical query text. Jev queries put `~` before the text. */
+export function formatQuery(spec: FilterSpec, searchMode: SearchMode): string {
+	const literal = formatFilterQuery({ ...spec, text: "" });
+
+	if (spec.text.length === 0) return literal;
+
+	const text = searchMode === "jev" ? `~${formatSemanticText(spec.text)}` : formatText(spec.text);
+
+	return literal.length === 0 ? text : `${literal} ${text}`;
 }
 
 export function formatFilterQuery(spec: FilterSpec): string {

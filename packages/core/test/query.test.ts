@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { EMPTY_FILTER, formatFilterQuery, parseFilterQuery, textMatchRanges, type FilterSpec } from "@logview/core";
+import { EMPTY_FILTER, formatFilterQuery, formatQuery, parseFilterQuery, parseQuery, textMatchRanges, type FilterSpec } from "@logview/core";
 
 function parsed(query: string): FilterSpec {
 	const result = parseFilterQuery(query);
@@ -110,5 +110,55 @@ describe("textMatchRanges", () => {
 
 	test("falls back to no ranges when folding changes length", () => {
 		expect(textMatchRanges("İstanbul", { ...EMPTY_FILTER, text: "stan" })).toEqual([]);
+	});
+});
+
+describe("Jev prefix", () => {
+	function jev(query: string) {
+		const result = parseQuery(query);
+
+		if (!result.ok) throw new Error(`${query}: ${result.error.message}`);
+
+		return result.value;
+	}
+
+	test("~ before the text asks Jev and keeps the other keys local", () => {
+		expect(jev("level:W ~database locks")).toEqual({
+			filter: { ...EMPTY_FILTER, minLevel: "W", text: "database locks" },
+			searchMode: "jev",
+		});
+		expect(jev("~ why did it crash").filter.text).toBe("why did it crash");
+		expect(jev('~"tag:x means"').filter.text).toBe("tag:x means");
+	});
+
+	test("~ later in the text, or quoted, is literal", () => {
+		expect(jev("a ~b")).toEqual({ filter: { ...EMPTY_FILTER, text: "a ~b" }, searchMode: "text" });
+		expect(jev('"~home"')).toEqual({ filter: { ...EMPTY_FILTER, text: "~home" }, searchMode: "text" });
+		expect(formatFilterQuery({ ...EMPTY_FILTER, text: "~home" })).toBe('"~home"');
+	});
+
+	test("an empty ~ is an error at the tilde", () => {
+		const result = parseQuery("level:E ~");
+
+		expect(result.ok ? null : result.error).toMatchObject({ field: "text", offset: 8 });
+	});
+
+	test("parseFilterQuery rejects a Jev query instead of searching for it literally", () => {
+		const result = parseFilterQuery("~locks");
+
+		expect(result.ok).toBe(false);
+	});
+
+	test("formatQuery round-trips both modes", () => {
+		const texts = ["lock", "database locks", "a  b", "tag:x", "~home", '"q"'];
+
+		for (const text of texts) {
+			for (const searchMode of ["text", "jev"] as const) {
+				const spec = { ...EMPTY_FILTER, minLevel: "E" as const, text };
+				expect(jev(formatQuery(spec, searchMode))).toEqual({ filter: spec, searchMode });
+			}
+		}
+
+		expect(formatQuery(EMPTY_FILTER, "jev")).toBe("");
 	});
 });

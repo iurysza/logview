@@ -1,4 +1,4 @@
-import type { EventId, FilterSpec, LogLevel, Result } from "./types.ts";
+import type { EventId, FilterSpec, LogLevel, Result, SearchMode } from "./types.ts";
 import { err, ok } from "./types.ts";
 
 export type SessionCommand =
@@ -9,7 +9,7 @@ export type SessionCommand =
 	| { kind: "toggle-line-display" }
 	| { kind: "toggle-search-mode" }
 	| { kind: "request-package-attribution" }
-	| { kind: "set-filter"; filter: FilterSpec }
+	| { kind: "set-filter"; filter: FilterSpec; searchMode?: SearchMode }
 	| { kind: "resize"; columns: number; rows: number };
 
 export type StartError = { kind: "already-started" | "stopped" };
