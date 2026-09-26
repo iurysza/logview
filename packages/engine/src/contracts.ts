@@ -21,6 +21,7 @@ import {
 	type LineDisplay,
 	type LogEvent,
 	type QueryCandidates,
+	type ClassificationMark,
 	type Result,
 	type SearchMode,
 	type SessionCommand,
@@ -97,6 +98,8 @@ export interface Session {
 	readMatches(after: EventId | null, limit: number): readonly LogEvent[];
 	/** Tags, PIDs and packages seen so far, most frequent first, for query completion. */
 	queryCandidates(): QueryCandidates;
+	/** Jev result for one retained event under the active query; `none` when Jev is not active. */
+	classificationOf(id: EventId): ClassificationMark;
 	subscribe(listener: (snapshot: SessionSnapshot) => void): () => void;
 	readonly sourceDone: Promise<SourceTerminal>;
 	stop(): Promise<void>;

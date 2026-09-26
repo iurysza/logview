@@ -312,6 +312,10 @@ class SessionImpl implements Session {
 		return this.commandFilter(filter);
 	}
 
+	classificationOf(id: EventId): ClassificationMark {
+		return this.classificationMark(id);
+	}
+
 	queryCandidates(): QueryCandidates {
 		return this.vocabulary.candidates();
 	}

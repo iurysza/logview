@@ -2,7 +2,7 @@ import type { Session } from "@kitlangton/terminal-control";
 import { join } from "node:path";
 import { INSPECT_WIDE_COLUMNS } from "../../src/app.ts";
 import { THEME } from "../../src/theme.ts";
-import { startFakeJev, type FakeJev } from "./fake-jev.ts";
+import { startFakeJev, type FakeJev } from "../../../../tests/support/fake-jev.ts";
 import { cellsFromSnapshot } from "./styled-snapshot.ts";
 import {
 	capture,

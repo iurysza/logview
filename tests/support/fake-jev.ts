@@ -20,9 +20,9 @@ export type FakeJev = Readonly<{
 	stop(): Promise<void>;
 }>;
 
-const RELEVANT = /database|lock|transaction|sqlite|store/i;
+const RELEVANT = /\b(database|locks?|transaction|sqlite|store)\b/i;
 
-const RELATED = /select|write|commit|connection/i;
+const RELATED = /\b(select|write|commit|connection)\b/i;
 
 export function fakeScore(entry: LogEntry): number {
 	const text = `${entry.tag ?? ""} ${entry.message}`;

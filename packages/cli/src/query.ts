@@ -1,13 +1,25 @@
-import { formatFilterQuery, messageText, parseFilterQuery, tagText, type LogEvent, type SourceKind } from "@logview/core";
+import {
+	formatQuery,
+	messageText,
+	parseQuery,
+	tagText,
+	type ClassificationMark,
+	type LogEvent,
+	type SearchMode,
+	type SourceKind,
+} from "@logview/core";
 import {
 	createAdbPackageResolver,
 	createAdbSource,
+	createJevClassifier,
 	createProcessRunner,
 	createRecordingFiles,
 	createReplaySource,
 	createScheduler,
 	createSession,
+	defaultSemanticOptions,
 	defaultSessionOptions,
+	type LogClassifier,
 	type Session,
 	type SourceTerminal,
 } from "@logview/engine";
@@ -34,7 +46,20 @@ type QueryOptions = Readonly<{
 	serial: string | null;
 	adbPath: string;
 	timeoutMs: number | null;
+	semantic: boolean;
 }>;
+
+type Verdict = "relevant" | "below-threshold" | "unscored";
+
+type JevResult = Readonly<{ score: number | null; verdict: Verdict }>;
+
+/** Jev results for this run; null when the query is literal. */
+type SemanticRun = {
+	readonly threshold: number;
+	relevant: number;
+	belowThreshold: number;
+	unscored: number;
+};
 
 const help = `logview query — stream matching events without opening the TUI
 
@@ -42,10 +67,15 @@ Usage:
   logview query PATH [QUERY] [--limit N] [--since TIME] [--format ndjson|text] [--allow-partial]
   logview query --live [QUERY] [--serial S] [--adb PATH] [--timeout DUR] [--limit N] [--since TIME|DUR]
   logview query --check QUERY
+  logview query PATH '~QUESTION' | --semantic QUESTION   ask Jev instead of matching text
 
 Query: terms separated by spaces. level:V|D|I|W|E|F|ALL, tag:NAME,
        pid:POSITIVE_INTEGER, pkg:NAME; other terms search text. Quote terms
        with spaces or terms that look like keys. Repeated keys are invalid.
+       ~ before the text asks Jev: 'level:W ~database locks'. Keys still
+       filter locally; Jev scores the remaining events. Needs TYPESAFE_API_KEY.
+       Jev output keeps only relevant events and adds score and verdict.
+       The summary counts relevant, below-threshold and unscored events.
 TIME: ISO-8601 with timezone or epoch seconds; relative 30s, 5m, 2h for --live only.
 DUR: positive duration in ms, s, m, or h. Live timeout defaults to 10s.
 
@@ -53,15 +83,17 @@ Examples:
   logview query capture.lvr.jsonl 'level:W tag:Database lock'
   logview query --live 'pid:4321' --timeout 5s --limit 20
   logview query --check 'level:e database'
+  logview query capture.lvr.jsonl '~database locks' --limit 5
 
-Exit codes: 0 success (including zero matches); 1 source failure; 2 invalid arguments/query.`;
+Exit codes: 0 success (including zero matches); 1 source or Jev failure;
+            2 invalid arguments/query, including a missing TYPESAFE_API_KEY.`;
 
-function error(writer: QueryWriter, kind: "source-failure", field: string, message: string, offset?: number | null): 1;
+function error(writer: QueryWriter, kind: "source-failure" | "jev-failure", field: string, message: string, offset?: number | null): 1;
 function error(writer: QueryWriter, kind: string, field: string, message: string, offset?: number | null): 2;
 function error(writer: QueryWriter, kind: string, field: string, message: string, offset: number | null = null): 1 | 2 {
 	writer.stderr(JSON.stringify({ v: 1, type: "error", kind, field, message, offset }));
 
-	return kind === "source-failure" ? 1 : 2;
+	return kind === "source-failure" || kind === "jev-failure" ? 1 : 2;
 }
 
 function duration(value: string): number | null {
@@ -109,6 +141,7 @@ function parse(args: readonly string[], now: number, writer: QueryWriter): Query
 	let serial: string | null = null;
 	let adbPath = process.env.ADB ?? "adb";
 	let timeoutMs: number | null = null;
+	let semantic = false;
 	const positional: string[] = [];
 
 	for (let i = 0; i < args.length; i++) {
@@ -119,6 +152,8 @@ function parse(args: readonly string[], now: number, writer: QueryWriter): Query
 		if (arg === "--check") { check = true; continue; }
 
 		if (arg === "--allow-partial") { allowPartial = true; continue; }
+
+		if (arg === "--semantic") { semantic = true; continue; }
 
 		if (["--limit", "--since", "--format", "--serial", "--adb", "--timeout"].includes(arg)) {
 			const value = args[++i];
@@ -149,7 +184,7 @@ function parse(args: readonly string[], now: number, writer: QueryWriter): Query
 	}
 
 	if (check) {
-		if (live || positional.length !== 1 || limit !== null || sinceValue !== null || timeoutMs !== null || serial !== null || allowPartial || format !== "ndjson" || adbPath !== (process.env.ADB ?? "adb")) {
+		if (live || semantic || positional.length !== 1 || limit !== null || sinceValue !== null || timeoutMs !== null || serial !== null || allowPartial || format !== "ndjson" || adbPath !== (process.env.ADB ?? "adb")) {
 			return error(writer, "invalid-argument", "--check", "--check requires exactly one QUERY and no other options");
 		}
 
@@ -170,10 +205,16 @@ function parse(args: readonly string[], now: number, writer: QueryWriter): Query
 
 	if (sinceValue !== null && sinceMicros === null) return error(writer, "invalid-argument", "--since", "since must be an absolute ISO-8601 time or epoch seconds; relative durations require --live");
 
-	return { path, live, check, query, limit, sinceMicros, format, allowPartial, serial, adbPath, timeoutMs };
+	return { path, live, check, query, limit, sinceMicros, format, allowPartial, serial, adbPath, timeoutMs, semantic };
 }
 
-function eventLine(event: LogEvent): string {
+function verdictOf(mark: ClassificationMark, threshold: number): JevResult {
+	if (mark.kind !== "scored") return { score: null, verdict: "unscored" };
+
+	return { score: mark.relevance, verdict: mark.relevance >= threshold ? "relevant" : "below-threshold" };
+}
+
+function eventLine(event: LogEvent, jev: JevResult | null): string {
 	const metadata = event.metadata;
 
 	return JSON.stringify({
@@ -185,6 +226,7 @@ function eventLine(event: LogEvent): string {
 		tag: metadata ? tagText(event.rawText, metadata.tag) : null,
 		message: metadata ? messageText(event.rawText, metadata.message) : null,
 		raw: event.rawText, continuations: event.continuations,
+		...jev,
 	});
 }
 
@@ -230,7 +272,7 @@ async function stream(session: Session, options: QueryOptions, canonical: string
 						writer.stdout(event.rawText);
 
 						for (const continuation of event.continuations) writer.stdout(continuation);
-					} else writer.stdout(eventLine(event));
+					} else writer.stdout(eventLine(event, null));
 					emitted++;
 
 					if (emitted === options.limit) { stop = "limit"; break; }
@@ -271,7 +313,7 @@ async function stream(session: Session, options: QueryOptions, canonical: string
 						writer.stdout(event.rawText);
 
 						for (const continuation of event.continuations) writer.stdout(continuation);
-					} else writer.stdout(eventLine(event));
+					} else writer.stdout(eventLine(event, null));
 					emitted++;
 
 					if (emitted === options.limit) break;
@@ -308,6 +350,89 @@ async function stream(session: Session, options: QueryOptions, canonical: string
 	}
 }
 
+/**
+ * Jev scores arrive asynchronously, so a Jev query reads only after the replay
+ * ends. The engine drains classification before it reports the source ended.
+ */
+async function streamSemantic(session: Session, options: QueryOptions, canonical: string, writer: QueryWriter): Promise<number> {
+	const started = session.start();
+
+	if (!started.ok) {
+		await session.stop();
+
+		return error(writer, "source-failure", "source", started.error.kind);
+	}
+
+	try {
+		const terminal = await session.sourceDone;
+		const threshold = session.snapshot().semantic?.threshold ?? defaultSemanticOptions().threshold;
+		const run: SemanticRun = { threshold, relevant: 0, belowThreshold: 0, unscored: 0 };
+		let cursor: number | null = null;
+		let emitted = 0;
+		let stop: "eof" | "limit" = "eof";
+		let batch = session.readMatches(cursor, 512);
+
+		while (batch.length > 0 && stop === "eof") {
+			for (const event of batch) {
+				cursor = event.id;
+
+				if (options.sinceMicros !== null && (event.metadata?.epochMicros ?? -Infinity) < options.sinceMicros) continue;
+
+				const jev = verdictOf(session.classificationOf(event.id), threshold);
+
+				if (jev.verdict === "below-threshold") run.belowThreshold++;
+				else if (jev.verdict === "unscored") run.unscored++;
+				else run.relevant++;
+
+				if (jev.verdict !== "relevant" || stop === "limit") continue;
+
+				if (options.format === "text") {
+					writer.stdout(event.rawText);
+
+					for (const continuation of event.continuations) writer.stdout(continuation);
+				} else writer.stdout(eventLine(event, jev));
+				emitted++;
+
+				if (emitted === options.limit) stop = "limit";
+			}
+
+			batch = session.readMatches(cursor, 512);
+		}
+
+		const lastError = session.snapshot().semantic?.lastError ?? null;
+
+		const summary = {
+			v: 1, type: "summary", query: canonical, emitted, matched: session.snapshot().stats.matchedEvents,
+			stop, terminal, evictedBeforeRead: 0,
+			jev: { threshold, relevant: run.relevant, belowThreshold: run.belowThreshold, unscored: run.unscored, error: lastError },
+		};
+
+		(options.format === "text" ? writer.stderr : writer.stdout)(JSON.stringify(summary));
+
+		if (terminal.kind === "failed") return error(writer, "source-failure", "source", terminal.error.message);
+
+		if (lastError !== null && run.relevant + run.belowThreshold === 0) {
+			return error(writer, "jev-failure", "jev", `Jev ${lastError}; no events were scored`);
+		}
+
+		return 0;
+	} finally {
+		await session.stop();
+	}
+}
+
+function createClassifier(writer: QueryWriter): LogClassifier | 2 {
+	const apiKey = process.env.TYPESAFE_API_KEY?.trim() ?? "";
+
+	if (apiKey.length === 0) return error(writer, "missing-api-key", "TYPESAFE_API_KEY", "Jev queries require TYPESAFE_API_KEY");
+
+	const created = createJevClassifier({ apiKey });
+
+	if (!created.ok) return error(writer, "invalid-argument", "jev", created.error.message);
+
+	return created.value;
+}
+
 export async function runQuery(args: readonly string[], writer: QueryWriter = defaultWriter): Promise<number> {
 	if (args.includes("--help") || args.includes("-h")) {
 		writer.stdout(help);
@@ -318,16 +443,31 @@ export async function runQuery(args: readonly string[], writer: QueryWriter = de
 	const options = parse(args, Date.now(), writer);
 
 	if (options === 2) return 2;
-	const parsed = parseFilterQuery(options.query);
+	const parsed = parseQuery(options.query);
 
 	if (!parsed.ok) return error(writer, parsed.error.kind, parsed.error.field, parsed.error.message, parsed.error.offset);
-	const canonical = formatFilterQuery(parsed.value);
+	const filter = parsed.value.filter;
+	const searchMode: SearchMode = options.semantic ? "jev" : parsed.value.searchMode;
+
+	if (searchMode === "jev" && filter.text.length === 0) {
+		return error(writer, "invalid-filter", "text", "--semantic needs text to ask Jev about", null);
+	}
+
+	const canonical = formatQuery(filter, searchMode);
 
 	if (options.check) {
-		writer.stdout(JSON.stringify({ v: 1, type: "check", query: canonical, filter: parsed.value }));
+		writer.stdout(JSON.stringify({ v: 1, type: "check", query: canonical, filter, searchMode }));
 
 		return 0;
 	}
+
+	if (searchMode === "jev" && options.live) {
+		return error(writer, "invalid-argument", "--live", "Jev queries read a recording; live Jev is available in the TUI");
+	}
+
+	const classifier = searchMode === "jev" ? createClassifier(writer) : undefined;
+
+	if (classifier === 2) return 2;
 
 	const scheduler = createScheduler();
 	const sourceKind: SourceKind = options.live ? "live" : "replay";
@@ -351,10 +491,12 @@ export async function runQuery(args: readonly string[], writer: QueryWriter = de
 		: undefined;
 
 	const created = createSession(defaultSessionOptions({
-		sessionId: `query-${Date.now()}`, sourceKind, label: options.path ?? options.serial ?? "adb", initialFilter: parsed.value,
-	}), { source, scheduler, packageResolver });
+		sessionId: `query-${Date.now()}`, sourceKind, label: options.path ?? options.serial ?? "adb", initialFilter: filter,
+	}), { source, scheduler, packageResolver, classifier });
 
 	if (!created.ok) return error(writer, "invalid-argument", created.error.field, created.error.message);
+
+	if (classifier) return streamSemantic(created.value, options, canonical, writer);
 
 	return stream(created.value, options, canonical, writer);
 }

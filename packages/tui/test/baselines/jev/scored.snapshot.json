@@ -202,7 +202,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " 5 relevant"
+      "text": " 4 relevant"
     },
     {
       "x": 85,
@@ -2560,9 +2560,9 @@
       "x": 0,
       "y": 18,
       "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
+        "r": 82,
+        "g": 98,
+        "b": 127
       },
       "background": {
         "r": 17,
@@ -2578,175 +2578,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "  08:54:59.999  "
-    },
-    {
-      "x": 16,
-      "y": 18,
-      "foreground": {
-        "r": 126,
-        "g": 231,
-        "b": 135
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " I"
-    },
-    {
-      "x": 18,
-      "y": 18,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 20,
-      "y": 18,
-      "foreground": {
-        "r": 69,
-        "g": 150,
-        "b": 255
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  4321:4321"
-    },
-    {
-      "x": 31,
-      "y": 18,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " "
-    },
-    {
-      "x": 32,
-      "y": 18,
-      "foreground": {
-        "r": 126,
-        "g": 231,
-        "b": 135
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "logview-demo    "
-    },
-    {
-      "x": 48,
-      "y": 18,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 50,
-      "y": 18,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "clock went backward                                    "
+      "text": "  08:54:59.999   I    4321:4321 logview-demo      clock went backward                                    "
     },
     {
       "x": 105,
@@ -2776,9 +2608,9 @@
       "x": 106,
       "y": 18,
       "foreground": {
-        "r": 199,
-        "g": 146,
-        "b": 234
+        "r": 82,
+        "g": 98,
+        "b": 127
       },
       "background": {
         "r": 17,
@@ -2794,7 +2626,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " ━━━━━ 0.93   "
+      "text": " ━╌╌╌╌ 0.08   "
     },
     {
       "x": 0,
