@@ -22,6 +22,7 @@ import {
 } from "./config.ts";
 import { runHeadless } from "./headless.ts";
 import { runRecord } from "./record.ts";
+import { runQuery, type QueryWriter } from "./query.ts";
 
 type CliError = { exit: 1 | 2; message: string };
 
@@ -70,6 +71,9 @@ Usage:
   logview live [--serial DEVICE] [--headless] [--semantic] [--config PATH]
   logview record --out PATH [--serial DEVICE] [--duration SEC]
   logview replay PATH [--speed N|instant] [--headless] [--allow-partial] [--semantic] [--config PATH]
+  logview query PATH [QUERY] [--limit N] [--since TIME] [--format ndjson|text]
+  logview query --live [QUERY] [--timeout DUR] [--limit N]
+  logview query --check QUERY
 
 Jev visual filter:
   Set TYPESAFE_API_KEY. Enable with --semantic or semantic.enabled in logview.json.
@@ -409,7 +413,9 @@ async function attachOrHeadless(session: Session, headless: boolean): Promise<nu
 	return 0;
 }
 
-export async function main(argv = process.argv): Promise<number> {
+export async function main(argv = process.argv, queryWriter?: QueryWriter): Promise<number> {
+	if (argv[2] === "query") return runQuery(argv.slice(3), queryWriter);
+
 	const parsed = parseArgs(argv);
 
 	if (!parsed.ok) {
