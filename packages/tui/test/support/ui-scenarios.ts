@@ -1,6 +1,7 @@
 import type { Session } from "@kitlangton/terminal-control";
 import { join } from "node:path";
 import { INSPECT_WIDE_COLUMNS } from "../../src/app.ts";
+import { inspectorWidth } from "../../src/inspect.ts";
 import { THEME } from "../../src/theme.ts";
 import { startFakeJev, type FakeJev } from "../../../../tests/support/fake-jev.ts";
 import { cellsFromSnapshot } from "./styled-snapshot.ts";
@@ -30,6 +31,7 @@ const DEFAULT_VIEWPORT: Viewport = { cols: 72, rows: 16 };
 export const UI_SCENARIO_NAMES = [
 	"replay",
 	"inspect",
+	"inspect-detail",
 	"help",
 	"filter",
 	"sizes",
@@ -211,14 +213,48 @@ const SCENARIOS: readonly UiScenario[] = [
 			const breakpoint = await context.capture("narrow-119", { cols: INSPECT_WIDE_COLUMNS - 1, rows: 24 });
 			expectNoCellText(breakpoint, 71, 2, "│", "breakpoint overlay");
 
-			await resize(context.session, DEFAULT_VIEWPORT);
+			const narrow = { cols: 72, rows: 17 };
+
+			await resize(context.session, narrow);
 			await waitForScreen(
 				context.session,
 				"72-column inspector overlay",
-				(screen) => screen.cols === 72 && screen.text.split("\n")[2]?.startsWith("Event Details") === true,
+				(screen) => screen.cols === 72 && screen.rows === 17 && screen.text.split("\n")[2]?.startsWith("Event Details") === true,
 			);
-			const final = await context.capture("final", DEFAULT_VIEWPORT);
+			const final = await context.capture("final", narrow);
 			expectText(final, "日本語 ok", "narrow inspector");
+		},
+	},
+	{
+		name: "inspect-detail",
+		viewport: { cols: INSPECT_WIDE_COLUMNS, rows: 30 },
+		color: "always",
+		async run(context) {
+			const viewport = { cols: INSPECT_WIDE_COLUMNS, rows: 30 };
+
+			await selectHeader(context.session, "Start proc");
+			await send(context.session, ["enter"]);
+			await waitForText(context.session, "MainActivity}");
+			const longMessage = await context.capture("long-message", viewport);
+			expectText(longMessage, "MainActivity}", "long message end");
+			expectNoInspectorEllipsis(longMessage, INSPECT_WIDE_COLUMNS, "long message");
+
+			await send(context.session, ["escape"]);
+			await waitForScreen(context.session, "list after long message", (screen) => {
+				return screen.text.split("\n").at(-1)?.trimStart().startsWith("BROWSE") === true;
+			});
+
+			await selectHeader(context.session, "Retry after lock timeout", "down");
+			await send(context.session, ["enter"]);
+			await waitForScreen(context.session, "stack inspector", (screen) => {
+				const footer = screen.text.split("\n").at(-1) ?? "";
+
+				return footer.trimStart().startsWith("INSPECT") && screen.text.includes("(Store.java:88)");
+			});
+			const stackTrace = await context.capture("stack-trace", viewport);
+			expectText(stackTrace, "(Store.java:88)", "stack location");
+			expectText(stackTrace, "(Store.java:41)", "second stack frame");
+			expectNoInspectorEllipsis(stackTrace, INSPECT_WIDE_COLUMNS, "stack trace");
 		},
 	},
 	{
@@ -421,6 +457,45 @@ function expectText(capture: Capture, text: string, checkpoint: string): void {
 	if (!capture.text.includes(text)) {
 		throw new Error(`${checkpoint} does not show ${JSON.stringify(text)}; inspect ${capture.paths.text}`);
 	}
+}
+
+function inspectorBody(capture: Capture, columns: number): string {
+	const width = columns >= INSPECT_WIDE_COLUMNS ? inspectorWidth(columns) : columns;
+	const start = columns - width;
+	const lines = capture.text.split("\n").slice(3, -3);
+
+	return lines.map((line) => line.slice(start, start + width)).join("\n");
+}
+
+function expectNoInspectorEllipsis(capture: Capture, columns: number, checkpoint: string): void {
+	if (inspectorBody(capture, columns).includes("…")) {
+		throw new Error(`${checkpoint} inspector still clips with an ellipsis; inspect ${capture.paths.text}`);
+	}
+}
+
+async function selectHeader(session: Session, label: string, direction: "up" | "down" = "up"): Promise<void> {
+	for (let step = 0; step < 20; step += 1) {
+		let selected = "";
+
+		await waitForScreen(session, `${label} selection`, (screen) => {
+			selected = screen.text.split("\n").find((line) => line.startsWith("▸")) ?? "";
+
+			return selected.length > 0;
+		});
+
+		if (selected.includes(label)) return;
+
+		const before = selected;
+
+		await send(session, [direction]);
+		await waitForScreen(session, `move toward ${label}`, (screen) => {
+			const line = screen.text.split("\n").find((row) => row.startsWith("▸")) ?? "";
+
+			return line.length > 0 && line !== before;
+		});
+	}
+
+	throw new Error(`did not select ${label}`);
 }
 
 function expectCell(capture: Capture, x: number, y: number, text: string, checkpoint: string): void {

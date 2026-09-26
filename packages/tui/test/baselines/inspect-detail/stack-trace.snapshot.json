@@ -1,6 +1,6 @@
 {
   "cols": 120,
-  "rows": 24,
+  "rows": 30,
   "foreground": {
     "r": 201,
     "g": 209,
@@ -538,7 +538,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                #15"
+      "text": "                                 #6"
     },
     {
       "x": 0,
@@ -850,7 +850,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "2025-10-09 08:55:00.004             "
+      "text": "2025-10-09 08:55:00.002             "
     },
     {
       "x": 0,
@@ -1144,9 +1144,9 @@
       "x": 84,
       "y": 4,
       "foreground": {
-        "r": 126,
-        "g": 231,
-        "b": 135
+        "r": 244,
+        "g": 201,
+        "b": 93
       },
       "background": {
         "r": 29,
@@ -1162,7 +1162,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "INFO (I)"
+      "text": "WARN (W)"
     },
     {
       "x": 92,
@@ -1450,7 +1450,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "PID 4321 · TID 4321"
+      "text": "PID 4321 · TID 4340"
     },
     {
       "x": 103,
@@ -2002,10 +2002,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "logview-demo"
+      "text": "Database"
     },
     {
-      "x": 96,
+      "x": 92,
       "y": 7,
       "foreground": {
         "r": 195,
@@ -2026,10 +2026,34 @@
         "overline": false,
         "underline": null
       },
-      "text": "                        "
+      "text": "                            "
     },
     {
       "x": 0,
+      "y": 8,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "▸ "
+    },
+    {
+      "x": 2,
       "y": 8,
       "foreground": {
         "r": 135,
@@ -2037,9 +2061,9 @@
         "b": 181
       },
       "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
+        "r": 28,
+        "g": 46,
+        "b": 74
       },
       "attributes": {
         "bold": false,
@@ -2050,7 +2074,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "  08:55:00.002  "
+      "text": "08:55:00.002  "
     },
     {
       "x": 16,
@@ -2061,9 +2085,9 @@
         "b": 93
       },
       "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
+        "r": 28,
+        "g": 46,
+        "b": 74
       },
       "attributes": {
         "bold": false,
@@ -2085,9 +2109,9 @@
         "b": 181
       },
       "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
+        "r": 28,
+        "g": 46,
+        "b": 74
       },
       "attributes": {
         "bold": false,
@@ -2109,9 +2133,9 @@
         "b": 255
       },
       "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
+        "r": 28,
+        "g": 46,
+        "b": 74
       },
       "attributes": {
         "bold": false,
@@ -2133,9 +2157,9 @@
         "b": 181
       },
       "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
+        "r": 28,
+        "g": 46,
+        "b": 74
       },
       "attributes": {
         "bold": false,
@@ -2157,9 +2181,9 @@
         "b": 93
       },
       "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
+        "r": 28,
+        "g": 46,
+        "b": 74
       },
       "attributes": {
         "bold": false,
@@ -2181,9 +2205,9 @@
         "b": 181
       },
       "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
+        "r": 28,
+        "g": 46,
+        "b": 74
       },
       "attributes": {
         "bold": false,
@@ -2205,9 +2229,9 @@
         "b": 232
       },
       "background": {
-        "r": 17,
-        "g": 24,
-        "b": 32
+        "r": 28,
+        "g": 46,
+        "b": 74
       },
       "attributes": {
         "bold": false,
@@ -2482,54 +2506,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "日本語 ok                                       ",
-      "widths": [
-        2,
-        2,
-        2,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
-      ]
+      "text": "Retry after lock timeout                        "
     },
     {
       "x": 0,
@@ -3009,10 +2986,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "Raw"
+      "text": "Stack Trace (2 frames)"
     },
     {
-      "x": 75,
+      "x": 94,
       "y": 12,
       "foreground": {
         "r": 82,
@@ -3033,7 +3010,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " ────────────────────────────────────────────"
+      "text": " ─────────────────────────"
     },
     {
       "x": 0,
@@ -3321,10 +3298,10 @@
         "overline": false,
         "underline": null
       },
-      "text": "1760000100.004100  4321  4321 I logview-demo:"
+      "text": "│  "
     },
     {
-      "x": 117,
+      "x": 75,
       "y": 13,
       "foreground": {
         "r": 195,
@@ -3345,7 +3322,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "   "
+      "text": "at com.example.logview.demo.db.Store.lock    "
     },
     {
       "x": 0,
@@ -3585,20 +3562,34 @@
         "overline": false,
         "underline": null
       },
-      "text": "  日本語 ok",
-      "widths": [
-        1,
-        1,
-        2,
-        2,
-        2,
-        1,
-        1,
-        1
-      ]
+      "text": "│    "
     },
     {
-      "x": 83,
+      "x": 77,
+      "y": 14,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "(Store.java:88)"
+    },
+    {
+      "x": 92,
       "y": 14,
       "foreground": {
         "r": 195,
@@ -3619,7 +3610,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                     "
+      "text": "                            "
     },
     {
       "x": 0,
@@ -3889,6 +3880,30 @@
       "x": 72,
       "y": 15,
       "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│  "
+    },
+    {
+      "x": 75,
+      "y": 15,
+      "foreground": {
         "r": 195,
         "g": 205,
         "b": 232
@@ -3907,7 +3922,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                "
+      "text": "at com.example.logview.demo.db.Store.write   "
     },
     {
       "x": 0,
@@ -4009,6 +4024,54 @@
       "x": 72,
       "y": 16,
       "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│    "
+    },
+    {
+      "x": 77,
+      "y": 16,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "(Store.java:41)"
+    },
+    {
+      "x": 92,
+      "y": 16,
+      "foreground": {
         "r": 195,
         "g": 205,
         "b": 232
@@ -4027,7 +4090,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                "
+      "text": "                            "
     },
     {
       "x": 0,
@@ -4153,33 +4216,9 @@
       "x": 72,
       "y": 17,
       "foreground": {
-        "r": 69,
-        "g": 150,
-        "b": 255
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": true,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "Actions"
-    },
-    {
-      "x": 79,
-      "y": 17,
-      "foreground": {
-        "r": 82,
-        "g": 98,
-        "b": 127
+        "r": 195,
+        "g": 205,
+        "b": 232
       },
       "background": {
         "r": 29,
@@ -4195,7 +4234,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " ────────────────────────────────────────"
+      "text": "                                                "
     },
     {
       "x": 0,
@@ -4417,14 +4456,14 @@
       "x": 72,
       "y": 18,
       "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
+        "r": 69,
+        "g": 150,
+        "b": 255
       },
       "background": {
-        "r": 39,
-        "g": 52,
-        "b": 71
+        "r": 29,
+        "g": 38,
+        "b": 51
       },
       "attributes": {
         "bold": true,
@@ -4435,15 +4474,15 @@
         "overline": false,
         "underline": null
       },
-      "text": " t "
+      "text": "Raw"
     },
     {
       "x": 75,
       "y": 18,
       "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
+        "r": 82,
+        "g": 98,
+        "b": 127
       },
       "background": {
         "r": 29,
@@ -4459,31 +4498,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " filter by this tag"
-    },
-    {
-      "x": 94,
-      "y": 18,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " \"logview-demo\"           "
+      "text": " ────────────────────────────────────────────"
     },
     {
       "x": 0,
@@ -4753,33 +4768,9 @@
       "x": 72,
       "y": 19,
       "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 39,
-        "g": 52,
-        "b": 71
-      },
-      "attributes": {
-        "bold": true,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " p "
-    },
-    {
-      "x": 75,
-      "y": 19,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
+        "r": 82,
+        "g": 98,
+        "b": 127
       },
       "background": {
         "r": 29,
@@ -4795,10 +4786,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " filter by this PID"
+      "text": "1760000100.002921  4321  4340 W Database: Retry"
     },
     {
-      "x": 94,
+      "x": 119,
       "y": 19,
       "foreground": {
         "r": 195,
@@ -4819,44 +4810,20 @@
         "overline": false,
         "underline": null
       },
-      "text": " 4321                     "
+      "text": " "
     },
     {
       "x": 0,
       "y": 20,
       "foreground": {
-        "r": 69,
-        "g": 150,
-        "b": 255
-      },
-      "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
-      },
-      "attributes": {
-        "bold": true,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "▸ "
-    },
-    {
-      "x": 2,
-      "y": 20,
-      "foreground": {
         "r": 135,
         "g": 150,
         "b": 181
       },
       "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "attributes": {
         "bold": false,
@@ -4867,7 +4834,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "08:55:00.004  "
+      "text": "  08:55:00.004  "
     },
     {
       "x": 16,
@@ -4878,9 +4845,9 @@
         "b": 135
       },
       "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "attributes": {
         "bold": false,
@@ -4902,9 +4869,9 @@
         "b": 181
       },
       "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "attributes": {
         "bold": false,
@@ -4926,9 +4893,9 @@
         "b": 255
       },
       "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "attributes": {
         "bold": false,
@@ -4950,9 +4917,9 @@
         "b": 181
       },
       "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "attributes": {
         "bold": false,
@@ -4974,9 +4941,9 @@
         "b": 135
       },
       "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "attributes": {
         "bold": false,
@@ -4998,9 +4965,9 @@
         "b": 181
       },
       "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "attributes": {
         "bold": false,
@@ -5022,9 +4989,9 @@
         "b": 232
       },
       "background": {
-        "r": 28,
-        "g": 46,
-        "b": 74
+        "r": 17,
+        "g": 24,
+        "b": 32
       },
       "attributes": {
         "bold": false,
@@ -5085,6 +5052,630 @@
       "x": 72,
       "y": 20,
       "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  after lock timeout"
+    },
+    {
+      "x": 92,
+      "y": 20,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                            "
+    },
+    {
+      "x": 0,
+      "y": 21,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                       "
+    },
+    {
+      "x": 71,
+      "y": 21,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│"
+    },
+    {
+      "x": 72,
+      "y": 21,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  at com.example.logview.demo.db.Store.lock"
+    },
+    {
+      "x": 115,
+      "y": 21,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "     "
+    },
+    {
+      "x": 0,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                       "
+    },
+    {
+      "x": 71,
+      "y": 22,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│"
+    },
+    {
+      "x": 72,
+      "y": 22,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "    (Store.java:88)"
+    },
+    {
+      "x": 91,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                             "
+    },
+    {
+      "x": 0,
+      "y": 23,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                       "
+    },
+    {
+      "x": 71,
+      "y": 23,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│"
+    },
+    {
+      "x": 72,
+      "y": 23,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Actions"
+    },
+    {
+      "x": 79,
+      "y": 23,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ────────────────────────────────────────"
+    },
+    {
+      "x": 0,
+      "y": 24,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                       "
+    },
+    {
+      "x": 71,
+      "y": 24,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│"
+    },
+    {
+      "x": 72,
+      "y": 24,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " t "
+    },
+    {
+      "x": 75,
+      "y": 24,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " filter by this tag"
+    },
+    {
+      "x": 94,
+      "y": 24,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " \"Database\"               "
+    },
+    {
+      "x": 0,
+      "y": 25,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                       "
+    },
+    {
+      "x": 71,
+      "y": 25,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│"
+    },
+    {
+      "x": 72,
+      "y": 25,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " p "
+    },
+    {
+      "x": 75,
+      "y": 25,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " filter by this PID"
+    },
+    {
+      "x": 94,
+      "y": 25,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " 4321                     "
+    },
+    {
+      "x": 0,
+      "y": 26,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                       "
+    },
+    {
+      "x": 71,
+      "y": 26,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "│"
+    },
+    {
+      "x": 72,
+      "y": 26,
+      "foreground": {
         "r": 195,
         "g": 205,
         "b": 232
@@ -5107,7 +5698,7 @@
     },
     {
       "x": 75,
-      "y": 20,
+      "y": 26,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5131,7 +5722,7 @@
     },
     {
       "x": 86,
-      "y": 20,
+      "y": 26,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5155,7 +5746,7 @@
     },
     {
       "x": 0,
-      "y": 21,
+      "y": 27,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5179,7 +5770,7 @@
     },
     {
       "x": 0,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 17,
         "g": 24,
@@ -5203,7 +5794,7 @@
     },
     {
       "x": 9,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5227,7 +5818,7 @@
     },
     {
       "x": 11,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5251,7 +5842,7 @@
     },
     {
       "x": 15,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5275,7 +5866,7 @@
     },
     {
       "x": 20,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5299,7 +5890,7 @@
     },
     {
       "x": 22,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5323,7 +5914,7 @@
     },
     {
       "x": 27,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5347,7 +5938,7 @@
     },
     {
       "x": 33,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5371,7 +5962,7 @@
     },
     {
       "x": 35,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5395,7 +5986,7 @@
     },
     {
       "x": 38,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5419,7 +6010,7 @@
     },
     {
       "x": 43,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5443,7 +6034,7 @@
     },
     {
       "x": 45,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5467,7 +6058,7 @@
     },
     {
       "x": 48,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 135,
         "g": 150,
@@ -5491,7 +6082,7 @@
     },
     {
       "x": 53,
-      "y": 22,
+      "y": 28,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -5515,7 +6106,7 @@
     },
     {
       "x": 0,
-      "y": 23,
+      "y": 29,
       "foreground": {
         "r": 195,
         "g": 205,

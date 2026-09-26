@@ -10,6 +10,7 @@ import {
 	formatFooter,
 	formatHints,
 	formatStatus,
+	INSPECT_WIDE_COLUMNS,
 	layoutFrame,
 	layoutSession,
 	paintFrame,
@@ -18,6 +19,7 @@ import {
 import { paintRow, paintStyleFromEnv } from "../src/color.ts";
 import { rgbSgr } from "../src/catppuccin.ts";
 import { THEME } from "../src/theme.ts";
+import { inspectorWidth } from "../src/inspect.ts";
 import { paintLogList, visiblePoolSize } from "../src/log-list.ts";
 
 const snapshot: SessionSnapshot = {
@@ -176,6 +178,41 @@ function visibleText(text: string): string {
 	return text.replace(/\u001b\[[0-9;]*m/g, "");
 }
 
+function inspectorPane(frame: readonly string[], columns: number): string[] {
+	const width = columns >= INSPECT_WIDE_COLUMNS ? inspectorWidth(columns) : columns;
+	const start = columns - width;
+	const body = frame.slice(3, frame.length - 3);
+
+	return body.map((line) => line.slice(start, start + width));
+}
+
+function linesAfterSection(pane: readonly string[], title: string): string[] {
+	const start = pane.findIndex((line) => line.startsWith(title));
+	const lines: string[] = [];
+
+	if (start < 0) return lines;
+
+	for (let index = start + 1; index < pane.length; index += 1) {
+		const line = pane[index]!;
+
+		if (line.includes("─") || line.trim().length === 0) break;
+		lines.push(line);
+	}
+
+	return lines;
+}
+
+function expectFullWidth(frame: readonly string[], columns: number): void {
+	for (const line of frame) expect(displayWidth(line)).toBe(columns);
+}
+
+function expectBlankBefore(pane: readonly string[], title: string): void {
+	const index = pane.findIndex((line) => line.startsWith(title));
+
+	expect(index).toBeGreaterThan(0);
+	expect(pane[index - 1]?.trim()).toBe("");
+}
+
 describe("tui chrome", () => {
 	test("formats status, filters, footer, and hints without a renderer", () => {
 		expect(formatStatus(snapshot)).toContain("REPLAY • END");
@@ -295,10 +332,10 @@ describe("tui chrome", () => {
 	});
 
 	test("Enter inspect is a full-viewport overlay on a narrow frame", () => {
-		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 72, 16, "plain");
+		const frame = layoutFrame(inspectSnapshot, INSPECT_FOCUS, 72, 17, "plain");
 		const text = frame.join("\n");
 
-		expect(frame).toHaveLength(16);
+		expect(frame).toHaveLength(17);
 		expect(text).toContain("Event Details");
 		expect(text).toContain("#7");
 		expect(text).toContain("Timestamp");
@@ -319,13 +356,17 @@ describe("tui chrome", () => {
 
 	test("inspect wraps the complete message before lower-priority sections", () => {
 		const frame = layoutFrame(longMessageSnapshot, INSPECT_FOCUS, 120, 24, "plain");
-		const text = frame.join("\n");
-		const visibleMessage = frame.slice(9, 12).map((line) => line.slice(72).trimEnd()).join("");
+		const pane = inspectorPane(frame, 120);
+		const messageLines = linesAfterSection(pane, "Message").map((line) => line.trimEnd());
 
-		expect(visibleMessage).toBe(longMessage);
-		expect(text).toContain("copy event");
-
-		for (const line of frame) expect(displayWidth(line)).toBe(120);
+		expect(messageLines.every((line) => !line.startsWith(" "))).toBe(true);
+		expect(messageLines.map((line) => line.trim()).join(" ")).toBe(longMessage);
+		expect(pane[0]?.startsWith("Timestamp")).toBe(true);
+		expectBlankBefore(pane, "Message");
+		expectBlankBefore(pane, "Raw");
+		expect(pane.join("\n").indexOf("Message")).toBeLessThan(pane.join("\n").indexOf("Raw"));
+		expect(frame.join("\n")).toContain("copy event");
+		expectFullWidth(frame, 120);
 	});
 
 	test("wide inspect structures stack traces and raw content", () => {
@@ -350,6 +391,140 @@ describe("tui chrome", () => {
 		for (const line of frame) {
 			expect(displayWidth(line)).toBe(120);
 		}
+	});
+
+	test("inspect keeps a long stack location visible without clipping", () => {
+		const location = "(Store.java:88)";
+		const method = `at ${"com.example.db.".repeat(5)}Store.lock`;
+
+		const event: LogEvent = {
+			...selectedEvent,
+			continuations: [`\t${method}${location}`, "\tat com.example.db.Store.write(Store.java:41)"],
+		};
+
+		const stackSnapshot: SessionSnapshot = { ...inspectSnapshot, selectedEvent: event };
+		const frame = layoutFrame(stackSnapshot, INSPECT_FOCUS, 72, 32, "plain");
+		const ansi = layoutFrame(stackSnapshot, INSPECT_FOCUS, 72, 32, "ansi").join("\n");
+		const pane = inspectorPane(frame, 72);
+		const stackLines = linesAfterSection(pane, "Stack Trace");
+
+		expect(method.length + location.length).toBeGreaterThan(72);
+		expect(pane.join("\n")).toContain("Store.java:88)");
+		expect(pane.join("\n")).not.toContain("…");
+		expect(stackLines.some((line) => line.includes("Store.java:88)"))).toBe(true);
+		expect(stackLines.every((line) => line.startsWith("│"))).toBe(true);
+		expect(stackLines.some((line) => line.startsWith("│    "))).toBe(true);
+		expect(stackLines.some((line) => line.startsWith("│  ") && !line.startsWith("│    "))).toBe(true);
+		expectBlankBefore(pane, "Stack Trace");
+		expect(ansi).toContain(`${rgbSgr(THEME.cyan, "fg")}${rgbSgr(THEME.bar, "bg")}(Store.java:88)`);
+		expect(ansi).toContain(`${rgbSgr(THEME.text, "fg")}${rgbSgr(THEME.bar, "bg")}at `);
+		expectFullWidth(frame, 72);
+	});
+
+	test("inspect wraps key=value messages on token boundaries", () => {
+		const scan =
+			"onScanResult to scannerId: 6- eventType=0x1b, addressType=1, address=XX:XX:XX:XX:46:90, primaryPhy=1, secondaryPhy=0, advertisingSid=0xff, txPower=127, rssi=-52, periodicAdvInt=0x0";
+
+		const rawText = `1760000000.002800  4321  4321 I Database: ${scan}`;
+
+		const event: LogEvent = {
+			...selectedEvent,
+			rawText,
+			metadata: {
+				...selectedEvent.metadata!,
+				level: "I",
+				message: { start: rawText.indexOf(scan), end: rawText.length },
+			},
+			continuations: [],
+		};
+
+		const scanSnapshot: SessionSnapshot = { ...inspectSnapshot, selectedEvent: event };
+		const frame = layoutFrame(scanSnapshot, INSPECT_FOCUS, 72, 32, "plain");
+		const ansi = layoutFrame(scanSnapshot, INSPECT_FOCUS, 72, 32, "ansi");
+		const messageLines = linesAfterSection(inspectorPane(frame, 72), "Message").map((line) => line.trimEnd());
+		const messageAnsi = ansi.find((line) => visibleText(line).includes("onScanResult"));
+		const levelAnsi = ansi.find((line) => visibleText(line).includes("INFO (I)"));
+
+		for (const token of scan.split(" ")) {
+			expect(messageLines.some((line) => line.includes(token))).toBe(true);
+		}
+
+		expect(messageLines.every((line) => !line.startsWith(" "))).toBe(true);
+		expect(messageAnsi).toContain(`${rgbSgr(THEME.text, "fg")}${rgbSgr(THEME.bar, "bg")}onScanResult`);
+		expect(messageAnsi).not.toContain(rgbSgr(THEME.green, "fg"));
+		expect(levelAnsi).toContain(`${rgbSgr(THEME.green, "fg")}${rgbSgr(THEME.bar, "bg")}INFO`);
+		expectFullWidth(frame, 72);
+	});
+
+	test("inspect raw header starts at column 0 when rawText has leading whitespace", () => {
+		const timestamp = "1789894159.528792  2150  2923 I BtGatt.ScanHelper: scan";
+		const cases = [`              ${timestamp}`, `\t${timestamp}`];
+
+		for (const rawText of cases) {
+			const event: LogEvent = { ...selectedEvent, rawText, metadata: null, continuations: [] };
+			const rawSnapshot: SessionSnapshot = { ...inspectSnapshot, selectedEvent: event };
+			const frame = layoutFrame(rawSnapshot, INSPECT_FOCUS, 72, 16, "plain");
+			const rawLines = linesAfterSection(inspectorPane(frame, 72), "Raw").map((line) => line.trimEnd());
+
+			expect(rawLines[0]?.startsWith(timestamp)).toBe(true);
+			expect(rawLines[0]?.startsWith(" ")).toBe(false);
+			expectFullWidth(frame, 72);
+		}
+	});
+
+	test("inspect raw continuation trims a leading tab and indents its wrapped rows", () => {
+		const head = "1789894159.528792  2150  2923 I BtGatt.ScanHelper: scan";
+		const body = "a".repeat(80);
+
+		const event: LogEvent = {
+			...selectedEvent,
+			rawText: `              ${head}`,
+			metadata: null,
+			continuations: [`\tat ${body}`],
+		};
+
+		const rawSnapshot: SessionSnapshot = { ...inspectSnapshot, selectedEvent: event };
+		const frame = layoutFrame(rawSnapshot, INSPECT_FOCUS, 72, 24, "plain");
+		const rawLines = linesAfterSection(inspectorPane(frame, 72), "Raw").map((line) => line.trimEnd());
+
+		expect(rawLines[0]).toBe(head);
+		expect(rawLines[1]?.startsWith("  at ")).toBe(true);
+		expect(rawLines[1]?.startsWith("    ")).toBe(false);
+		expect(rawLines[2]?.startsWith("    ")).toBe(true);
+		expect(rawLines.slice(1).map((line) => line.trim()).join("")).toBe(`at ${body}`);
+		expectFullWidth(frame, 72);
+	});
+
+	test("inspect paints a missing package in muted rather than warning amber", () => {
+		const missing: SessionSnapshot = {
+			...inspectSnapshot,
+			packageAttribution: { kind: "unavailable", reason: "not-recorded" },
+		};
+
+		const unknown: SessionSnapshot = {
+			...inspectSnapshot,
+			packageAttribution: { kind: "unavailable", reason: "missing-uid" },
+		};
+
+		const resolving: SessionSnapshot = {
+			...inspectSnapshot,
+			packageAttribution: { kind: "resolving", uid: 10123 },
+		};
+
+		const recorded = layoutFrame(missing, INSPECT_FOCUS, 72, 24, "ansi");
+		const unavailable = layoutFrame(unknown, INSPECT_FOCUS, 72, 24, "ansi");
+		const pending = layoutFrame(resolving, INSPECT_FOCUS, 72, 24, "ansi");
+		const recordedLine = recorded.find((line) => visibleText(line).includes("Not recorded"));
+		const unavailableLine = unavailable.find((line) => visibleText(line).includes("Unavailable"));
+		const resolvingLine = pending.find((line) => visibleText(line).includes("Resolving"));
+		const levelLine = recorded.find((line) => visibleText(line).includes("WARN (W)"));
+
+		expect(recordedLine).toContain(`${rgbSgr(THEME.muted, "fg")}${rgbSgr(THEME.bar, "bg")}Not recorded`);
+		expect(recordedLine).not.toContain(rgbSgr(THEME.amber, "fg"));
+		expect(unavailableLine).toContain(`${rgbSgr(THEME.muted, "fg")}${rgbSgr(THEME.bar, "bg")}Unavailable`);
+		expect(resolvingLine).toContain(`${rgbSgr(THEME.muted, "fg")}${rgbSgr(THEME.bar, "bg")}Resolving`);
+		expect(resolvingLine).not.toContain(rgbSgr(THEME.amber, "fg"));
+		expect(levelLine).toContain(`${rgbSgr(THEME.amber, "fg")}${rgbSgr(THEME.bar, "bg")}WARN`);
 	});
 
 	test("classification notes use plain states and exception-only icons", () => {
