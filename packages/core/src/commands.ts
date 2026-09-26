@@ -8,6 +8,7 @@ export type SessionCommand =
 	| { kind: "tail" }
 	| { kind: "toggle-line-display" }
 	| { kind: "toggle-search-mode" }
+	| { kind: "toggle-below-threshold" }
 	| { kind: "request-package-attribution" }
 	| { kind: "set-filter"; filter: FilterSpec; searchMode?: SearchMode }
 	| { kind: "resize"; columns: number; rows: number };

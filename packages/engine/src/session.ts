@@ -41,6 +41,7 @@ import {
 	defaultSessionOptions,
 	validateSessionOptions,
 	visibleLogRows,
+	type BelowThreshold,
 	type PackageAttribution,
 	type Session,
 	type SessionDependencies,
@@ -121,6 +122,9 @@ class SessionImpl implements Session {
 	private rows: number;
 	private lineDisplay: LineDisplay = "clip";
 	private searchMode: SearchMode = "text";
+	private belowThreshold: BelowThreshold = "dim";
+	/** Relevant-only view of activeIndex; rebuilt lazily while hide is on. */
+	private hiddenView: VisibleIndexStore | null = null;
 	private readonly vocabulary = new QueryVocabulary();
 	private framer: FramerState = emptyFramerState();
 	private nextEventId = 1;
@@ -224,6 +228,7 @@ class SessionImpl implements Session {
 			Match.when({ kind: "toggle-line-display" }, () => this.commandToggleLineDisplay()),
 			Match.when({ kind: "request-package-attribution" }, () => this.commandPackageAttribution()),
 			Match.when({ kind: "toggle-search-mode" }, () => this.commandToggleSearchMode()),
+			Match.when({ kind: "toggle-below-threshold" }, () => this.commandToggleBelowThreshold()),
 			Match.when({ kind: "set-filter" }, (set) => this.commandSetFilter(set.filter, set.searchMode)),
 			Match.when({ kind: "resize" }, (resize) => this.commandResize(resize.columns, resize.rows)),
 			Match.exhaustive,
@@ -333,6 +338,42 @@ class SessionImpl implements Session {
 		this.publishImmediate();
 
 		return ok(undefined);
+	}
+
+	private commandToggleBelowThreshold(): Result<void, CommandError> {
+		this.belowThreshold = this.belowThreshold === "dim" ? "hide" : "dim";
+		this.hiddenView = null;
+		this.applyNavigation({ kind: "resize" }, 0);
+		this.bump();
+		this.publishImmediate();
+
+		return ok(undefined);
+	}
+
+	/** The ranks the list scrolls through. Hide mode drops scored rows below the threshold. */
+	private viewIndex(): VisibleIndexStore {
+		if (this.belowThreshold === "dim" || !this.semanticQueryActive()) return this.activeIndex;
+
+		if (this.hiddenView !== null) return this.hiddenView;
+
+		const threshold = this.semanticThreshold();
+		const kept: number[] = [];
+
+		for (let rank = 0; rank < this.activeIndex.size; rank += 1) {
+			const id = this.activeIndex.at(rank);
+
+			if (id === null) continue;
+
+			const mark = this.classificationMark(id);
+
+			if (mark.kind !== "scored" || mark.relevance >= threshold) kept.push(id);
+		}
+
+		const view = new VisibleIndexStore();
+		view.append(kept);
+		this.hiddenView = view;
+
+		return view;
 	}
 
 	private commandToggleSearchMode(): Result<void, CommandError> {
@@ -941,25 +982,27 @@ class SessionImpl implements Session {
 		cause: Parameters<typeof planNavigation>[1],
 		newMatchingArrivals: number,
 	): void {
+		this.hiddenView = null;
+		const index = this.viewIndex();
 		const visibleHeight = Math.max(1, logViewportHeight(this.rows));
 		const projectionColumns = this.projectionColumns();
 
 		const plan = planNavigation(this.view, cause, {
-			count: this.activeIndex.size,
+			count: index.size,
 			visibleHeight,
 			rowHeightAt: (rank) => {
-				const id = this.activeIndex.at(rank);
+				const id = index.at(rank);
 				const event = id === null ? null : this.history.get(id);
 
 				return event ? eventScreenRows(event, projectionColumns, this.lineDisplay) : 1;
 			},
-			top: this.activeIndex.locate(this.view.topId),
-			selected: this.activeIndex.locate(this.view.selectedId),
+			top: index.locate(this.view.topId),
+			selected: index.locate(this.view.selectedId),
 			newMatchingArrivals,
 		});
 
-		const selectedId = plan.selectedRank === null ? null : this.activeIndex.at(plan.selectedRank);
-		const topId = plan.topRank === null ? null : this.activeIndex.at(plan.topRank);
+		const selectedId = plan.selectedRank === null ? null : index.at(plan.selectedRank);
+		const topId = plan.topRank === null ? null : index.at(plan.topRank);
 
 		this.view = materializeNavigation(plan, { topId, selectedId });
 	}
@@ -969,14 +1012,15 @@ class SessionImpl implements Session {
 	}
 
 	private buildSnapshot(): SessionSnapshot {
+		const index = this.viewIndex();
 		const height = visibleLogRows(this.rows);
-		const topRank = this.view.topId === null ? 0 : (this.activeIndex.locate(this.view.topId).exactRank ?? 0);
+		const topRank = this.view.topId === null ? 0 : (index.locate(this.view.topId).exactRank ?? 0);
 		const events: LogEvent[] = [];
 		let used = 0;
 		let rank = topRank;
 
-		while (rank < this.activeIndex.size && used < height) {
-			const id = this.activeIndex.at(rank);
+		while (rank < index.size && used < height) {
+			const id = index.at(rank);
 			rank += 1;
 
 			if (id === null) break;
@@ -1031,6 +1075,7 @@ class SessionImpl implements Session {
 			view: this.view,
 			lineDisplay: this.lineDisplay,
 			searchMode: this.searchMode,
+			belowThreshold: this.belowThreshold,
 			rows: this.classifyRows(projectRows(events, this.view.selectedId, projectionColumns, height, this.lineDisplay)),
 			selectedEvent,
 			packageAttribution: this.packageAttribution,
@@ -1082,6 +1127,7 @@ class SessionImpl implements Session {
 	}
 
 	private bump(): void {
+		this.hiddenView = null;
 		this.revision += 1;
 	}
 

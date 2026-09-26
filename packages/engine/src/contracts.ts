@@ -68,6 +68,8 @@ export type SessionSnapshot = Readonly<{
 	view: ViewState;
 	lineDisplay: LineDisplay;
 	searchMode: SearchMode;
+	/** Jev rows scored below the threshold: dimmed in place or hidden from the list. */
+	belowThreshold: BelowThreshold;
 	rows: readonly ViewRow[];
 	selectedEvent: LogEvent | null;
 	packageAttribution: PackageAttribution;
@@ -90,6 +92,8 @@ export type SessionOptions = Readonly<{
 	rows: number;
 	initialFilter: FilterSpec;
 }>;
+
+export type BelowThreshold = "dim" | "hide";
 
 export interface Session {
 	start(): Result<void, StartError>;

@@ -1,4 +1,5 @@
 export type {
+	BelowThreshold,
 	HeadlessOutput,
 	PackageAttribution,
 	Session,

@@ -72,7 +72,7 @@ function helpLines(width: number): string[] {
 		"G / End      follow newest logs · Home first event",
 		"w            toggle line wrapping",
 		"~            ask Jev in the query: / ~database locks",
-		"m            switch the current text between literal and Jev",
+		"m · v        switch literal/Jev · hide or dim weak Jev rows",
 		"h            fill empty list space",
 		"y            copy selected event",
 		"Enter        inspect event · t tag · p PID · y copy",

@@ -549,6 +549,33 @@ describe("semantic query line", () => {
 		}
 	});
 
+	test("v hides rows below the threshold and shows them again", async () => {
+		const classifier = new ScriptedClassifier();
+		const scenario = await openScenario({ maxEvents: 20, rows: 24, columns: 120, classifier, semantic: { flushDelayMs: 0 } });
+
+		try {
+			await scenario.deliver([1, 2, 3], () => ({ message: "database event" }));
+			scenario.session.dispatch({ kind: "set-filter", filter: { ...empty, text: "database" }, searchMode: "jev" });
+			await scenario.waitUntil(() => classifier.pending.length > 0);
+			classifier.resolveShuffled((id) => (id === 2 ? 0.1 : 0.9));
+
+			const scored = await scenario.waitUntil((current) => current.semantic?.classifiedEvents === 3);
+			expect(scored.rows.map((row) => row.id)).toEqual([1, 2, 3]);
+			expect(scored.belowThreshold).toBe("dim");
+
+			scenario.session.dispatch({ kind: "toggle-below-threshold" });
+			const hidden = scenario.session.snapshot();
+			expect(hidden.belowThreshold).toBe("hide");
+			expect(hidden.rows.map((row) => row.id)).toEqual([1, 3]);
+			expect(scenario.session.readMatches(null, 10).map((event) => event.id)).toEqual([1, 2, 3]);
+
+			scenario.session.dispatch({ kind: "toggle-below-threshold" });
+			expect(scenario.session.snapshot().rows.map((row) => row.id)).toEqual([1, 2, 3]);
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
 	test("asking Jev without a classifier is an invalid filter", async () => {
 		const scenario = await openScenario();
 

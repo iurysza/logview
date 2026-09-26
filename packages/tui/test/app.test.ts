@@ -33,6 +33,7 @@ const snapshot: SessionSnapshot = {
 	view: EMPTY_VIEW,
 	lineDisplay: "clip",
 	searchMode: "text",
+	belowThreshold: "dim",
 	rows: [],
 	selectedEvent: null,
 	packageAttribution: { kind: "idle" },

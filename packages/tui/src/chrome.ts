@@ -12,7 +12,7 @@ import {
 	type QueryError,
 	type SearchMode,
 } from "@logview/core";
-import { type SessionSnapshot as EngineSessionSnapshot } from "@logview/engine";
+import { type BelowThreshold, type SessionSnapshot as EngineSessionSnapshot } from "@logview/engine";
 import { paintStyled, rgbSgr, styleOn, type CellStyle, type Rgb } from "./catppuccin.ts";
 import { type PaintStyle } from "./color.ts";
 import { severityStyle, THEME } from "./theme.ts";
@@ -93,6 +93,7 @@ export function keyHints(
 	interaction: InteractionState,
 	searchMode: SearchMode = "text",
 	semanticAvailable = false,
+	belowThreshold: BelowThreshold = "dim",
 ): readonly KeyHint[] {
 	if (interaction.focus === "filters") {
 		return [
@@ -130,12 +131,13 @@ export function keyHints(
 	return [
 		{ key: "Enter", label: "Inspect" },
 		{ key: "/", label: "Query" },
+		...(semanticAvailable ? [{ key: "m", label: searchMode === "jev" ? "Use text" : "Ask Jev" }] : []),
+		...(semanticAvailable && searchMode === "jev" ? [{ key: "v", label: belowThreshold === "hide" ? "Show all" : "Hide weak" }] : []),
 		{ key: "f", label: "Filters" },
 		{ key: "x", label: "Clear" },
 		{ key: "u", label: "Undo" },
 		{ key: "c", label: "Copy query" },
 		{ key: "G", label: "Tail" },
-		...(semanticAvailable ? [{ key: "m", label: searchMode === "jev" ? "Use text" : "Ask Jev" }] : []),
 		{ key: "y", label: "Copy" },
 		{ key: "?", label: "Help" },
 		{ key: "q", label: "Quit" },
@@ -251,7 +253,12 @@ export function jevStatusSpans(snapshot: Snapshot): ChromeSpan[] | null {
 		return [badge, plain(` asking · ${semantic.pendingEvents} left`, THEME.muted)];
 	}
 
-	return [badge, plain(` ${semantic.relevantEvents} relevant`, THEME.purple)];
+	const relevant = plain(` ${semantic.relevantEvents} relevant`, THEME.purple);
+	const below = semantic.classifiedEvents - semantic.relevantEvents;
+
+	if (snapshot.belowThreshold === "hide" && below > 0) return [badge, relevant, plain(` · ${below} hidden`, THEME.muted)];
+
+	return [badge, relevant];
 }
 
 export function paintStatus(snapshot: Snapshot, columns: number, style: PaintStyle): string {
@@ -400,7 +407,7 @@ export function paintFooter(snapshot: Snapshot, interaction: InteractionState, c
 	const badge = displayBadge(snapshot, interaction);
 	const badgeColor = badge === "BROWSE" ? THEME.amber : THEME.accent;
 	const badgeSpan = bold(` ${badge} `, THEME.canvas, badgeColor);
-	const hints = keyHints(interaction, snapshot.searchMode, snapshot.semantic !== null);
+	const hints = keyHints(interaction, snapshot.searchMode, snapshot.semantic !== null, snapshot.belowThreshold);
 	const quit = hints.at(-1)!;
 	const optional = hints.slice(0, -1);
 

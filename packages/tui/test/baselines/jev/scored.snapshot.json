@@ -3114,7 +3114,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " f "
+      "text": " m "
     },
     {
       "x": 39,
@@ -3138,10 +3138,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Filters"
+      "text": " Use text"
     },
     {
-      "x": 47,
+      "x": 48,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -3165,7 +3165,151 @@
       "text": "  "
     },
     {
-      "x": 49,
+      "x": 50,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " v "
+    },
+    {
+      "x": 53,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Hide weak"
+    },
+    {
+      "x": 63,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 65,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " f "
+    },
+    {
+      "x": 68,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Filters"
+    },
+    {
+      "x": 76,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 78,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -3189,7 +3333,7 @@
       "text": " x "
     },
     {
-      "x": 52,
+      "x": 81,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -3213,7 +3357,7 @@
       "text": " Clear"
     },
     {
-      "x": 58,
+      "x": 87,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -3237,7 +3381,7 @@
       "text": "  "
     },
     {
-      "x": 60,
+      "x": 89,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -3261,7 +3405,7 @@
       "text": " u "
     },
     {
-      "x": 63,
+      "x": 92,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -3285,7 +3429,7 @@
       "text": " Undo"
     },
     {
-      "x": 68,
+      "x": 97,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -3307,225 +3451,9 @@
         "underline": null
       },
       "text": "  "
-    },
-    {
-      "x": 70,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 39,
-        "g": 52,
-        "b": 71
-      },
-      "attributes": {
-        "bold": true,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " c "
-    },
-    {
-      "x": 73,
-      "y": 22,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " Copy query"
-    },
-    {
-      "x": 84,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 86,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 39,
-        "g": 52,
-        "b": 71
-      },
-      "attributes": {
-        "bold": true,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " G "
-    },
-    {
-      "x": 89,
-      "y": 22,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " Tail"
-    },
-    {
-      "x": 94,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 96,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 39,
-        "g": 52,
-        "b": 71
-      },
-      "attributes": {
-        "bold": true,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " m "
     },
     {
       "x": 99,
-      "y": 22,
-      "foreground": {
-        "r": 135,
-        "g": 150,
-        "b": 181
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": " Use text"
-    },
-    {
-      "x": 108,
-      "y": 22,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "  "
-    },
-    {
-      "x": 110,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -3549,7 +3477,7 @@
       "text": " q "
     },
     {
-      "x": 113,
+      "x": 102,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -3573,7 +3501,7 @@
       "text": " Quit"
     },
     {
-      "x": 118,
+      "x": 107,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -3594,7 +3522,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "  "
+      "text": "             "
     },
     {
       "x": 0,

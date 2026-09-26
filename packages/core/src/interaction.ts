@@ -490,6 +490,8 @@ function reduceList(
 
 	if (key === "m" || key === "M") return done(state, { kind: "toggle-search-mode" });
 
+	if ((key === "v" || key === "V") && searchMode === "jev") return done(state, { kind: "toggle-below-threshold" });
+
 	if (!ctrl && (key === "x" || key === "X")) {
 		const committed = commitFilter(state.undo, activeFilter, EMPTY_FILTER);
 

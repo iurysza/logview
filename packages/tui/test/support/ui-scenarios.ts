@@ -343,6 +343,14 @@ const SCENARIOS: readonly UiScenario[] = [
 			expectText(scored, "✦ Jev database locks", "scored");
 			expectText(scored, "━━━━━ 0.93", "scored");
 
+			await send(context.session, ["text:v"]);
+			await waitForText(context.session, "hidden");
+			const hidden = await context.capture("hidden", { cols: 120, rows: 24 });
+
+			expectText(hidden, "Show all", "hidden");
+			await send(context.session, ["text:v"]);
+			await waitForText(context.session, "Hide weak");
+
 			await send(context.session, ["text:m"]);
 			await waitForText(context.session, "Text / database locks");
 			await context.capture("literal", { cols: 120, rows: 24 });
