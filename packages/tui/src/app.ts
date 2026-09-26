@@ -543,7 +543,10 @@ export async function attachTui(
 				{ kind: "key", key: mapped.key, ctrl: mapped.ctrl, shift: mapped.shift },
 				snapshot.activeFilter,
 				selectionOf(snapshot),
+				snapshot.searchMode,
 			);
+
+			if (result.effect?.kind === "copy") void copyToClipboard(result.effect.text);
 
 			interaction = result.state;
 
