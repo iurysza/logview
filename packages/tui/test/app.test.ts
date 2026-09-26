@@ -178,6 +178,10 @@ describe("tui chrome", () => {
 		expect(formatFilter(snapshot)).toContain("Tag: any");
 		expect(formatFooter(snapshot)).toContain("TAIL");
 		expect(formatHints()).toContain("q Quit");
+		expect(formatHints()).toContain("/ Query");
+		expect(formatHints()).toContain("x Clear");
+		expect(formatHints()).toContain("u Undo");
+		expect(formatHints()).toContain("c Copy query");
 		expect(formatHints()).toContain("y Copy");
 		expect(formatHints()).not.toMatch(/\bw /);
 		expect(formatHints(LIST_FOCUS, "jev", true)).toContain("m Jev");
@@ -213,7 +217,54 @@ describe("tui chrome", () => {
 		const help = layoutFrame(snapshot, HELP_FOCUS, 72, 16, "plain").join("\n");
 
 		expect(help).toMatch(/h\s+fill empty list space/);
+		expect(help).toContain("x clear");
+		expect(help).toContain("u undo");
+		expect(help).toContain("c copy");
 		expect(formatHints()).not.toMatch(/\bh List background\b/);
+	});
+
+	test("status counts matches while a filter is active", () => {
+		const filtered: SessionSnapshot = {
+			...snapshot,
+			activeFilter: { ...EMPTY_FILTER, minLevel: "W" },
+			stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 4 },
+		};
+
+		expect(formatStatus(filtered)).toContain("4 of 15");
+		expect(formatStatus(snapshot)).toContain("18 events");
+	});
+
+	test("empty matches name the query and the clear keys", () => {
+		const filtered: SessionSnapshot = {
+			...snapshot,
+			activeFilter: { ...EMPTY_FILTER, tag: "Nope" },
+			stats: { ...snapshot.stats, retainedEvents: 15, matchedEvents: 0 },
+			rows: [],
+		};
+
+		const text = layoutFrame(filtered, LIST_FOCUS, 80, 16, "plain").join("\n");
+
+		expect(text).toContain("No events match tag:Nope");
+		expect(text).toContain("x clear · u undo");
+	});
+
+	test("query editor shows the draft, cursor text, and parse error", () => {
+		const editing = {
+			focus: "query" as const,
+			draft: "pid:",
+			cursor: 4,
+			error: { kind: "invalid-filter" as const, field: "pid" as const, message: "PID must be a positive integer" },
+			origin: EMPTY_FILTER,
+			historyIndex: null,
+			history: [],
+			undo: [],
+		};
+
+		const frame = layoutFrame(snapshot, editing, 80, 16, "plain");
+
+		expect(frame[1]).toContain("/ pid:");
+		expect(frame[1]).toContain("! PID must be a positive integer");
+		expect(frame.at(-2)).toContain("QUERY");
 	});
 
 	test("ansi status fits 48 columns like the plain branch", () => {

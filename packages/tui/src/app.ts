@@ -16,6 +16,7 @@ import {
 import type { Session, SessionSnapshot, TerminalAttachment, UiError } from "@logview/engine";
 import { paintChrome, paintFilled, paintRow, paintStyleFromEnv, type PaintStyle } from "./color.ts";
 import {
+	emptyMatchCopy,
 	formatFilter,
 	formatFooter,
 	formatHints,
@@ -70,7 +71,7 @@ function helpLines(width: number): string[] {
 		"h            fill empty list space",
 		"y            copy selected event",
 		"Enter        inspect event · t tag · p PID · y copy",
-		"/            search event text",
+		"/            query   x clear   u undo   c copy",
 		"f            change filters",
 	];
 
@@ -112,8 +113,17 @@ function paintLogRows(
 	style: PaintStyle,
 	semantic: SessionSnapshot["semantic"],
 	listBackground: boolean,
+	emptyCopy: readonly string[] | null,
 ): string[] {
 	const lines: string[] = [];
+
+	if (rows.length === 0 && emptyCopy) {
+		for (const text of emptyCopy) {
+			if (lines.length >= count) break;
+
+			lines.push(paintFilled(text, columns, style, THEME.muted, listBackground ? THEME.canvas : null));
+		}
+	}
 
 	if (semantic === null) {
 		for (const row of rows) {
@@ -226,7 +236,7 @@ function layoutLines(
 	const wideInspect = inspectOpen && columns >= INSPECT_WIDE_COLUMNS;
 	const logWidth = wideInspect ? Math.max(1, columns - inspectorWidth(columns) - 1) : columns;
 	const semantic = snapshot.searchMode === "jev" && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
-	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic, listBackground);
+	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic, listBackground, emptyMatchCopy(snapshot));
 	const selectedRow = selectedHeaderRow(snapshot);
 	const classification = classificationLabel(selectedRow);
 
