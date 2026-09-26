@@ -21,6 +21,20 @@ bun run logview replay sessions/example.lvr.jsonl --config logview.json
 
 `--headless` prints one JSON `HeadlessOutput` line after the source completes. Diagnostics go to stderr. Exit codes: `0` success (including a size-limit recording), `1` source/recording failure, `2` invalid arguments.
 
+## Agent CLI
+
+`query` streams matched events from a recording or live ADB without loading the TUI. It does not write files.
+
+```sh
+bun run logview query sessions/example.lvr.jsonl 'level:W tag:Database lock' --limit 20
+bun run logview query --live 'pid:4321' --serial DEVICE --timeout 5s
+bun run logview query --check 'level:w tag:Database'
+```
+
+Terms `level:`, `tag:`, `pid:`, and `pkg:` filter events. Other terms search text. Run `logview query --help` for the full grammar. `--since` accepts an ISO-8601 time with timezone or epoch seconds; live queries also accept a relative duration such as `30s`. Live queries time out after 10 seconds unless you set `--timeout`.
+
+Default output is NDJSON: one event per line, then one summary line. An event has `v`, `type`, `id`, `time` (ISO), `epochMicros`, `level`, `pid`, `tid`, `uid`, `tag`, `message`, `raw`, and `continuations`. Events without parsed metadata have null metadata fields. The summary has `query`, `emitted`, `matched`, `stop`, `terminal`, `evictedBeforeRead`, and `timeout_ms` (for live queries). `evictedBeforeRead` estimates unread eviction from the eviction count and last-read ID; it can include nonmatching events. `--format text` sends raw lines and continuations to stdout and the JSON summary to stderr. Exit codes: `0` success, `1` source failure, `2` invalid arguments or query.
+
 ## Config file
 
 `live` and `replay` read `logview.json` in the working directory. Pass `--config PATH` to use another file. Flags override the file. Keep `TYPESAFE_API_KEY` in the environment.
