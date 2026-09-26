@@ -220,10 +220,11 @@ function openQuery(state: InteractionState, activeFilter: FilterSpec): Interacti
 	};
 }
 
-function editQuery(
+function applyQueryDraft(
 	state: QueryState,
 	draft: string,
 	cursor: number,
+	historyIndex: number | null,
 	activeFilter: FilterSpec,
 	searchMode: SearchMode,
 ): InteractionResult {
@@ -235,16 +236,24 @@ function editQuery(
 		cursor,
 		error: parsed.ok ? null : parsed.error,
 		origin: state.origin,
-		historyIndex: null,
+		historyIndex,
 		history: state.history,
 		undo: state.undo,
 	};
 
-	if (!parsed.ok || searchMode === "jev") return done(next, null);
+	if (!parsed.ok || searchMode === "jev" || sameFilter(activeFilter, parsed.value)) return done(next, null);
 
-	const committed = commitFilter(state.undo, activeFilter, parsed.value);
+	return done(next, { kind: "set-filter", filter: parsed.value });
+}
 
-	return done({ ...next, undo: committed.undo }, committed.command);
+function editQuery(
+	state: QueryState,
+	draft: string,
+	cursor: number,
+	activeFilter: FilterSpec,
+	searchMode: SearchMode,
+): InteractionResult {
+	return applyQueryDraft(state, draft, cursor, null, activeFilter, searchMode);
 }
 
 function commitQuery(state: QueryState, activeFilter: FilterSpec): InteractionResult {
@@ -252,18 +261,17 @@ function commitQuery(state: QueryState, activeFilter: FilterSpec): InteractionRe
 
 	if (!parsed.ok) return done({ ...state, error: parsed.error }, null);
 
-	const committed = commitFilter(state.undo, activeFilter, parsed.value);
+	const filter = parsed.value;
+	const undo = sameFilter(state.origin, filter) ? state.undo : rememberFilter(state.undo, state.origin);
+	const command = sameFilter(activeFilter, filter) ? null : { kind: "set-filter" as const, filter };
 
-	return done(
-		{ focus: "list", history: rememberQuery(state.history, formatFilterQuery(parsed.value)), undo: committed.undo },
-		committed.command,
-	);
+	return done({ focus: "list", history: rememberQuery(state.history, formatFilterQuery(filter)), undo }, command);
 }
 
 function cancelQuery(state: QueryState, activeFilter: FilterSpec): InteractionResult {
-	const committed = commitFilter(state.undo, activeFilter, state.origin);
+	const command = sameFilter(activeFilter, state.origin) ? null : { kind: "set-filter" as const, filter: state.origin };
 
-	return done(showList(state, committed.undo), committed.command);
+	return done(showList(state), command);
 }
 
 function recallQuery(
@@ -287,21 +295,8 @@ function recallQuery(
 	if (index === null || index === state.historyIndex) return done(state, null);
 
 	const draft = history[index] ?? "";
-	const parsed = parseFilterQuery(draft);
 
-	const next: QueryState = {
-		...state,
-		draft,
-		cursor: [...draft].length,
-		historyIndex: index,
-		error: parsed.ok ? null : parsed.error,
-	};
-
-	if (!parsed.ok || searchMode === "jev") return done(next, null);
-
-	const committed = commitFilter(state.undo, activeFilter, parsed.value);
-
-	return done({ ...next, undo: committed.undo }, committed.command);
+	return applyQueryDraft(state, draft, [...draft].length, index, activeFilter, searchMode);
 }
 
 function insertQuery(state: QueryState, text: string, activeFilter: FilterSpec, searchMode: SearchMode): InteractionResult {

@@ -159,6 +159,7 @@ describe("query editor", () => {
 
 		expect(escaped.command).toEqual({ kind: "set-filter", filter: origin });
 		expect(escaped.state.focus).toBe("list");
+		expect(escaped.state.undo).toEqual([]);
 	});
 
 	test("Enter records history and Up recalls an earlier query", () => {
@@ -205,6 +206,26 @@ describe("query editor", () => {
 			kind: "set-filter",
 			filter: { minLevel: null, tag: null, pid: null, packageName: null, text: "lock" },
 		});
+	});
+
+	test("typing a query records one undo entry for the origin filter", () => {
+		let state = applyKey(LIST_FOCUS, "/", EMPTY_FILTER).state;
+		let active = EMPTY_FILTER;
+
+		for (const key of "Database") {
+			const step = applyKey(state, key, active);
+			expect(step.state.undo).toEqual([]);
+			state = step.state;
+			active = step.active;
+		}
+
+		const entered = applyKey(state, "enter", active);
+
+		expect(entered.state.undo).toEqual([EMPTY_FILTER]);
+		const restored = applyKey(entered.state, "u", entered.active);
+
+		expect(restored.active).toEqual(EMPTY_FILTER);
+		expect(restored.state.undo).toEqual([]);
 	});
 
 	test("c copies the canonical query", () => {
