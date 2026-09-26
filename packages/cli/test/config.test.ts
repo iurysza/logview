@@ -9,7 +9,7 @@ import {
 	DEFAULT_SEMANTIC_HISTORY_EVENTS,
 	DEFAULT_SEMANTIC_THRESHOLD,
 	JEV_MODEL_ID,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import {
 	decodeConfigJson,
 	readConfigFile,
@@ -24,7 +24,7 @@ const emptyOverlay: CliOverlay = {
 	modelFromEnv: null,
 };
 
-describe("logview.json", () => {
+describe("logcayo.json", () => {
 	test("empty object keeps semantic off and engine defaults", () => {
 		const decoded = decodeConfigJson("{}");
 
@@ -149,7 +149,7 @@ describe("logview.json", () => {
 	});
 
 	test("readConfigFile loads an explicit path and skips a missing default", async () => {
-		const dir = await mkdtemp(join(tmpdir(), "logview-config-"));
+		const dir = await mkdtemp(join(tmpdir(), "logcayo-config-"));
 		const path = join(dir, "settings.json");
 
 		await writeFile(
@@ -179,7 +179,7 @@ describe("logview.json", () => {
 		expect(missingDefault.value).toBeNull();
 
 		await writeFile(
-			join(dir, "logview.json"),
+			join(dir, "logcayo.json"),
 			JSON.stringify({ filter: { text: "from-default" } }),
 		);
 

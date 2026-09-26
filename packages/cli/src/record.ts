@@ -7,7 +7,7 @@ import {
 	DEFAULT_MAX_RECORDING_BYTES,
 	recordSession,
 	uidRecordingHeader,
-} from "@logview/engine";
+} from "@logcayo/engine";
 
 export type RecordCommand = Readonly<{
 	adbPath: string;

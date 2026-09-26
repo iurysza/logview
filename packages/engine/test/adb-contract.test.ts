@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { err, ok, type Result } from "@logview/core";
+import { err, ok, type Result } from "@logcayo/core";
 import {
 	createAdbPackageResolver,
 	createAdbSource,
@@ -10,7 +10,7 @@ import {
 	type ProcessRunner,
 	type ProcessSpec,
 	type SourceError,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { adbStubPath } from "../../../tests/support/adb-stubs/paths.ts";
 import { ManualScheduler } from "../../../tests/support/manual-scheduler.ts";
 import { SANITIZED_DEVICE_SERIAL } from "../../../tests/fixtures/real/sanitized-payload.ts";

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { HELP_FOCUS, INSPECT_FOCUS, LIST_FOCUS, NONE_CLASSIFICATION, displayWidth, type LogEvent, type ViewRow } from "@logview/core";
-import type { SessionSnapshot } from "@logview/engine";
-import { EMPTY_FILTER, EMPTY_VIEW } from "@logview/core";
+import { HELP_FOCUS, INSPECT_FOCUS, LIST_FOCUS, NONE_CLASSIFICATION, displayWidth, type LogEvent, type ViewRow } from "@logcayo/core";
+import type { SessionSnapshot } from "@logcayo/engine";
+import { EMPTY_FILTER, EMPTY_VIEW } from "@logcayo/core";
 import {
 	decodeTerminalInput,
 	decodeTerminalKey,
@@ -290,7 +290,7 @@ describe("tui chrome", () => {
 		expect(displayWidth(plain[0]!)).toBe(48);
 		expect(displayWidth(visible)).toBe(48);
 		expect(visible).toBe(plain[0]!);
-		expect(visible.startsWith("logview")).toBe(true);
+		expect(visible.startsWith("logcayo")).toBe(true);
 		expect(visible).toContain("15 events");
 	});
 

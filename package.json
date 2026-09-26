@@ -1,11 +1,11 @@
 {
-  "name": "logview",
+  "name": "logcayo",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "workspaces": ["packages/*"],
   "scripts": {
-    "logview": "bun packages/cli/src/main.ts",
+    "logcayo": "bun packages/cli/src/main.ts",
     "lint": "bun --bun oxlint -c oxlint.config.ts packages tests bench",
     "lint:fix": "bun --bun oxlint -c oxlint.config.ts --fix packages tests bench",
     "test": "bun test packages/core packages/engine packages/cli tests",

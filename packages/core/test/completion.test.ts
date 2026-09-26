@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { acceptCompletion, completeQuery, EMPTY_CANDIDATES, type QueryCandidates } from "@logview/core";
+import { acceptCompletion, completeQuery, EMPTY_CANDIDATES, type QueryCandidates } from "@logcayo/core";
 
 const seen: QueryCandidates = {
 	tags: ["Database", "logview-demo", "ActivityManager", "My Tag"],

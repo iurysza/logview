@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { EMPTY_FILTER, formatFilterQuery, formatQuery, parseFilterQuery, parseQuery, textMatchRanges, type FilterSpec } from "@logview/core";
+import { EMPTY_FILTER, formatFilterQuery, formatQuery, parseFilterQuery, parseQuery, textMatchRanges, type FilterSpec } from "@logcayo/core";
 
 function parsed(query: string): FilterSpec {
 	const result = parseFilterQuery(query);

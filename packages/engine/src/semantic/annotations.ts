@@ -1,4 +1,4 @@
-import type { EventId } from "@logview/core";
+import type { EventId } from "@logcayo/core";
 import type { Relevance } from "./contracts.ts";
 
 export type Annotation =

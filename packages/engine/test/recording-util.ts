@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@logview/core";
+import { err, ok, type Result } from "@logcayo/core";
 import type {
 	RecordingEnd,
 	RecordingError,
@@ -7,13 +7,13 @@ import type {
 	RecordingRecord,
 	RecordingWriter,
 	SourcePacket,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import {
 	bytesToBase64,
 	decodeRecordingLine,
 	encodeRecordingRecord,
 	syntheticRecordingHeader,
-} from "@logview/engine";
+} from "@logcayo/engine";
 
 class MemoryWriter implements RecordingWriter {
 	constructor(

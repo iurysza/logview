@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { err, ok, type Result } from "@logview/core";
+import { err, ok, type Result } from "@logcayo/core";
 import {
 	validateClassifyResponse,
 	type ClassifierError,
@@ -8,7 +8,7 @@ import {
 	type ClassifyResponse,
 	type LogClassifier,
 	type Relevance,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { openScenario, tick } from "../../../tests/support/scenario.ts";
 
 function item(eventId: number, message: string): ClassifierItem {

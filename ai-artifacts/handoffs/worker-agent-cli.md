@@ -1,4 +1,4 @@
-# Worker brief: `logview query` agent CLI
+# Worker brief: `logcayo query` agent CLI
 
 You work in `~/dev/worktrees/logview/agent-cli` on branch `feature/agent-cli`. Nobody else writes here.
 
@@ -7,14 +7,14 @@ Read first: `AGENTS.md`, `ai-artifacts/specs/2026-09-26-tui-filtering-agent-cli-
 ## Build
 
 1. **Engine**: add `readMatches(after: EventId | null, limit: number): readonly LogEvent[]` to the `Session` interface in `engine/src/contracts.ts` and implement it in `session.ts`. Read-only. Walk the *active* index (published filter only, never a pending one) in id order, return events with id > `after`, at most `limit`. Also expose `filterSettled` via the snapshot if you need it (`pendingFilter === null` already exists; prefer that).
-2. **CLI**: `logview query` in `cli/src/main.ts`, logic in `cli/src/headless.ts` (extend it, do not add a parallel module unless headless.ts would exceed ~250 lines; then `cli/src/query.ts` is fine). Surface:
+2. **CLI**: `logcayo query` in `cli/src/main.ts`, logic in `cli/src/headless.ts` (extend it, do not add a parallel module unless headless.ts would exceed ~250 lines; then `cli/src/query.ts` is fine). Surface:
    ```
-   logview query PATH [QUERY] [--limit N] [--since TIME] [--format ndjson|text] [--allow-partial]
-   logview query --live [QUERY] [--serial S] [--adb PATH] [--timeout DUR] [--limit N] [--since TIME|DUR]
-   logview query --check QUERY
-   logview query --help
+   logcayo query PATH [QUERY] [--limit N] [--since TIME] [--format ndjson|text] [--allow-partial]
+   logcayo query --live [QUERY] [--serial S] [--adb PATH] [--timeout DUR] [--limit N] [--since TIME|DUR]
+   logcayo query --check QUERY
+   logcayo query --help
    ```
-   - QUERY is parsed ONLY with `parseFilterQuery` from `@logview/core` and passed as `initialFilter`. No other filter parsing anywhere in the CLI. Replay uses `speed: instant`.
+   - QUERY is parsed ONLY with `parseFilterQuery` from `@logcayo/core` and passed as `initialFilter`. No other filter parsing anywhere in the CLI. Replay uses `speed: instant`.
    - Loop: subscribe; on each publish, `readMatches(cursor, remaining)` and write. Stop on first of: limit reached, timeout, source terminal AND `pendingFilter === null` AND no more matches, SIGINT/SIGTERM. Then drain once more, write the summary, `await session.stop()`.
    - NDJSON event: `{"v":1,"type":"event","id","time"(ISO from epochMicros, null if no metadata),"epochMicros","level","pid","tid","uid","tag","message","raw","continuations":[]}`. Use `tagText`/`messageText` from core. Unparsed lines: metadata fields null, `raw` set.
    - Summary last line: `{"v":1,"type":"summary","query":<formatFilterQuery(spec)>,"emitted","matched":stats.matchedEvents,"stop":"eof"|"limit"|"timeout"|"signal","terminal":SourceTerminal|null,"evictedBeforeRead":n}`. `evictedBeforeRead` counts ids skipped because history evicted them before read (detect gaps via active index vs cursor; a simple approach is fine; document it).
@@ -25,7 +25,7 @@ Read first: `AGENTS.md`, `ai-artifacts/specs/2026-09-26-tui-filtering-agent-cli-
    - Read-only: never write files.
    - `--help` for query: grammar, 3 examples, exit codes. Update top-level `usage()` too.
 3. **Tests** (`packages/cli/test/query.test.ts`, `packages/engine/test/session.test.ts` additions):
-   - Contract: for every case in `tests/contract/filter-cases.ts`, run `main(["bun","logview","query",FIXTURE,query])` capturing stdout (inject a writer; do not spawn processes), assert event ids equal `expectedIds` and summary `query` equals `canonical`. Every `INVALID_FILTER_QUERIES` entry exits 2 with a JSON error whose `field` matches.
+   - Contract: for every case in `tests/contract/filter-cases.ts`, run `main(["bun","logcayo","query",FIXTURE,query])` capturing stdout (inject a writer; do not spawn processes), assert event ids equal `expectedIds` and summary `query` equals `canonical`. Every `INVALID_FILTER_QUERIES` entry exits 2 with a JSON error whose `field` matches.
    - `--limit 2` stops with `stop:"limit"`, 2 events. `--check`. `--format text`. relative `--since` without `--live` → 2.
    - Live: use the fake adb in `tests/support/adb-stubs/` with `--timeout`, as `packages/cli/test/live-adb.test.ts` does.
    - Headless tests must not load OpenTUI or start real adb.
@@ -34,6 +34,6 @@ Read first: `AGENTS.md`, `ai-artifacts/specs/2026-09-26-tui-filtering-agent-cli-
 ## Rules
 
 - Do not touch `packages/tui/**`, `packages/core/src/interaction.ts`, `tests/architecture/**`. If you need a core change, stop and tell the coordinator in your final message.
-- `bun run check` must pass and oxlint must be clean before you finish. Also run the real thing: `bun run logview query tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl 'level:W'` and paste the output in your final message.
+- `bun run check` must pass and oxlint must be clean before you finish. Also run the real thing: `bun run logcayo query tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl 'level:W'` and paste the output in your final message.
 - Commit in small conventional commits, author is the repo default (Iury). No co-author trailers. Do not push.
 - Finish with a short report: files changed, commands run with results, anything you deferred.

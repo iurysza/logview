@@ -4,7 +4,7 @@ Status: accepted direction, 20 September 2026
 
 ## Decision
 
-Logview will use Android UID data for package attribution and filtering.
+Logcayo will use Android UID data for package attribution and filtering.
 
 - add UID to the Logcat capture profile and `LogMetadata`
 - resolve package names only when details or a package filter needs them
@@ -31,7 +31,7 @@ PID tracking is weaker for retained logs. Processes restart, PIDs are reused, an
 | [Logcat-viewer](https://github.com/IzhanAli/Logcat-viewer/blob/8d5ef5eae1c31605f0edff92c93701cdae2d6c0f/src/adb.js#L90-L134) | uses `pidof`, falls back to `ps`, and repolls every 2 seconds | package filtering, not replay-safe attribution |
 | [BeautyCat](https://github.com/jeziellago/beautycat/blob/f80e99946bfce5ff9c6078b2b5b0c03f1bcf174f/beautycat/resolver.py#L10-L51) | refreshes a complete PID-to-process map every 2 seconds and annotates new records | can miss short-lived, dead, and buffered processes |
 
-These tools justify package filtering as a product need. Their PID-based designs do not meet logview's retained-history and replay requirements.
+These tools justify package filtering as a product need. Their PID-based designs do not meet logcayo's retained-history and replay requirements.
 
 ## Implementation direction
 

@@ -1,5 +1,5 @@
 import type { Cancel, Scheduler } from "../ports.ts";
-import type { EventId, SessionId } from "@logview/core";
+import type { EventId, SessionId } from "@logcayo/core";
 import { AnnotationTable, type Annotation } from "./annotations.ts";
 import type {
 	ClassifierError,

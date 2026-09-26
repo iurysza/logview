@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { DEFAULT_MAX_EVENTS, DEFAULT_MAX_HISTORY_CHARGE_BYTES } from "@logview/core";
+import { DEFAULT_MAX_EVENTS, DEFAULT_MAX_HISTORY_CHARGE_BYTES } from "@logcayo/core";
 import { benchEnvironment, measureSession, type BenchMode, type BenchMeasurement } from "./session-bench.ts";
 
 const DEFAULT_COUNT = 2_000;

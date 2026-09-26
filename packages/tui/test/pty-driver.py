@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Drive logview inside a PTY, resize, and print captured output after quit."""
+"""Drive logcayo inside a PTY, resize, and print captured output after quit."""
 
 from __future__ import annotations
 
@@ -75,9 +75,9 @@ def main() -> int:
 
     set_winsize(fd, pid, 24, 80)
     deadline = time.monotonic() + TIMEOUT_SEC
-    captured = drain(fd, deadline, b"logview")
+    captured = drain(fd, deadline, b"logcayo")
 
-    if b"q quit" not in captured and b"logview" not in captured:
+    if b"q quit" not in captured and b"logcayo" not in captured:
         os.write(fd, b"q")
         captured += drain(fd, time.monotonic() + 2)
 
@@ -114,7 +114,7 @@ def main() -> int:
     sys.stdout.buffer.write(captured)
     sys.stdout.buffer.write(b"\nPTY_WAIT_STATUS=" + str(status).encode("ascii") + b"\n")
 
-    if b"q quit" not in captured and b"logview" not in captured:
+    if b"q quit" not in captured and b"logcayo" not in captured:
         return 1
 
     return 0

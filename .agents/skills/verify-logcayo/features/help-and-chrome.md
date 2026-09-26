@@ -5,7 +5,7 @@ The header, filter line, and footer stay on screen while the user reads logs. He
 ## Sub-features
 
 - `help-open` replaces the list body with the key list.
-- `chrome-narrow` keeps `logview` and `15 events` on one 48-column header.
+- `chrome-narrow` keeps `logcayo` and `15 events` on one 48-column header.
 - `chrome-minimum` shows the resize warning below 40×8.
 - `chrome-no-color` paints a plain screen when color is disabled.
 
@@ -19,11 +19,11 @@ The header, filter line, and footer stay on screen while the user reads logs. He
 
 Preconditions:
 
-- `bun .agents/skills/verify-logview/doctor.ts` reports `ok`.
+- `bun .agents/skills/verify-logcayo/doctor.ts` reports `ok`.
 - Use a unique `--out` directory for each named scenario below.
 
 - **Help.** Run `bun run ui:verify --scenario help --out generated/ui/help`. After `?`, `generated/ui/help/final/screen.txt` contains `Keys` and `t / p        from inspect`.
-- **48-column header.** Run `bun run ui:verify --scenario sizes --out generated/ui/sizes`. `generated/ui/sizes/columns-48/screen.txt` line 1 contains `logview`, ends with `15 events`, and is 48 columns wide.
+- **48-column header.** Run `bun run ui:verify --scenario sizes --out generated/ui/sizes`. `generated/ui/sizes/columns-48/screen.txt` line 1 contains `logcayo`, ends with `15 events`, and is 48 columns wide.
 - **Minimum size.** The same `sizes` run resizes to 39×7. `generated/ui/sizes/final/screen.txt` contains `Terminal too small`.
 - **No color.** Run `bun run ui:verify --scenario no-color --out generated/ui/no-color`. `generated/ui/no-color/final/screen.snapshot.json` has no span whose colors differ from the default foreground and background.
 - **Highlights.** Run `bun run ui:verify --scenario highlight --out generated/ui/highlight` when you need color proof. The snapshot has a Catppuccin red `E` and the text `token=REDACTED`.

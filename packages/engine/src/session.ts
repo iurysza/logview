@@ -34,7 +34,7 @@ import {
 	type StartError,
 	type ViewRow,
 	type ViewState,
-} from "@logview/core";
+} from "@logcayo/core";
 import { Effect, Match } from "effect";
 import { fromResultEffect, runSyncResult } from "./result.ts";
 import {
@@ -88,7 +88,7 @@ type SemanticVisibleCounts = {
 export function createSession(
 	options: SessionOptions,
 	dependencies: SessionDependencies,
-): Result<Session, import("@logview/core").ConfigurationError> {
+): Result<Session, import("@logcayo/core").ConfigurationError> {
 	return runSyncResult(
 		Effect.gen(function* () {
 			const validated = yield* fromResultEffect(validateSessionOptions(options, dependencies.source));

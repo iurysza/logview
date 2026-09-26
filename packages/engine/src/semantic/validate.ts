@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@logview/core";
+import { err, ok, type Result } from "@logcayo/core";
 import type { ClassifyRequest, ClassifyResponse, ClassifierError, Relevance } from "./contracts.ts";
 
 function isFiniteUnitInterval(value: number): boolean {

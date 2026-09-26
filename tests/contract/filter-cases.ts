@@ -1,5 +1,5 @@
 /**
- * Shared filter contract. The CLI (`logview query`) and the TUI (`/` editor)
+ * Shared filter contract. The CLI (`logcayo query`) and the TUI (`/` editor)
  * must return exactly these event IDs for each query against FIXTURE.
  * IDs are engine event IDs from an instant replay. Continuation lines belong
  * to their parent event.

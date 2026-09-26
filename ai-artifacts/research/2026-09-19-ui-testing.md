@@ -1,4 +1,4 @@
-# Visual testing for logview
+# Visual testing for logcayo
 
 ## Recommendation
 
@@ -75,7 +75,7 @@ Each screenshot has text and cell JSON alongside it. `replay.termctrl` retains t
 
 ## Tool comparison
 
-Capabilities below come from primary documentation and package metadata. Only Terminal Control 0.4.1 was exercised against logview.
+Capabilities below come from primary documentation and package metadata. Only Terminal Control 0.4.1 was exercised against logcayo.
 
 | Tool | Best use here | Trade-off | Decision |
 |---|---|---|---|

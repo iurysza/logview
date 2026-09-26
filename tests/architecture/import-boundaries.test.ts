@@ -54,7 +54,7 @@ describe("import boundaries", () => {
 			const source = await readFile(file, "utf8");
 
 			for (const specifier of importedSpecifiers(source)) {
-				expect(specifier.includes("opentui") || specifier.includes("@logview/tui")).toBe(false);
+				expect(specifier.includes("opentui") || specifier.includes("@logcayo/tui")).toBe(false);
 			}
 		}
 	});
@@ -63,7 +63,7 @@ describe("import boundaries", () => {
 		const source = await readFile(join(import.meta.dir, "../../packages/cli/src/headless.ts"), "utf8");
 
 		for (const specifier of importedSpecifiers(source)) {
-			expect(specifier.includes("@logview/tui") || specifier.includes("opentui")).toBe(false);
+			expect(specifier.includes("@logcayo/tui") || specifier.includes("opentui")).toBe(false);
 		}
 	});
 
@@ -75,10 +75,10 @@ describe("import boundaries", () => {
 			const source = await readFile(file, "utf8");
 
 			for (const specifier of importedSpecifiers(source)) {
-				expect({ file, specifier, tui: specifier.includes("@logview/tui") || specifier.includes("opentui") }).toMatchObject({ tui: false });
+				expect({ file, specifier, tui: specifier.includes("@logcayo/tui") || specifier.includes("opentui") }).toMatchObject({ tui: false });
 			}
 
-			const dynamic = source.match(/import\(\s*["']@logview\/tui["']\s*\)/g) ?? [];
+			const dynamic = source.match(/import\(\s*["']@logcayo\/tui["']\s*\)/g) ?? [];
 
 			if (dynamic.length > 0) expect(file.endsWith("packages/cli/src/main.ts")).toBe(true);
 			dynamicImports += dynamic.length;
@@ -95,7 +95,7 @@ describe("import boundaries", () => {
 				const source = await readFile(file, "utf8");
 
 				for (const specifier of importedSpecifiers(source)) {
-					expect({ file, specifier, cli: specifier.includes("@logview/cli") }).toMatchObject({ cli: false });
+					expect({ file, specifier, cli: specifier.includes("@logcayo/cli") }).toMatchObject({ cli: false });
 				}
 			}
 		}
@@ -109,7 +109,7 @@ describe("import boundaries", () => {
 				const source = await readFile(file, "utf8");
 
 				for (const specifier of importedSpecifiers(source)) {
-					const deep = /^@logview\/[a-z]+\//.test(specifier) || /(\.\.\/)+(core|engine|cli|tui)\//.test(specifier);
+					const deep = /^@logcayo\/[a-z]+\//.test(specifier) || /(\.\.\/)+(core|engine|cli|tui)\//.test(specifier);
 					expect({ file, specifier, deep }).toMatchObject({ deep: false });
 				}
 			}

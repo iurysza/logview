@@ -1,4 +1,4 @@
-import { err, ok, type ConfigurationError, type Result } from "@logview/core";
+import { err, ok, type ConfigurationError, type Result } from "@logcayo/core";
 import { Effect, Match } from "effect";
 import type {
 	LogSource,

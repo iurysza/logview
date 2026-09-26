@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>logview · one filter, two doors</title>
+<title>logcayo · one filter, two doors</title>
 <style>
 :root{--bg:#11111b;--base:#1e1e2e;--s0:#313244;--s1:#45475a;--tx:#cdd6f4;--mu:#9399b2;--bl:#89b4fa;--gr:#a6e3a1;--ye:#f9e2af;--pe:#fab387;--re:#f38ba8;--mv:#cba6f7;--te:#94e2d5}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
@@ -70,7 +70,7 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
 <main>
 
 <section id="why" class="in">
-  <div class="kicker">logview · feature/tui-filtering-agent-cli</div>
+  <div class="kicker">logcayo · feature/tui-filtering-agent-cli</div>
   <h1>One filter.<br>Two doors.</h1>
   <p class="lead">You type a filter in the terminal UI. An agent runs the <em>same string</em> in a CLI. Both go through one parser and one matcher. Same answer, every time.</p>
   <div class="term mono"><span class="p">/</span> <span id="typed"></span><span class="caret"></span></div>
@@ -91,13 +91,13 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
       <rect x="20" y="40" width="190" height="80" rx="14" fill="#1e1e2e" stroke="#cba6f7"/>
       <text x="115" y="75" text-anchor="middle" font-weight="700">TUI  /  editor</text><text x="115" y="100" text-anchor="middle" fill="#9399b2" font-size="13">keys → query string</text>
       <rect x="20" y="210" width="190" height="80" rx="14" fill="#1e1e2e" stroke="#89b4fa"/>
-      <text x="115" y="245" text-anchor="middle" font-weight="700">logview query</text><text x="115" y="270" text-anchor="middle" fill="#9399b2" font-size="13">argv → query string</text>
+      <text x="115" y="245" text-anchor="middle" font-weight="700">logcayo query</text><text x="115" y="270" text-anchor="middle" fill="#9399b2" font-size="13">argv → query string</text>
       <rect x="320" y="115" width="230" height="100" rx="16" fill="#1e1e2e" stroke="url(#g)" stroke-width="2.5"/>
-      <text x="435" y="150" text-anchor="middle" font-weight="800">@logview/core</text>
+      <text x="435" y="150" text-anchor="middle" font-weight="800">@logcayo/core</text>
       <text x="435" y="175" text-anchor="middle" class="mono" fill="#f9e2af" font-size="13">parseFilterQuery</text>
       <text x="435" y="197" text-anchor="middle" class="mono" fill="#a6e3a1" font-size="13">matches</text>
       <rect x="660" y="115" width="220" height="100" rx="16" fill="#1e1e2e" stroke="#94e2d5"/>
-      <text x="770" y="150" text-anchor="middle" font-weight="800">@logview/engine</text>
+      <text x="770" y="150" text-anchor="middle" font-weight="800">@logcayo/engine</text>
       <text x="770" y="175" text-anchor="middle" fill="#9399b2" font-size="13">Session · active index</text>
       <text x="770" y="197" text-anchor="middle" class="mono" fill="#94e2d5" font-size="13">readMatches()</text>
     </g>
@@ -137,7 +137,7 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
   <h2>What changed on screen</h2>
   <div class="ba">
     <div class="screen before mono">
-      <div class="bar"><span class="tag">BEFORE</span> logview · REPLAY · END · <b>15 events</b></div>
+      <div class="bar"><span class="tag">BEFORE</span> logcayo · REPLAY · END · <b>15 events</b></div>
       <div class="row muted"> Level all  Tag any  PID any  Text / lock</div>
       <div class="row"> W 4321 Database  Retry after lock timeout</div>
       <div class="row"> I 4321 logview-demo  clock went backward</div>
@@ -145,7 +145,7 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
       <div class="row muted"> Enter applies. No count. No undo.</div>
     </div>
     <div class="screen after mono">
-      <div class="bar"><span class="tag">AFTER</span> logview · REPLAY · END · <b style="color:var(--gr)">2 of 15</b></div>
+      <div class="bar"><span class="tag">AFTER</span> logcayo · REPLAY · END · <b style="color:var(--gr)">2 of 15</b></div>
       <div class="row" style="color:var(--mv)"> / lock▌</div>
       <div class="row sel"> W 4321 Database  Retry after <span class="hl">lock</span> timeout</div>
       <div class="row"> I 4321 logview-demo  c<span class="hl">lock</span> went backward</div>
@@ -168,11 +168,11 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
   <div class="kicker">Agent CLI</div>
   <h2>Ask once, get JSON lines</h2>
   <div class="term mono" style="font-size:14px">
-    <div><span class="p">$</span> logview query capture.lvr.jsonl 'level:W tag:Database lock'</div>
+    <div><span class="p">$</span> logcayo query capture.lvr.jsonl 'level:W tag:Database lock'</div>
     <div class="stream" id="stream">
       <div class="row ev">{"v":1,"type":"event","id":6,"level":"W","tag":"Database","message":"Retry after lock timeout",…}</div>
       <div class="row sum">{"v":1,"type":"summary","query":"level:W tag:Database lock","emitted":1,"matched":1,"stop":"eof"}</div>
-      <div class="row"><span class="p">$</span> logview query capture.lvr.jsonl 'pid:0'</div>
+      <div class="row"><span class="p">$</span> logcayo query capture.lvr.jsonl 'pid:0'</div>
       <div class="row err">{"v":1,"type":"error","kind":"invalid-filter","field":"pid","message":"PID must be a positive integer","offset":0}</div>
     </div>
   </div>
@@ -197,14 +197,14 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
       <text x="120" y="72" text-anchor="middle" font-weight="700">TUI query line</text>
       <text x="120" y="96" text-anchor="middle" class="mono" fill="#cba6f7" font-size="13">~database locks⏎</text>
       <rect x="20" y="220" width="200" height="84" rx="14" fill="#1e1e2e" stroke="#89b4fa"/>
-      <text x="120" y="252" text-anchor="middle" font-weight="700">logview query</text>
+      <text x="120" y="252" text-anchor="middle" font-weight="700">logcayo query</text>
       <text x="120" y="276" text-anchor="middle" class="mono" fill="#89b4fa" font-size="13">'~…' or --semantic</text>
       <rect x="290" y="120" width="200" height="104" rx="16" fill="#1e1e2e" stroke="#f9e2af" stroke-width="2"/>
-      <text x="390" y="152" text-anchor="middle" font-weight="800">@logview/core</text>
+      <text x="390" y="152" text-anchor="middle" font-weight="800">@logcayo/core</text>
       <text x="390" y="176" text-anchor="middle" class="mono" fill="#f9e2af" font-size="13">parseQuery</text>
       <text x="390" y="198" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">→ filter + searchMode</text>
       <rect x="560" y="30" width="320" height="300" rx="16" fill="#181825" stroke="#94e2d5"/>
-      <text x="720" y="58" text-anchor="middle" font-weight="800">@logview/engine · Session</text>
+      <text x="720" y="58" text-anchor="middle" font-weight="800">@logcayo/engine · Session</text>
       <rect x="585" y="80" width="270" height="56" rx="10" fill="#1e1e2e" stroke="#a6e3a1"/>
       <text x="720" y="104" text-anchor="middle">text: local match, live</text>
       <text x="720" y="124" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">level · tag · pid · pkg · text</text>
@@ -245,11 +245,11 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
   </div>
 
   <h3>Agent CLI</h3>
-  <div class="term mono" style="font-size:14px;white-space:pre;overflow-x:auto"><span class="p">$</span> logview query capture.lvr.jsonl '~database locks' --limit 2
+  <div class="term mono" style="font-size:14px;white-space:pre;overflow-x:auto"><span class="p">$</span> logcayo query capture.lvr.jsonl '~database locks' --limit 2
 <span class="ev">{"type":"event","id":4,"tag":"Database","message":"Opening connection",…,"score":0.71,"verdict":"relevant"}</span>
 <span class="ev">{"type":"event","id":5,"tag":"Database","message":"SELECT completed in 12 ms",…,"score":0.71,"verdict":"relevant"}</span>
 <span class="sum">{"type":"summary","query":"~database locks","emitted":2,…,"jev":{"threshold":0.5,"relevant":4,"belowThreshold":11,"unscored":0,"error":null}}</span>
-<span class="p">$</span> TYPESAFE_API_KEY= logview query capture.lvr.jsonl '~database locks'; echo $?
+<span class="p">$</span> TYPESAFE_API_KEY= logcayo query capture.lvr.jsonl '~database locks'; echo $?
 <span class="err">{"type":"error","kind":"missing-api-key","field":"TYPESAFE_API_KEY",…}</span>
 2</div>
 </section>

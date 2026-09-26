@@ -4,7 +4,7 @@ import {
 	chunkFromPacket,
 	encodeRecordingRecord,
 	sanitizedRecordingHeader,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { SANITIZED_LOGCAT, SANITIZED_STDERR } from "./sanitized-payload.ts";
 
 export const SANITIZED_RECORDING_NAME = "sanitized-aosp-pattern.lvr.jsonl";

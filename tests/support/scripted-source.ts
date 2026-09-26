@@ -1,4 +1,4 @@
-import type { LogSource, SourceError, SourceEvent, SourcePacket } from "@logview/engine";
+import type { LogSource, SourceError, SourceEvent, SourcePacket } from "@logcayo/engine";
 
 export class ScriptedSource implements LogSource {
 	readonly maxBufferedBytes = 0;

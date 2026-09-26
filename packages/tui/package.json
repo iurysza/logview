@@ -1,5 +1,5 @@
 {
-  "name": "@logview/tui",
+  "name": "@logcayo/tui",
   "version": "0.1.0",
   "type": "module",
   "private": true,
@@ -7,8 +7,8 @@
     ".": "./src/app.ts"
   },
   "dependencies": {
-    "@logview/core": "workspace:*",
-    "@logview/engine": "workspace:*"
+    "@logcayo/core": "workspace:*",
+    "@logcayo/engine": "workspace:*"
   },
   "devDependencies": {
     "@kitlangton/terminal-control": "0.4.1"

@@ -1,4 +1,4 @@
-# logview
+# logcayo
 
 Keyboard-driven Android log viewer. Live capture, recording, and replay share one byte pipeline. The same `Session` API supports headless tests and the optional ANSI terminal UI.
 
@@ -10,13 +10,13 @@ Keyboard-driven Android log viewer. Live capture, recording, and replay share on
 ## Commands
 
 ```sh
-bun run logview live --serial DEVICE
-bun run logview record --serial DEVICE --out sessions/example.lvr.jsonl --duration 60
-bun run logview replay sessions/example.lvr.jsonl
-bun run logview replay sessions/example.lvr.jsonl --speed 4
-bun run logview replay sessions/example.lvr.jsonl --speed instant --headless
-bun run logview replay sessions/example.lvr.jsonl --semantic --filter-text "database locks"
-bun run logview replay sessions/example.lvr.jsonl --config logview.json
+bun run logcayo live --serial DEVICE
+bun run logcayo record --serial DEVICE --out sessions/example.lvr.jsonl --duration 60
+bun run logcayo replay sessions/example.lvr.jsonl
+bun run logcayo replay sessions/example.lvr.jsonl --speed 4
+bun run logcayo replay sessions/example.lvr.jsonl --speed instant --headless
+bun run logcayo replay sessions/example.lvr.jsonl --semantic --filter-text "database locks"
+bun run logcayo replay sessions/example.lvr.jsonl --config logcayo.json
 ```
 
 `--headless` prints one JSON `HeadlessOutput` line after the source completes. Diagnostics go to stderr. Exit codes: `0` success (including a size-limit recording), `1` source/recording failure, `2` invalid arguments.
@@ -26,14 +26,14 @@ bun run logview replay sessions/example.lvr.jsonl --config logview.json
 `query` streams matched events from a recording or live ADB without loading the TUI. It does not write files.
 
 ```sh
-bun run logview query sessions/example.lvr.jsonl 'level:W tag:Database lock' --limit 20
-bun run logview query --live 'pid:4321' --serial DEVICE --timeout 5s
-bun run logview query --check 'level:w tag:Database'
-bun run logview query sessions/example.lvr.jsonl '~database locks' --limit 5
-bun run logview query sessions/example.lvr.jsonl 'level:W database locks' --semantic
+bun run logcayo query sessions/example.lvr.jsonl 'level:W tag:Database lock' --limit 20
+bun run logcayo query --live 'pid:4321' --serial DEVICE --timeout 5s
+bun run logcayo query --check 'level:w tag:Database'
+bun run logcayo query sessions/example.lvr.jsonl '~database locks' --limit 5
+bun run logcayo query sessions/example.lvr.jsonl 'level:W database locks' --semantic
 ```
 
-Terms `level:`, `tag:`, `pid:`, and `pkg:` filter events. Other terms search text. Put `~` before the text to ask Jev instead, as in `level:W ~database locks`; `--semantic` does the same for plain text. Run `logview query --help` for the full grammar. `--since` accepts an ISO-8601 time with timezone or epoch seconds; live queries also accept a relative duration such as `30s`. Live queries time out after 10 seconds unless you set `--timeout`.
+Terms `level:`, `tag:`, `pid:`, and `pkg:` filter events. Other terms search text. Put `~` before the text to ask Jev instead, as in `level:W ~database locks`; `--semantic` does the same for plain text. Run `logcayo query --help` for the full grammar. `--since` accepts an ISO-8601 time with timezone or epoch seconds; live queries also accept a relative duration such as `30s`. Live queries time out after 10 seconds unless you set `--timeout`.
 
 Default output is NDJSON: one event per line, then one summary line. An event has `v`, `type`, `id`, `time` (ISO), `epochMicros`, `level`, `pid`, `tid`, `uid`, `tag`, `message`, `raw`, and `continuations`. Events without parsed metadata have null metadata fields. The summary has `query`, `emitted`, `matched`, `stop`, `terminal`, `evictedBeforeRead`, and `timeout_ms` (for live queries). `evictedBeforeRead` estimates unread eviction from the eviction count and last-read ID; it can include nonmatching events. `--format text` sends raw lines and continuations to stdout and the JSON summary to stderr. Exit codes: `0` success, `1` source failure, `2` invalid arguments or query.
 
@@ -41,7 +41,7 @@ A Jev query reads a recording to the end, waits for Jev to score it, and then pr
 
 ## Config file
 
-`live` and `replay` read `logview.json` in the working directory. Pass `--config PATH` to use another file. Flags override the file. Keep `TYPESAFE_API_KEY` in the environment.
+`live` and `replay` read `logcayo.json` in the working directory. Pass `--config PATH` to use another file. Flags override the file. Keep `TYPESAFE_API_KEY` in the environment.
 
 ```json
 {
@@ -102,14 +102,14 @@ CI uses a fake `adb` at `tests/support/adb-stubs/` so live capture can be exerci
 
 ```sh
 bun run test:adapters
-bun run logview live --headless --adb tests/support/adb-stubs/one-device --serial emulator-5554
+bun run logcayo live --headless --adb tests/support/adb-stubs/one-device --serial emulator-5554
 ```
 
 On a real authorized device:
 
 ```sh
-bun run logview live --serial DEVICE
-bun run logview record --serial DEVICE --out sessions/device.lvr.jsonl --duration 10
+bun run logcayo live --serial DEVICE
+bun run logcayo record --serial DEVICE --out sessions/device.lvr.jsonl --duration 10
 ```
 
 With no device, several devices and no `--serial`, or an unauthorized/offline serial, the command explains the problem and exits `1`.
@@ -119,7 +119,7 @@ With no device, several devices and no `--serial`, or an unauthorized/offline se
 Interactive live/replay loads the TUI only when stdout is a TTY. Replay the sanitized fixture:
 
 ```sh
-bun run logview replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --speed instant
+bun run logcayo replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --speed instant
 bun run test:tui
 ```
 
@@ -155,17 +155,17 @@ Each JSON report records Bun version, OS, CPU, memory, seed, line-size plan, RSS
 
 ## Architecture
 
-Functional core (`@logview/core`) plus an imperative shell (`@logview/engine`). Core has no Bun or terminal imports. The terminal UI is a direct ANSI adapter in `@logview/tui`, and the CLI dynamically loads it only for an interactive terminal. Effect is internal:
+Functional core (`@logcayo/core`) plus an imperative shell (`@logcayo/engine`). Core has no Bun or terminal imports. The terminal UI is a direct ANSI adapter in `@logcayo/tui`, and the CLI dynamically loads it only for an interactive terminal. Effect is internal:
 
 - `Either` / `Effect` at session construction, mapped to documented `Result` types at public boundaries
 - `Match` for tagged commands and recording records
-- `Schema` for recording JSONL and `logview.json`
+- `Schema` for recording JSONL and `logcayo.json`
 - `Context.Tag` layers for scheduler, source, files, and processes
 - `Effect.scoped` / finalizers for recording and process lifetime
 
-Read [the architecture reference](ai-artifacts/architecture.md) for the implemented package boundaries, session lifecycle, recordings, filtering, semantic queries, terminal rendering, and test seams. `specs/2026-09-18-logview-technical-design.md` remains the original design handoff; source and tests define current contracts.
+Read [the architecture reference](ai-artifacts/architecture.md) for the implemented package boundaries, session lifecycle, recordings, filtering, semantic queries, terminal rendering, and test seams. `specs/2026-09-18-logcayo-technical-design.md` remains the original design handoff; source and tests define current contracts.
 
-Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or `semantic.enabled` in `logview.json`, and set `TYPESAFE_API_KEY`. In the `/` query line, plain text filters live as you type; `~question` asks Jev when you press Enter, because each question is a paid call. A purple ` ✦ Jev ` badge marks Jev in the query line, the filter chips, and the status bar. `m` switches the current text between literal and Jev. `v` hides or dims rows scored below the threshold. When you apply a query, Jev classifies the newest `semantic.historyEvents` locally eligible retained logs, which defaults to 100. New locally eligible arrivals continue to be classified while the query is active. Older rows stay visible with an unrequested icon. Rows scored below the threshold are dimmed. Headless tests never call Jev.
+Natural-language filtering uses TypeSafe **Jev**. Enable it with `--semantic` or `semantic.enabled` in `logcayo.json`, and set `TYPESAFE_API_KEY`. In the `/` query line, plain text filters live as you type; `~question` asks Jev when you press Enter, because each question is a paid call. A purple ` ✦ Jev ` badge marks Jev in the query line, the filter chips, and the status bar. `m` switches the current text between literal and Jev. `v` hides or dims rows scored below the threshold. When you apply a query, Jev classifies the newest `semantic.historyEvents` locally eligible retained logs, which defaults to 100. New locally eligible arrivals continue to be classified while the query is active. Older rows stay visible with an unrequested icon. Rows scored below the threshold are dimmed. Headless tests never call Jev.
 
 ## Scripts
 

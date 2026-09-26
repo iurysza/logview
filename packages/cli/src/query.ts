@@ -7,7 +7,7 @@ import {
 	type LogEvent,
 	type SearchMode,
 	type SourceKind,
-} from "@logview/core";
+} from "@logcayo/core";
 import {
 	createAdbPackageResolver,
 	createAdbSource,
@@ -22,7 +22,7 @@ import {
 	type LogClassifier,
 	type Session,
 	type SourceTerminal,
-} from "@logview/engine";
+} from "@logcayo/engine";
 
 export type QueryWriter = Readonly<{
 	stdout(line: string): void;
@@ -61,13 +61,13 @@ type SemanticRun = {
 	unscored: number;
 };
 
-const help = `logview query — stream matching events without opening the TUI
+const help = `logcayo query — stream matching events without opening the TUI
 
 Usage:
-  logview query PATH [QUERY] [--limit N] [--since TIME] [--format ndjson|text] [--allow-partial]
-  logview query --live [QUERY] [--serial S] [--adb PATH] [--timeout DUR] [--limit N] [--since TIME|DUR]
-  logview query --check QUERY
-  logview query PATH '~QUESTION' | --semantic QUESTION   ask Jev instead of matching text
+  logcayo query PATH [QUERY] [--limit N] [--since TIME] [--format ndjson|text] [--allow-partial]
+  logcayo query --live [QUERY] [--serial S] [--adb PATH] [--timeout DUR] [--limit N] [--since TIME|DUR]
+  logcayo query --check QUERY
+  logcayo query PATH '~QUESTION' | --semantic QUESTION   ask Jev instead of matching text
 
 Query: terms separated by spaces. level:V|D|I|W|E|F|ALL, tag:NAME,
        pid:POSITIVE_INTEGER, pkg:NAME; other terms search text. Quote terms
@@ -80,10 +80,10 @@ TIME: ISO-8601 with timezone or epoch seconds; relative 30s, 5m, 2h for --live o
 DUR: positive duration in ms, s, m, or h. Live timeout defaults to 10s.
 
 Examples:
-  logview query capture.lvr.jsonl 'level:W tag:Database lock'
-  logview query --live 'pid:4321' --timeout 5s --limit 20
-  logview query --check 'level:e database'
-  logview query capture.lvr.jsonl '~database locks' --limit 5
+  logcayo query capture.lvr.jsonl 'level:W tag:Database lock'
+  logcayo query --live 'pid:4321' --timeout 5s --limit 20
+  logcayo query --check 'level:e database'
+  logcayo query capture.lvr.jsonl '~database locks' --limit 5
 
 Exit codes: 0 success (including zero matches); 1 source or Jev failure;
             2 invalid arguments/query, including a missing TYPESAFE_API_KEY.`;

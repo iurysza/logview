@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseLogcatLine } from "@logview/core";
+import { parseLogcatLine } from "@logcayo/core";
 
 function line(text: string, extras?: { omittedBytes?: number; endedWithLf?: boolean }) {
 	return {

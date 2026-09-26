@@ -1,4 +1,4 @@
-import type { HeadlessOutput, Session } from "@logview/engine";
+import type { HeadlessOutput, Session } from "@logcayo/engine";
 
 export async function runHeadless(
 	session: Session,

@@ -1,8 +1,8 @@
-# Logview V1 technical design
+# Logcayo V1 technical design
 
 Date: 18 September 2026  
 Status: Proposed architecture handoff. Design only.  
-Product requirements: [Logview V1 PRD](2026-09-18-logview-prd.md).  
+Product requirements: [Logcayo V1 PRD](2026-09-18-logcayo-prd.md).  
 Scope: A headless Android log engine, recording and replay, and a thin OpenTUI adapter.
 
 ## Summary
@@ -793,9 +793,9 @@ Package direction is `core ← engine ← CLI` and `core ← TUI → engine`. Co
 
 The CLI chooses the mode before loading an adapter. Live and replay with a TUI dynamically load the TUI package. `record`, `--headless`, and all headless tests never load that package, including through an index barrel.
 
-Live and replay read optional `logview.json` from the working directory, or `--config PATH`. Flags override the file. `TYPESAFE_API_KEY` stays in the environment.
+Live and replay read optional `logcayo.json` from the working directory, or `--config PATH`. Flags override the file. `TYPESAFE_API_KEY` stays in the environment.
 
-Keep entrypoints separate: `logview/core`, `logview/engine`, and `logview/tui`. Names are provisional local package names, not claims about registry availability.
+Keep entrypoints separate: `logcayo/core`, `logcayo/engine`, and `logcayo/tui`. Names are provisional local package names, not claims about registry availability.
 
 ## Call Stacks and Data Flow
 
@@ -1041,7 +1041,7 @@ No existing files are changed or deleted because no target repository was suppli
 | New file | Responsibility |
 |---|---|
 | `packages/cli/src/main.ts` | Argument validation, subcommand selection, and deferred TUI loading. |
-| `packages/cli/src/config.ts` | `logview.json` schema, file load, and flag overlay. |
+| `packages/cli/src/config.ts` | `logcayo.json` schema, file load, and flag overlay. |
 | `packages/cli/src/headless.ts` | `HeadlessOutput` and replay or live session without terminal setup. |
 | `packages/cli/src/record.ts` | `record` command arguments and recorder lifecycle. |
 | `packages/tui/src/app.ts` | `attachTui`, renderer lifecycle, subscription, and normalized input forwarding. |
@@ -1175,7 +1175,7 @@ For a memory plateau test, run through at least ten full history-eviction cycles
 
 | Risk or open decision | Current position | Resolution or release gate |
 |---|---|---|
-| Product name and repository | `logview` and all paths are provisional. No repository was inspected. | Inspect the chosen repository and its instructions before writing application files. |
+| Product name and repository | `logcayo` and all paths are provisional. No repository was inspected. | Inspect the chosen repository and its instructions before writing application files. |
 | Functional-core interpretation | Mutable storage is confined to the shell; decisions remain pure. | Import checks and tests reject live store access from reducers. |
 | Text Logcat fidelity | V1 preserves output lines, not original binary record boundaries. | Document the capture profile and compare it with a real device fixture. |
 | Real recording availability | None was supplied or captured for this handoff. | Add a reviewed, sanitized real capture before the live-source release. Synthetic fixtures unblock earlier work. |

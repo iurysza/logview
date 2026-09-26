@@ -2,7 +2,7 @@
 
 You work in `~/dev/worktrees/logview/tui-query` on branch `feature/tui-query`. Nobody else writes here.
 
-Read first: `AGENTS.md`, `ai-artifacts/specs/2026-09-26-tui-filtering-agent-cli-design.md` (Decision 2 is your job), `packages/core/src/{query,interaction}.ts`, `packages/tui/src/{app,chrome,color}.ts`, `packages/tui/test/*`, `tests/contract/filter-cases.ts`, and the `verify-logview` skill in `.agents/skills/`.
+Read first: `AGENTS.md`, `ai-artifacts/specs/2026-09-26-tui-filtering-agent-cli-design.md` (Decision 2 is your job), `packages/core/src/{query,interaction}.ts`, `packages/tui/src/{app,chrome,color}.ts`, `packages/tui/test/*`, `tests/contract/filter-cases.ts`, and the `verify-logcayo` skill in `.agents/skills/`.
 
 ## Build (items refer to Decision 2)
 
@@ -39,6 +39,6 @@ Do them in this order and commit after each group.
 ## Rules
 
 - Do not touch `packages/cli/**`, `packages/engine/**`, `tests/architecture/**`, baselines.
-- Keep `@logview/core` pure. Oxlint clean. `bun run check` and `bun run test:ui` (except expected baseline diffs) must pass.
+- Keep `@logcayo/core` pure. Oxlint clean. `bun run check` and `bun run test:ui` (except expected baseline diffs) must pass.
 - Small conventional commits, default author (Iury), no co-author trailer. Do not push.
 - Finish with a short report: files changed, commands with results, which baselines changed and why, anything deferred.

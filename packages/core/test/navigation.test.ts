@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { EMPTY_LOCATION, EMPTY_VIEW, planNavigation } from "@logview/core";
+import { EMPTY_LOCATION, EMPTY_VIEW, planNavigation } from "@logcayo/core";
 
 describe("navigation", () => {
 	test("tail arrivals select the newest event", () => {

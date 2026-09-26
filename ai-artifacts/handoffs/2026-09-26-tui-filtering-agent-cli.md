@@ -1,4 +1,4 @@
-# Handoff: Logview TUI filtering, visual polish and agent CLI
+# Handoff: Logcayo TUI filtering, visual polish and agent CLI
 
 Owner: Iury. Coordinator: you (Opus, Pi, in Herdr). Date: 2026-09-26.
 
@@ -19,7 +19,7 @@ Owner: Iury. Coordinator: you (Opus, Pi, in Herdr). Date: 2026-09-26.
    - match highlighting, counts (visible vs total), empty states
    - no flicker, bounded redraws, and respect for terminal size and colour support
    Pick what adds value. Don't gold-plate. Justify each change against the current code.
-2. **Headless agent CLI.** Research and design how an agent can use Logview without the TUI, through a CLI that uses the **same core and engine code paths** as the TUI (one filter model, one query language, one parser). No duplicated filter logic. Look at the existing `packages/cli/src/headless.ts` first and extend it; don't build something parallel. Consider:
+2. **Headless agent CLI.** Research and design how an agent can use Logcayo without the TUI, through a CLI that uses the **same core and engine code paths** as the TUI (one filter model, one query language, one parser). No duplicated filter logic. Look at the existing `packages/cli/src/headless.ts` first and extend it; don't build something parallel. Consider:
    - stable machine output (JSON/NDJSON), exit codes, `--help` quality
    - the same filter expressions the TUI accepts, so a filter can move between the TUI and the CLI unchanged
    - one-shot queries over recordings/files and bounded live capture (`--since`, `--limit`, `--timeout`)

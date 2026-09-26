@@ -15,8 +15,8 @@ import {
 	err,
 	ok,
 	type Result,
-} from "@logview/core";
-import type { Session, SessionSnapshot, TerminalAttachment, UiError } from "@logview/engine";
+} from "@logcayo/core";
+import type { Session, SessionSnapshot, TerminalAttachment, UiError } from "@logcayo/engine";
 import { paintChrome, paintFilled, paintRow, paintStyleFromEnv, type PaintStyle } from "./color.ts";
 import {
 	emptyMatchCopy,

@@ -1,14 +1,14 @@
 {
-  "name": "@logview/cli",
+  "name": "@logcayo/cli",
   "version": "0.1.0",
   "type": "module",
   "private": true,
   "bin": {
-    "logview": "./src/main.ts"
+    "logcayo": "./src/main.ts"
   },
   "dependencies": {
-    "@logview/core": "workspace:*",
-    "@logview/engine": "workspace:*",
+    "@logcayo/core": "workspace:*",
+    "@logcayo/engine": "workspace:*",
     "effect": "3.22.2"
   }
 }

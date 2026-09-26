@@ -6,8 +6,8 @@ import {
 	tagText,
 	type LogEvent,
 	type LogLevel,
-} from "@logview/core";
-import type { PackageAttribution } from "@logview/engine";
+} from "@logcayo/core";
+import type { PackageAttribution } from "@logcayo/engine";
 import type { Rgb } from "./catppuccin.ts";
 import { type ChromeLine, type ChromeSpan, paintChromeLine } from "./chrome.ts";
 import type { PaintStyle } from "./color.ts";

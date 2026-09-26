@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { clipToWidth, displayWidth, padToWidth, sanitizeDisplay } from "@logview/core";
+import { clipToWidth, displayWidth, padToWidth, sanitizeDisplay } from "@logcayo/core";
 
 describe("display text", () => {
 	test("measures Japanese as wide cells", () => {

@@ -1,4 +1,4 @@
-import type { EventId, LogLevel, Result, SessionId } from "@logview/core";
+import type { EventId, LogLevel, Result, SessionId } from "@logcayo/core";
 
 export const JEV_MODEL_ID = "jev-1.13.0";
 

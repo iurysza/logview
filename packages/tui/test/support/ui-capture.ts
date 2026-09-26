@@ -167,9 +167,9 @@ export async function resize(session: Session, viewport: Viewport): Promise<void
 export async function waitForExit(session: Session, timeoutMs = 5_000): Promise<void> {
 	const result = await session.waitForExit({ timeoutMs });
 
-	if (result.reason !== "exited") throw new Error(`logview did not exit within ${timeoutMs}ms after quit`);
+	if (result.reason !== "exited") throw new Error(`logcayo did not exit within ${timeoutMs}ms after quit`);
 
-	if (!result.exit.success) throw new Error(`logview exited unsuccessfully after quit: ${result.exit.code}`);
+	if (!result.exit.success) throw new Error(`logcayo exited unsuccessfully after quit: ${result.exit.code}`);
 }
 
 export async function capture(
@@ -318,7 +318,7 @@ function pinnedBinaryPath(): string {
 	}
 
 	try {
-		// Bun's createRequire from @logview/tui cannot see the native optional
+		// Bun's createRequire from @logcayo/tui cannot see the native optional
 		// package. Resolve it from @kitlangton/terminal-control, which owns it.
 		const terminalControlPackage = fileURLToPath(
 			import.meta.resolve("@kitlangton/terminal-control/package.json"),

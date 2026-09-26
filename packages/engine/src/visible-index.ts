@@ -1,5 +1,5 @@
-import type { EventId } from "@logview/core";
-import { EMPTY_LOCATION, type Location } from "@logview/core";
+import type { EventId } from "@logcayo/core";
+import { EMPTY_LOCATION, type Location } from "@logcayo/core";
 
 export interface VisibleIndex {
 	readonly size: number;

@@ -1,4 +1,4 @@
-import { matches, type EventId, type LogEvent, type PreparedFilter } from "@logview/core";
+import { matches, type EventId, type LogEvent, type PreparedFilter } from "@logcayo/core";
 import type { History } from "./history.ts";
 import { VisibleIndexStore } from "./visible-index.ts";
 

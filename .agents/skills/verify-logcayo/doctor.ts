@@ -37,7 +37,7 @@ async function main(): Promise<void> {
 
 	process.stdout.write(
 		[
-			"verify-logview doctor",
+			"verify-logcayo doctor",
 			`bun: ${Bun.version}`,
 			`termctrl: ${tool.version} at ${tool.binary}`,
 			`fixture: ${fixture}`,

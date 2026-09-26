@@ -14,9 +14,9 @@
     "verbatimModuleSyntax": true,
     "types": ["bun-types"],
     "paths": {
-      "@logview/core": ["./packages/core/src/index.ts"],
-      "@logview/engine": ["./packages/engine/src/index.ts"],
-      "@logview/tui": ["./packages/tui/src/app.ts"]
+      "@logcayo/core": ["./packages/core/src/index.ts"],
+      "@logcayo/engine": ["./packages/engine/src/index.ts"],
+      "@logcayo/tui": ["./packages/tui/src/app.ts"]
     }
   },
   "include": ["packages/**/*.ts", "tests/**/*.ts", "bench/**/*.ts", "tools/**/*.ts"],

@@ -1,4 +1,4 @@
-import { messageText, sanitizeDisplay, tagText, type LogEvent } from "@logview/core";
+import { messageText, sanitizeDisplay, tagText, type LogEvent } from "@logcayo/core";
 
 function formatDateTime(epochMicros: number): string {
 	return new Date(Math.floor(epochMicros / 1000)).toISOString().replace("T", " ").replace("Z", "");

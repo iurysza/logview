@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { emptyFramerState, frameBytes, parseLogcatLine } from "@logview/core";
+import { emptyFramerState, frameBytes, parseLogcatLine } from "@logcayo/core";
 
 describe("framing and logcat", () => {
 	test("a line split inside its timestamp and a UTF-8 character round-trips", () => {

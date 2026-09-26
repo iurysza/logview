@@ -1,4 +1,4 @@
-import type { ViewRow } from "@logview/core";
+import type { ViewRow } from "@logcayo/core";
 import { renderRowText } from "./app.ts";
 import type { PaintStyle } from "./color.ts";
 

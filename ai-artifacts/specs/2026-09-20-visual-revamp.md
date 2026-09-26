@@ -1,4 +1,4 @@
-# Logview visual revamp technical specification
+# Logcayo visual revamp technical specification
 
 ## Summary
 
@@ -30,7 +30,7 @@ Inspected on 20 September 2026 at `e12818c`, branch `feature/visual-revamp`.
 | Source labels | Replay supplies a basename through `SessionSnapshot.label`, not the complete path or an application version. | [main.ts](../../packages/cli/src/main.ts) |
 | Visual tests | Named PTY scenarios exist. Only `inspect` currently has reviewed baselines; `test:ui` enrolls scenarios by baseline-directory presence. | [ui-scenarios.ts](../../packages/tui/test/support/ui-scenarios.ts), [ui-scenarios.test.ts](../../packages/tui/test/ui-scenarios.test.ts) |
 
-The initial product document describes an earlier minimal interface. Preserve the public session boundaries in the [technical design](../../specs/2026-09-18-logview-technical-design.md) and the existing implementation's inspector and semantic-filter behavior. Do not remove those implemented features to match the older document.
+The initial product document describes an earlier minimal interface. Preserve the public session boundaries in the [technical design](../../specs/2026-09-18-logcayo-technical-design.md) and the existing implementation's inspector and semantic-filter behavior. Do not remove those implemented features to match the older document.
 
 A planning-session capture failed with `unsupported termctrl protocol version 1`. The doctor reported Bun 1.4.2 and Terminal Control 0.4.1, but that version check did not prove protocol compatibility. No current-screen screenshot was captured successfully in that attempt.
 
@@ -240,7 +240,7 @@ Proposed initial colors follow the agreed direction. Confirm them against retain
 
 `severityStyle` maps unknown and V to muted, D and I to green, W to amber, and E and F to red. E and F use bold text. Tags and level letters call the same function. An active minimum-level badge uses that level's style; a tag-filter badge has no inherent severity and uses the ordinary active-filter style.
 
-Leave the official `MOCHA` palette and existing ANSI helper types intact. Switch logview painters to `THEME`; do not silently redefine Catppuccin colors.
+Leave the official `MOCHA` palette and existing ANSI helper types intact. Switch logcayo painters to `THEME`; do not silently redefine Catppuccin colors.
 
 ## Interfaces and APIs
 
@@ -330,14 +330,14 @@ Component functions decide which groups fit before calling the line painter. Do 
 
 #### Top bar
 
-- Place `logview` and `snapshot.label` on the left. Use the existing label, including the replay basename; no CLI change is required.
+- Place `logcayo` and `snapshot.label` on the left. Use the existing label, including the replay basename; no CLI change is required.
 - Place source lifecycle, retained-event count, and committed-filter count on the right.
 - Derive source status only from `sourceKind` and `source`: `IDLE`, `STARTING`, `PLAYING` for running replay, `RUNNING` for running live, `END`, or `FAILED`.
 - Prefix status with `REPLAY` or `LIVE`. Preserve `REPLAY • END` as the completed-replay readiness text, including during browsing.
 - Use a colored dot plus text. A dot alone never communicates state.
 - Fit full groups first. Reduce the source label first, then omit it, then omit the filter count. The badges below still expose filter state.
 - If needed, remove decorative separators or compact the status spacing. Preserve the app name and source lifecycle. Show the event count atomically or omit it; never clip digits into a different count.
-- At the existing 48-column fixture checkpoint, retain `logview` and the complete `15 events` count.
+- At the existing 48-column fixture checkpoint, retain `logcayo` and the complete `15 events` count.
 
 #### Filters
 
@@ -604,12 +604,12 @@ All paths below are relative to the repository root. No production files are del
 | Add | `packages/tui/test/fixtures/build-visual-reference.ts` | Deterministic synthetic recording builder using existing recording encoders. |
 | Add | `packages/tui/test/fixtures/visual-reference.lvr.jsonl` | Synthetic reference-like replay data; never replace the reviewed 15-event fixture. |
 | Change/add after review | `packages/tui/test/baselines/<scenario>/*.snapshot.json` | Only generated through `ui:update`, after reference comparison. |
-| Change | `.agents/skills/verify-logview/SKILL.md` | Updated scenario list and visible handles. |
-| Change | `.agents/skills/verify-logview/features/README.md` | Include the new reference-comparison entrypoint. |
-| Change | `.agents/skills/verify-logview/features/replay.md` | Source lifecycle remains END while the footer enters BROWSE. |
-| Change | `.agents/skills/verify-logview/features/filter.md` | Human-readable editor labels, badge/error checkpoints, and activation evidence. |
-| Change | `.agents/skills/verify-logview/features/help-and-chrome.md` | Header fitting, new keycaps, reference comparison, and no-color checks. |
-| Change | `.agents/skills/verify-logview/features/inspect.md` | Inspector heading and footer action handles. |
+| Change | `.agents/skills/verify-logcayo/SKILL.md` | Updated scenario list and visible handles. |
+| Change | `.agents/skills/verify-logcayo/features/README.md` | Include the new reference-comparison entrypoint. |
+| Change | `.agents/skills/verify-logcayo/features/replay.md` | Source lifecycle remains END while the footer enters BROWSE. |
+| Change | `.agents/skills/verify-logcayo/features/filter.md` | Human-readable editor labels, badge/error checkpoints, and activation evidence. |
+| Change | `.agents/skills/verify-logcayo/features/help-and-chrome.md` | Header fitting, new keycaps, reference comparison, and no-color checks. |
+| Change | `.agents/skills/verify-logcayo/features/inspect.md` | Inspector heading and footer action handles. |
 
 No production edits are expected in engine session/contracts, CLI, `interaction.ts`, `filter-form.ts`, `log-list.ts`, or `catppuccin.ts`. Engine helpers already import the shared chrome constant. Other tests that assert exact projected row windows may need updated expectations after the budget change; keep their behavioral assertions.
 
@@ -655,7 +655,7 @@ Red: running, ended, and failed sources remain identifiable in list, browse, and
 
 Green: extract the chrome painter, compose status groups, and separate lifecycle text from the mode badge. Re-export the existing text helpers from `app.ts`.
 
-Verify: the 48-column fixture retains `logview` and `15 events`; no group paints outside the frame or emits a misleading clipped number.
+Verify: the 48-column fixture retains `logcayo` and `15 events`; no group paints outside the frame or emits a misleading clipped number.
 
 ### Slice 4: filter badges, editing, and errors
 
@@ -723,7 +723,7 @@ Run focused tests after each slice. Before acceptance, run:
 bun run check
 bun run test:tui
 bun run test:ui
-bun .agents/skills/verify-logview/doctor.ts
+bun .agents/skills/verify-logcayo/doctor.ts
 ```
 
 For each relevant scenario, retain a capture in its own run directory:

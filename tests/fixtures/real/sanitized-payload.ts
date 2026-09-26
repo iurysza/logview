@@ -1,4 +1,4 @@
-import { SANITIZED_REDACTION_VERSION } from "@logview/engine";
+import { SANITIZED_REDACTION_VERSION } from "@logcayo/engine";
 
 export { SANITIZED_REDACTION_VERSION };
 

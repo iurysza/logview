@@ -1,5 +1,5 @@
 import { Effect, Either } from "effect";
-import { eitherToResult, type Result } from "@logview/core";
+import { eitherToResult, type Result } from "@logcayo/core";
 
 export function runSyncResult<A, E>(effect: Effect.Effect<A, E>): Result<A, E> {
 	return eitherToResult(Effect.runSync(Effect.either(effect)));

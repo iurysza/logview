@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { HistoryStore } from "@logview/engine";
+import { HistoryStore } from "@logcayo/engine";
 
 function event(id: number, charge = 200) {
 	return {

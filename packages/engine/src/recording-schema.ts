@@ -1,5 +1,5 @@
-import { err, ok, type Result } from "@logview/core";
-import { MAX_PACKET_BYTES, MAX_RECORDING_LINE_BYTES } from "@logview/core";
+import { err, ok, type Result } from "@logcayo/core";
+import { MAX_PACKET_BYTES, MAX_RECORDING_LINE_BYTES } from "@logcayo/core";
 import { Either, Match, Schema } from "effect";
 import type {
 	RecordingError,

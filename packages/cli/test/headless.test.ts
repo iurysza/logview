@@ -9,7 +9,7 @@ import {
 	createScheduler,
 	createSession,
 	defaultSessionOptions,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { main } from "../src/main.ts";
 import { runHeadless } from "../src/headless.ts";
 
@@ -77,7 +77,7 @@ describe("headless CLI", () => {
 	});
 
 	test("missing replay path is exit 2", async () => {
-		const code = await main(["bun", "logview", "replay"]);
+		const code = await main(["bun", "logcayo", "replay"]);
 
 		expect(code).toBe(2);
 	});
@@ -85,7 +85,7 @@ describe("headless CLI", () => {
 	test("--semantic without TYPESAFE_API_KEY is exit 2", async () => {
 		const previous = process.env.TYPESAFE_API_KEY;
 		delete process.env.TYPESAFE_API_KEY;
-		const code = await main(["bun", "logview", "replay", "missing.lvr.jsonl", "--semantic"]);
+		const code = await main(["bun", "logcayo", "replay", "missing.lvr.jsonl", "--semantic"]);
 
 		if (previous === undefined) delete process.env.TYPESAFE_API_KEY;
 		else process.env.TYPESAFE_API_KEY = previous;
@@ -96,12 +96,12 @@ describe("headless CLI", () => {
 	test("--config with semantic.enabled and no TYPESAFE_API_KEY is exit 2", async () => {
 		const previous = process.env.TYPESAFE_API_KEY;
 		delete process.env.TYPESAFE_API_KEY;
-		const dir = await mkdtemp(join(tmpdir(), "logview-cli-config-"));
-		const path = join(dir, "logview.json");
+		const dir = await mkdtemp(join(tmpdir(), "logcayo-cli-config-"));
+		const path = join(dir, "logcayo.json");
 
 		await writeFile(path, JSON.stringify({ semantic: { enabled: true } }));
 
-		const code = await main(["bun", "logview", "replay", "missing.lvr.jsonl", "--config", path]);
+		const code = await main(["bun", "logcayo", "replay", "missing.lvr.jsonl", "--config", path]);
 
 		if (previous === undefined) delete process.env.TYPESAFE_API_KEY;
 		else process.env.TYPESAFE_API_KEY = previous;
@@ -112,8 +112,8 @@ describe("headless CLI", () => {
 	test("--no-semantic overrides a config that enables Jev", async () => {
 		const previous = process.env.TYPESAFE_API_KEY;
 		delete process.env.TYPESAFE_API_KEY;
-		const dir = await mkdtemp(join(tmpdir(), "logview-cli-config-"));
-		const path = join(dir, "logview.json");
+		const dir = await mkdtemp(join(tmpdir(), "logcayo-cli-config-"));
+		const path = join(dir, "logcayo.json");
 
 		await writeFile(path, JSON.stringify({ semantic: { enabled: true } }));
 
@@ -121,7 +121,7 @@ describe("headless CLI", () => {
 
 		const code = await main([
 			"bun",
-			"logview",
+			"logcayo",
 			"replay",
 			fixture,
 			"--headless",
@@ -139,11 +139,11 @@ describe("headless CLI", () => {
 	test("missing --config path is exit 2", async () => {
 		const code = await main([
 			"bun",
-			"logview",
+			"logcayo",
 			"replay",
 			"missing.lvr.jsonl",
 			"--config",
-			"no-such-logview.json",
+			"no-such-logcayo.json",
 		]);
 
 		expect(code).toBe(2);

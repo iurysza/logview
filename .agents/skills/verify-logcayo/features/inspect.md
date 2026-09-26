@@ -20,7 +20,7 @@ Inspect opens the selected event so the user can read the full record, with the 
 
 Preconditions:
 
-- `bun .agents/skills/verify-logview/doctor.ts` reports `ok`.
+- `bun .agents/skills/verify-logcayo/doctor.ts` reports `ok`.
 - No other recipe is using `--out generated/ui/inspect`.
 
 - **Named scenario.** Run `bun run ui:verify --scenario inspect --out generated/ui/inspect`. The run waits for `REPLAY • END`, presses Enter, then resizes to 119 and 72 columns.

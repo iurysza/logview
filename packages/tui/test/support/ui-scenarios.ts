@@ -261,7 +261,7 @@ const SCENARIOS: readonly UiScenario[] = [
 			const narrow = await context.capture("columns-48", { cols: 48, rows: 12 });
 			const header = firstLine(narrow);
 
-			if (!header.includes("logview") || !header.includes("15 events")) {
+			if (!header.includes("logcayo") || !header.includes("15 events")) {
 				throw new Error(`48-column ANSI header is not fitted: ${JSON.stringify(header)}`);
 			}
 

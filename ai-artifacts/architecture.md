@@ -1,8 +1,8 @@
 ---
-description: How logview moves Android log bytes through a bounded session into headless and terminal views.
+description: How logcayo moves Android log bytes through a bounded session into headless and terminal views.
 ---
 
-# Logview architecture
+# Logcayo architecture
 
 This page describes the implementation in this checkout. It is for maintainers who need to change capture, replay, filtering, semantic classification, or the terminal UI without moving state across the wrong boundary.
 
@@ -12,10 +12,10 @@ The implementation has four packages:
 
 | Package | Owns | Must not own |
 | --- | --- | --- |
-| `@logview/core` | Pure framing, parsing, filters, navigation, interaction reduction, display-safe projection | Bun APIs, files, processes, clocks, terminal codes, or the TypeSafe SDK |
-| `@logview/engine` | `Session`, bounded storage, source consumption, recording, scheduling, adapter implementations, and semantic coordination | TUI imports or terminal state |
-| `@logview/cli` | Argument parsing, config loading, source and session composition, command exit handling | Session policy or terminal rendering |
-| `@logview/tui` | ANSI frames, raw terminal input, presentation state, and terminal cleanup | History, source lifecycle, or filter membership |
+| `@logcayo/core` | Pure framing, parsing, filters, navigation, interaction reduction, display-safe projection | Bun APIs, files, processes, clocks, terminal codes, or the TypeSafe SDK |
+| `@logcayo/engine` | `Session`, bounded storage, source consumption, recording, scheduling, adapter implementations, and semantic coordination | TUI imports or terminal state |
+| `@logcayo/cli` | Argument parsing, config loading, source and session composition, command exit handling | Session policy or terminal rendering |
+| `@logcayo/tui` | ANSI frames, raw terminal input, presentation state, and terminal cleanup | History, source lifecycle, or filter membership |
 
 `tests/architecture/import-boundaries.test.ts` enforces the important import rules. The public package entry points are `packages/*/src/index.ts`.
 
@@ -96,7 +96,7 @@ The history charge is accounting, not measured process memory. The performance t
 | `record` | Streams raw source packets to a new recording and finalizes a footer. It does not create a viewer session or load the TUI. |
 | `replay` | Reads a recording through the replay source. Timed and instant replay use the normal session ingestion path. |
 
-For `live` and `replay`, the CLI loads `logview.json` from the working directory unless `--config PATH` is supplied. `packages/cli/src/config.ts` validates the file with Effect Schema. Command-line flags override config values. `TYPESAFE_DEFAULT_MODEL` overrides the semantic model, and `TYPESAFE_API_KEY` stays in the environment.
+For `live` and `replay`, the CLI loads `logcayo.json` from the working directory unless `--config PATH` is supplied. `packages/cli/src/config.ts` validates the file with Effect Schema. Command-line flags override config values. `TYPESAFE_DEFAULT_MODEL` overrides the semantic model, and `TYPESAFE_API_KEY` stays in the environment.
 
 The ADB adapter builds an argument vector. It does not interpolate a shell command. Its fixed capture profile is documented in the README and exported as `LOGCAT_ARGS` from `packages/engine/src/adapters/adb.ts`.
 
@@ -112,9 +112,9 @@ A recording is UTF-8 JSON Lines:
 
 ## Filters and navigation
 
-`parseQuery` in `packages/core/src/query.ts` turns the one-line query into a `FilterSpec` and a `SearchMode`. A `~` before the text selects Jev; the TUI and `logview query` share this parser. `completeQuery` in `packages/core/src/completion.ts` returns a ghost suffix and alternatives from `Session.queryCandidates()`, which `packages/engine/src/vocabulary.ts` counts as events arrive.
+`parseQuery` in `packages/core/src/query.ts` turns the one-line query into a `FilterSpec` and a `SearchMode`. A `~` before the text selects Jev; the TUI and `logcayo query` share this parser. `completeQuery` in `packages/core/src/completion.ts` returns a ghost suffix and alternatives from `Session.queryCandidates()`, which `packages/engine/src/vocabulary.ts` counts as events arrive.
 
-`@logview/core` prepares a filter from minimum level, exact tag, PID, and text. Local filtering combines populated fields with AND. The text match is a case-insensitive literal match over retained source text. `reduceInteraction` turns normalized keys into session commands or local focus changes. It keeps editor drafts in the TUI layer until Enter commits a filter command.
+`@logcayo/core` prepares a filter from minimum level, exact tag, PID, and text. Local filtering combines populated fields with AND. The text match is a case-insensitive literal match over retained source text. `reduceInteraction` turns normalized keys into session commands or local focus changes. It keeps editor drafts in the TUI layer until Enter commits a filter command.
 
 When a filter changes, `Session` starts a revisioned `FilterJob` in `packages/engine/src/reindex.ts`. The old visible index remains active while the new candidate index scans retained events in slices. New arrivals are tested against both filters. Only the newest completed revision can replace the active index. This prevents an old scan from publishing after a later query.
 
@@ -134,7 +134,7 @@ Semantic filtering is active only when the CLI has created a Jev classifier and 
 - It validates response session ID, request ID, query revision, and every returned event ID before applying annotations.
 - It retries one transient batch failure. It marks a permanent failure, skipped item, or oversized item as unknown.
 
-`set-filter` carries an optional `searchMode`, so a `~` query and a literal query use one command. The session retains semantic annotations separately from `LogEvent` data. `SemanticStats` reports relevant, pending, failed, and skipped counts plus `lastError`. The terminal UI displays their state and dims scored rows below the configured threshold. `toggle-below-threshold` switches the snapshot to `belowThreshold: "hide"`; the session then builds navigation and rows from a relevant-only view of the active index. `readMatches` still returns every local match. `Session.classificationOf(id)` exposes one row's score, which `logview query` uses to add `score` and `verdict` to NDJSON after `sourceDone` resolves. Semantic work never blocks source ingestion or removes raw events from history.
+`set-filter` carries an optional `searchMode`, so a `~` query and a literal query use one command. The session retains semantic annotations separately from `LogEvent` data. `SemanticStats` reports relevant, pending, failed, and skipped counts plus `lastError`. The terminal UI displays their state and dims scored rows below the configured threshold. `toggle-below-threshold` switches the snapshot to `belowThreshold: "hide"`; the session then builds navigation and rows from a relevant-only view of the active index. `readMatches` still returns every local match. `Session.classificationOf(id)` exposes one row's score, which `logcayo query` uses to add `score` and `verdict` to NDJSON after `sourceDone` resolves. Semantic work never blocks source ingestion or removes raw events from history.
 
 ## Terminal UI and shutdown
 
@@ -165,7 +165,7 @@ Use `ManualScheduler` and scripted sources for state tests. Use the pinned termi
 ## Documents in this repository
 
 - [`README.md`](../README.md) is the command and development guide.
-- [`specs/2026-09-18-logview-prd.md`](../specs/2026-09-18-logview-prd.md) is the original product proposal.
-- [`specs/2026-09-18-logview-technical-design.md`](../specs/2026-09-18-logview-technical-design.md) is the original architecture handoff. It marks its proposed behavior and file map as design material.
+- [`specs/2026-09-18-logcayo-prd.md`](../specs/2026-09-18-logcayo-prd.md) is the original product proposal.
+- [`specs/2026-09-18-logcayo-technical-design.md`](../specs/2026-09-18-logcayo-technical-design.md) is the original architecture handoff. It marks its proposed behavior and file map as design material.
 
 The checkout may also contain untracked planning artifacts under `ai-artifacts/`. Do not treat those artifacts as accepted behavior until they are added to the repository. When the implementation and a proposal differ, treat the source and its tests as the description of current behavior. Update this page with the implementation change when you move a boundary, change a limit, or alter a lifecycle guarantee.

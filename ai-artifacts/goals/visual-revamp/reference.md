@@ -24,8 +24,8 @@ This reference records the visual direction. It does not authorize implementatio
 
 ## Collect implementation evidence
 
-1. Read the `verify-logview` skill and its feature map.
-2. Run `bun .agents/skills/verify-logview/doctor.ts`.
+1. Read the `verify-logcayo` skill and its feature map.
+2. Run `bun .agents/skills/verify-logcayo/doctor.ts`.
 3. Capture the relevant named scenarios with `bun run ui:verify --scenario NAME --out generated/ui/NAME`.
 4. Inspect each saved PNG beside `reference.png`.
 5. Check the accompanying text, styled cells, and metadata for alignment, colors, viewport size, and source revision.

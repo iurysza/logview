@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@logview/core";
+import { err, ok, type Result } from "@logcayo/core";
 import { appendFile } from "node:fs/promises";
 import { link, unlink } from "node:fs/promises";
 import type {

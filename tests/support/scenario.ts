@@ -6,7 +6,7 @@ import {
 	type SemanticOptions,
 	type Session,
 	type SessionSnapshot,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { ManualScheduler } from "./manual-scheduler.ts";
 import { ScriptedSource } from "./scripted-source.ts";
 import { threadtimeLine } from "./log-lines.ts";

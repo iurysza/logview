@@ -14,7 +14,7 @@ async function query(...args: string[]): Promise<Run> {
 	const out: string[] = [];
 	const err: string[] = [];
 
-	const code = await main(["bun", "logview", "query", ...args], {
+	const code = await main(["bun", "logcayo", "query", ...args], {
 		stdout: (line) => { out.push(line); },
 		stderr: (line) => { err.push(line); },
 	});

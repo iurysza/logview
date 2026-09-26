@@ -8,7 +8,7 @@ import {
 	type InteractionState,
 	type QueryContext,
 	type SearchMode,
-} from "@logview/core";
+} from "@logcayo/core";
 
 const pressKey = (key: string) => ({ kind: "key" as const, key, ctrl: false, shift: false });
 

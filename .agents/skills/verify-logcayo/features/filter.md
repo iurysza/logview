@@ -22,7 +22,7 @@ Filters hide events that do not match the active level, tag, PID, or literal tex
 
 Preconditions:
 
-- `bun .agents/skills/verify-logview/doctor.ts` reports `ok`.
+- `bun .agents/skills/verify-logcayo/doctor.ts` reports `ok`.
 - No other recipe is using `--out generated/ui/filter`.
 
 - **Named scenario.** Run `bun run ui:verify --scenario filter --out generated/ui/filter`. The run waits for `REPLAY • END`, opens `/`, types `Database`, applies it, then replaces the draft with `no-match`.

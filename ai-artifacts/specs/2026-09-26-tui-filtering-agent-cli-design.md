@@ -4,7 +4,7 @@ Status: draft for Iury's review. Date: 2026-09-26. Branch: `feature/tui-filterin
 
 ## What we have today
 
-- Matching is already shared. `prepareFilter`, `matches` and `matchesLocal` live in `@logview/core/filters.ts`. The engine uses them for both arrivals and re-filter jobs. Package filters resolve names to UIDs in the engine, because that needs I/O.
+- Matching is already shared. `prepareFilter`, `matches` and `matchesLocal` live in `@logcayo/core/filters.ts`. The engine uses them for both arrivals and re-filter jobs. Package filters resolve names to UIDs in the engine, because that needs I/O.
 - Parsing from text is not shared. The only string-to-`FilterSpec` path is `commitDraft` in `core/interaction.ts`. It reads the TUI's five-field form (level, tag, PID, package, text). The CLI only has `--filter-text`, which sets the text field.
 - No filter can move between the TUI and the CLI. The TUI has no single-line form of a filter, and the CLI has no flag for level, tag, PID or package.
 - Headless mode (`cli/src/headless.ts`) waits for the source to end and prints one `summary` line containing the whole snapshot. It prints no events. An agent can learn counts, not logs.
@@ -57,7 +57,7 @@ value  = bare | '"' (char | '\"' | '\\')* '"'
 
 Contract: for every valid spec, `parseFilterQuery(formatFilterQuery(spec))` equals `spec`. A property test enforces it. The canonical form orders keys `level tag pid pkg`, then text.
 
-Why a language and not more CLI flags: flags cannot be pasted into the TUI. One string can move both ways unchanged: `logview query rec.lvr.jsonl 'level:W tag:Database lock'` and `/` then `level:W tag:Database lock` in the TUI.
+Why a language and not more CLI flags: flags cannot be pasted into the TUI. One string can move both ways unchanged: `logcayo query rec.lvr.jsonl 'level:W tag:Database lock'` and `/` then `level:W tag:Database lock` in the TUI.
 
 ## Decision 2: TUI changes
 
@@ -73,14 +73,14 @@ Each change is justified by an observation above. Anything not listed is out of 
 8. **No flicker.** Replace `ESC[2J` with cursor-home plus full-width overwrite, wrap each frame in synchronized output (`ESC[?2026h`/`l`), and skip writing a frame identical to the last one.
 9. Update help overlay and footer hints for the new keys.
 
-## Decision 3: agent CLI as `logview query`
+## Decision 3: agent CLI as `logcayo query`
 
 It extends `headless.ts`. It builds the same `Session` with the same replay or ADB source and the same `initialFilter`. It adds no second matcher.
 
 ```text
-logview query PATH  [QUERY] [--limit N] [--since TIME] [--format ndjson|text] [--allow-partial]
-logview query --live [QUERY] [--serial S] [--timeout DUR] [--limit N] [--since TIME|DUR]
-logview query --check QUERY        # validate and print the canonical query and spec
+logcayo query PATH  [QUERY] [--limit N] [--since TIME] [--format ndjson|text] [--allow-partial]
+logcayo query --live [QUERY] [--serial S] [--timeout DUR] [--limit N] [--since TIME|DUR]
+logcayo query --check QUERY        # validate and print the canonical query and spec
 ```
 
 - **Engine addition**: `Session.readMatches(after: EventId | null, limit: number): readonly LogEvent[]`. It is read-only and walks the active index. It is the one new public contract.
@@ -93,17 +93,17 @@ logview query --check QUERY        # validate and print the canonical query and 
 - **Exit codes**: they match the existing CLI. `0` means completed, including zero matches. `1` means source failure. `2` means invalid arguments or an invalid query.
 - **Bounds**: live defaults to `--timeout 10s`, and the summary reports it. `--since` accepts an absolute ISO time or epoch for any source. A relative duration such as `5m` is valid only with `--live`, because it is relative to now. It filters buffered logcat history. For replay, a relative duration is rejected with exit `2`.
 - **Read-only**: `query` never writes a file. `record` stays the only writer.
-- **Help**: `logview query --help` includes the grammar, three examples and the exit codes.
+- **Help**: `logcayo query --help` includes the grammar, three examples and the exit codes.
 - `replay --headless` keeps its current one-line summary for compatibility.
 
 ## Decision 4: architecture guards
 
 Extend `tests/architecture/import-boundaries.test.ts`:
 
-- CLI source has no static import of `@logview/tui`. The single dynamic `import("@logview/tui")` in `main.ts` is allowed.
-- The TUI and the engine never import `@logview/cli`.
+- CLI source has no static import of `@logcayo/tui`. The single dynamic `import("@logcayo/tui")` in `main.ts` is allowed.
+- The TUI and the engine never import `@logcayo/cli`.
 - Outside core, no source imports `parseLevelField`, `parsePidField` or `foldText`. Filter text is parsed only through `parseFilterQuery`.
-- Packages import each other only through the package entry point (`@logview/core`), never `../core/src/...`.
+- Packages import each other only through the package entry point (`@logcayo/core`), never `../core/src/...`.
 
 ## Decision 5: one contract table, two adapters
 
@@ -119,7 +119,7 @@ If the adapters ever disagree, one of these two tests fails.
 | Step | Who | Where | Files |
 |---|---|---|---|
 | 1. `query.ts`, property and round-trip tests, contract table | coordinator | this worktree | `core/src/query.ts`, `core/test/query.test.ts`, `tests/contract/filter-cases.ts` |
-| 2a. Engine `readMatches` and `logview query` | worker `cli` (gpt-6-sol) | `~/dev/worktrees/logview/agent-cli` | `engine/src/{contracts,session}.ts`, `cli/src/*`, `cli/test/*`, README CLI section |
+| 2a. Engine `readMatches` and `logcayo query` | worker `cli` (gpt-6-sol) | `~/dev/worktrees/logview/agent-cli` | `engine/src/{contracts,session}.ts`, `cli/src/*`, `cli/test/*`, README CLI section |
 | 2b. TUI items 1 to 9 | worker `tui` (grok-4.7) | `~/dev/worktrees/logview/tui-query` | `core/src/interaction.ts`, `tui/src/*`, `tui/test/*`, baselines only via `ui:update` after my review |
 | 3. Architecture tests, integration, verification | coordinator | this worktree | `tests/architecture/*` |
 | 4. Demo: terminal recordings, animated explainer, diagrams | coordinator plus one worker | `ai-artifacts/demo/` | new files only |
