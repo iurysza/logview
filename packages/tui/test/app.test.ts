@@ -254,7 +254,7 @@ describe("tui chrome", () => {
 			focus: "query" as const,
 			draft: "pid:",
 			cursor: 4,
-			error: { kind: "invalid-filter" as const, field: "pid" as const, message: "PID must be a positive integer" },
+			error: { kind: "invalid-filter" as const, field: "pid" as const, message: "PID must be a positive integer", offset: 4 },
 			origin: EMPTY_FILTER,
 			historyIndex: null,
 			history: [],
