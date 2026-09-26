@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { EMPTY_FILTER, EMPTY_SELECTION, INSPECT_FOCUS, LIST_FOCUS, displayWidth, reduceInteraction, type InteractionState } from "@logview/core";
+import { EMPTY_FILTER, EMPTY_SELECTION, INSPECT_FOCUS, LIST_FOCUS, displayWidth, formatFilterQuery, reduceInteraction, type InteractionState } from "@logview/core";
 import { createRecordingFiles, createReplaySource, createSession, defaultSessionOptions } from "@logview/engine";
 import { layoutFrame } from "../src/app.ts";
 import { FILTER_CONTRACT_CASES, FILTER_CONTRACT_FIXTURE } from "../../../tests/contract/filter-cases.ts";
@@ -79,7 +79,6 @@ describe("UI state scenarios", () => {
 });
 
 describe("query contract", () => {
-	// TODO(coordinator): switch to readMatches after merge
 	for (const contract of FILTER_CONTRACT_CASES) {
 		test(contract.query.length === 0 ? "empty query matches every event" : contract.query, async () => {
 			const scheduler = new ManualScheduler();
@@ -141,13 +140,10 @@ describe("query contract", () => {
 			await typeKey("enter");
 			await scheduler.runUntilIdle();
 
-			const ids: number[] = [];
-
-			for (const row of session.snapshot().rows) {
-				if (row.kind === "header") ids.push(row.id);
-			}
+			const ids = session.readMatches(null, 1000).map((event) => event.id);
 
 			expect(ids).toEqual([...contract.expectedIds]);
+			expect(formatFilterQuery(session.snapshot().activeFilter)).toBe(contract.canonical);
 			await session.stop();
 		});
 	}
