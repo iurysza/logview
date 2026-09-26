@@ -30,7 +30,7 @@ const Summary = Schema.parseJson(
 
 const repoRoot = join(import.meta.dir, "../../..");
 
-async function runLogview(args: readonly string[]): Promise<{
+async function runLogcayo(args: readonly string[]): Promise<{
 	code: number;
 	stdout: string;
 	stderr: string;
@@ -58,7 +58,7 @@ async function runLogview(args: readonly string[]): Promise<{
 
 describe("live ADB CLI smoke", () => {
 	test("headless live against the one-device stub admits the sanitized fixture", async () => {
-		const result = await runLogview([
+		const result = await runLogcayo([
 			"live",
 			"--headless",
 			"--adb",
@@ -83,7 +83,7 @@ describe("live ADB CLI smoke", () => {
 	});
 
 	test("headless live with no device explains the failure", async () => {
-		const result = await runLogview([
+		const result = await runLogcayo([
 			"live",
 			"--headless",
 			"--adb",
@@ -95,7 +95,7 @@ describe("live ADB CLI smoke", () => {
 	});
 
 	test("headless live with a missing adb binary is a source failure", async () => {
-		const result = await runLogview(["live", "--headless", "--adb", "/no/such/adb-binary"]);
+		const result = await runLogcayo(["live", "--headless", "--adb", "/no/such/adb-binary"]);
 		expect(result.code).toBe(1);
 
 		const line = result.stdout.trim().split("\n").at(-1) ?? "{}";
@@ -113,7 +113,7 @@ describe("live ADB CLI smoke", () => {
 	});
 
 	test("several devices without --serial refuse to pick one", async () => {
-		const result = await runLogview(["live", "--headless", "--adb", adbStubPath("multi-device")]);
+		const result = await runLogcayo(["live", "--headless", "--adb", adbStubPath("multi-device")]);
 		expect(result.code).toBe(1);
 		expect(result.stdout.includes("ambiguous-device")).toBe(true);
 	});

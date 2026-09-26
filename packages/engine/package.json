@@ -1,5 +1,5 @@
 {
-  "name": "@logview/engine",
+  "name": "@logcayo/engine",
   "version": "0.1.0",
   "type": "module",
   "private": true,
@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@logview/core": "workspace:*",
+    "@logcayo/core": "workspace:*",
     "@typesafe-ai/sdk": "0.6.0",
     "effect": "3.22.2"
   }

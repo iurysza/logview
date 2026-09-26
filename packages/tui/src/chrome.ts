@@ -11,8 +11,8 @@ import {
 	type InteractionState,
 	type QueryError,
 	type SearchMode,
-} from "@logview/core";
-import { type BelowThreshold, type SessionSnapshot as EngineSessionSnapshot } from "@logview/engine";
+} from "@logcayo/core";
+import { type BelowThreshold, type SessionSnapshot as EngineSessionSnapshot } from "@logcayo/engine";
 import { paintStyled, rgbSgr, styleOn, type CellStyle, type Rgb } from "./catppuccin.ts";
 import { type PaintStyle } from "./color.ts";
 import { severityStyle, THEME } from "./theme.ts";
@@ -161,7 +161,7 @@ export function formatHints(
 }
 
 export function formatStatus(snapshot: Snapshot): string {
-	return `logview   ${snapshot.label}   ${sourceStatusText(snapshot)}   ${eventCountLabel(snapshot)}   ${activeFilterCount(snapshot.activeFilter)} filters`;
+	return `logcayo   ${snapshot.label}   ${sourceStatusText(snapshot)}   ${eventCountLabel(snapshot)}   ${activeFilterCount(snapshot.activeFilter)} filters`;
 }
 
 export function formatFilter(snapshot: Snapshot): string {
@@ -267,7 +267,7 @@ export function paintStatus(snapshot: Snapshot, columns: number, style: PaintSty
 	if (snapshot.source.kind === "failed") statusColor = THEME.red;
 
 	if (snapshot.source.kind === "running") statusColor = THEME.green;
-	const left = [bold("logview", THEME.accent), plain("  "), plain(snapshot.label, THEME.muted)];
+	const left = [bold("logcayo", THEME.accent), plain("  "), plain(snapshot.label, THEME.muted)];
 
 	const jev = jevStatusSpans(snapshot);
 	const jevGroup = jev === null ? [] : [plain("  "), ...jev];
@@ -287,7 +287,7 @@ export function paintStatus(snapshot: Snapshot, columns: number, style: PaintSty
 	if (displayWidth(full.map((span) => span.text).join("")) <= columns) return paintChromeLine(full, columns, style, THEME.bar);
 
 	const retained = [
-		bold("logview", THEME.accent),
+		bold("logcayo", THEME.accent),
 		plain("  "),
 		bold(sourceStatusText(snapshot), statusColor),
 		plain("  "),

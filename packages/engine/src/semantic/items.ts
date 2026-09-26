@@ -1,4 +1,4 @@
-import { messageText, tagText, type LogEvent } from "@logview/core";
+import { messageText, tagText, type LogEvent } from "@logcayo/core";
 import type { ClassifierItem } from "./contracts.ts";
 
 export function classifierItemFromEvent(event: LogEvent): ClassifierItem {

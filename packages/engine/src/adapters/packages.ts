@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@logview/core";
+import { err, ok, type Result } from "@logcayo/core";
 import type { PackageResolver, PackageTable, ProcessRunner, SourceError } from "../ports.ts";
 
 export type AdbPackageResolverOptions = Readonly<{

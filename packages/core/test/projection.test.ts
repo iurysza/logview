@@ -11,7 +11,7 @@ import {
 	rowDisplayText,
 	rowText,
 	type LogEvent,
-} from "@logview/core";
+} from "@logcayo/core";
 
 function event(
 	id: number,

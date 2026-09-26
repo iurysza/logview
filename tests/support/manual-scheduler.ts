@@ -1,4 +1,4 @@
-import type { Cancel, Scheduler } from "@logview/engine";
+import type { Cancel, Scheduler } from "@logcayo/engine";
 
 export class ManualScheduler implements Scheduler {
 	now = 0;

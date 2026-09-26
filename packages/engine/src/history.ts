@@ -1,5 +1,5 @@
-import type { EventId, LogEvent } from "@logview/core";
-import { eventChargeBytes } from "@logview/core";
+import type { EventId, LogEvent } from "@logcayo/core";
+import { eventChargeBytes } from "@logcayo/core";
 
 export type HistoryBounds = Readonly<{
 	firstId: EventId | null;

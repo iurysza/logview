@@ -1,4 +1,4 @@
-import { EMPTY_FILTER, err, ok, type FilterSpec, type Result, type SourceKind } from "@logview/core";
+import { EMPTY_FILTER, err, ok, type FilterSpec, type Result, type SourceKind } from "@logcayo/core";
 import {
 	createAdbPackageResolver,
 	createAdbSource,
@@ -12,7 +12,7 @@ import {
 	DEFAULT_MAX_RECORDING_BYTES,
 	type LogClassifier,
 	type Session,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import {
 	readConfigFile,
 	resolveViewerSettings,
@@ -65,18 +65,18 @@ type ParsedCli =
 	| { command: "help" };
 
 function usage(): string {
-	return `logview — keyboard-driven Android log viewer
+	return `logcayo — keyboard-driven Android log viewer
 
 Usage:
-  logview live [--serial DEVICE] [--headless] [--semantic] [--config PATH]
-  logview record --out PATH [--serial DEVICE] [--duration SEC]
-  logview replay PATH [--speed N|instant] [--headless] [--allow-partial] [--semantic] [--config PATH]
-  logview query PATH [QUERY] [--limit N] [--since TIME] [--format ndjson|text]
-  logview query --live [QUERY] [--timeout DUR] [--limit N]
-  logview query --check QUERY
+  logcayo live [--serial DEVICE] [--headless] [--semantic] [--config PATH]
+  logcayo record --out PATH [--serial DEVICE] [--duration SEC]
+  logcayo replay PATH [--speed N|instant] [--headless] [--allow-partial] [--semantic] [--config PATH]
+  logcayo query PATH [QUERY] [--limit N] [--since TIME] [--format ndjson|text]
+  logcayo query --live [QUERY] [--timeout DUR] [--limit N]
+  logcayo query --check QUERY
 
 Jev visual filter:
-  Set TYPESAFE_API_KEY. Enable with --semantic or semantic.enabled in logview.json.
+  Set TYPESAFE_API_KEY. Enable with --semantic or semantic.enabled in logcayo.json.
   The / text field is then a natural-language query. Eligible logs are classified
   in batches. The list shows each result and dims scores below the threshold.
   Flags override the config file.
@@ -396,7 +396,7 @@ async function attachOrHeadless(session: Session, headless: boolean): Promise<nu
 		return 1;
 	}
 
-	const tui = await import("@logview/tui");
+	const tui = await import("@logcayo/tui");
 	const attached = await tui.attachTui(session);
 
 	if (!attached.ok) {

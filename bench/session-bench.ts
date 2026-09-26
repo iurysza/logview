@@ -1,5 +1,5 @@
 import { cpus, release, totalmem } from "node:os";
-import { createSession, defaultSessionOptions } from "@logview/engine";
+import { createSession, defaultSessionOptions } from "@logcayo/engine";
 import { ManualScheduler } from "../tests/support/manual-scheduler.ts";
 import { ScriptedSource } from "../tests/support/scripted-source.ts";
 import { BENCH_SEED, generateLines, PRD_SIZE_PLAN } from "./generate.ts";

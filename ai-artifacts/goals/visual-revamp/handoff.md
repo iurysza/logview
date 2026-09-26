@@ -1,6 +1,6 @@
 # Visual revamp handoff
 
-Make logview easier to scan using the supplied image. Strengthen the bars, filters, column headings, selection, and shortcut labels. Make each tag match its row's severity.
+Make logcayo easier to scan using the supplied image. Strengthen the bars, filters, column headings, selection, and shortcut labels. Make each tag match its row's severity.
 
 ## Current state
 
@@ -18,7 +18,7 @@ Confirm implementation approval before changing application code. Do not reopen 
 2. Read the [technical specification](../../specs/2026-09-20-visual-revamp.md). It defines each component's contracts, file changes, data flow, layout rules, and acceptance tests. Use it as the implementation plan rather than reconstructing requirements from chat.
 3. Keep [reference.md](reference.md) open during visual review. It is the comparison checklist and explains which screenshot details to ignore.
 
-Also read the repository's `AGENTS.md`, the `coding-standards` skill, and the `verify-logview` skill and feature map before working.
+Also read the repository's `AGENTS.md`, the `coding-standards` skill, and the `verify-logcayo` skill and feature map before working.
 
 The screenshot mixes fixed tag colors and severity colors. Follow the user's explicit request: tags match severity. Do not copy its sample version, counts, line percentage, window frame, `Enter Expand`, or `r Replay` into the product.
 

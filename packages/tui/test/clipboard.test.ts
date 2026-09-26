@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { eventChargeBytes, type LogEvent } from "@logview/core";
+import { eventChargeBytes, type LogEvent } from "@logcayo/core";
 import { formatClipboardEvent } from "../src/clipboard.ts";
 
 function event(rawText: string, continuations: readonly string[] = []): LogEvent {

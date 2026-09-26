@@ -9,7 +9,7 @@ import {
 	defaultSessionOptions,
 	recordSession,
 	syntheticRecordingHeader,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { ManualScheduler } from "../../../tests/support/manual-scheduler.ts";
 import { ScriptedSource } from "../../../tests/support/scripted-source.ts";
 import { threadtimeLine } from "../../../tests/support/log-lines.ts";
@@ -17,7 +17,7 @@ import { tick } from "../../../tests/support/scenario.ts";
 
 describe("replay", () => {
 	test("replay of a synthetic recording matches direct packet delivery", async () => {
-		const directory = await mkdtemp(join(tmpdir(), "logview-replay-"));
+		const directory = await mkdtemp(join(tmpdir(), "logcayo-replay-"));
 		const outPath = join(directory, "cap.lvr.jsonl");
 		const recordedSource = new ScriptedSource();
 		recordedSource.pushLine(threadtimeLine(1), 0);

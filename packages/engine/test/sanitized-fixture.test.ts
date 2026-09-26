@@ -10,7 +10,7 @@ import {
 	packetFromChunk,
 	SANITIZED_REDACTION_VERSION,
 	validateRecordingSequence,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { ManualScheduler } from "../../../tests/support/manual-scheduler.ts";
 import { buildSanitizedRecordingBytes, sanitizedRecordingPath } from "../../../tests/fixtures/real/build-recording.ts";
 import {

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { EMPTY_FILTER, EMPTY_SELECTION, INSPECT_FOCUS, LIST_FOCUS, displayWidth, formatFilterQuery, reduceInteraction, type InteractionState } from "@logview/core";
-import { createRecordingFiles, createReplaySource, createSession, defaultSessionOptions } from "@logview/engine";
+import { EMPTY_FILTER, EMPTY_SELECTION, INSPECT_FOCUS, LIST_FOCUS, displayWidth, formatFilterQuery, reduceInteraction, type InteractionState } from "@logcayo/core";
+import { createRecordingFiles, createReplaySource, createSession, defaultSessionOptions } from "@logcayo/engine";
 import { layoutFrame } from "../src/app.ts";
 import { FILTER_CONTRACT_CASES, FILTER_CONTRACT_FIXTURE } from "../../../tests/contract/filter-cases.ts";
 import { ManualScheduler } from "../../../tests/support/manual-scheduler.ts";

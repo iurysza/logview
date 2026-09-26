@@ -1,12 +1,12 @@
-# logview verification map
+# logcayo verification map
 
-This directory is the maintained source for verifying the user-facing behavior of logview. Read the index before driving the app, then use the matching feature file as the recipe.
+This directory is the maintained source for verifying the user-facing behavior of logcayo. Read the index before driving the app, then use the matching feature file as the recipe.
 
 ## Baseline preconditions
 
 - Work from the repository root.
 - Run `bun install` once in this checkout.
-- Run `bun .agents/skills/verify-logview/doctor.ts` and require Bun 1.4+, Terminal Control `0.4.1`, and `tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl`.
+- Run `bun .agents/skills/verify-logcayo/doctor.ts` and require Bun 1.4+, Terminal Control `0.4.1`, and `tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl`.
 - Drive replay against that sanitized fixture at `--speed instant`. It admits 15 events. It is a reviewed AOSP-shaped stand-in, not a private device capture. See `tests/fixtures/real/MANIFEST.md`.
 - Use a unique `--out generated/ui/<run-id>` directory for each TUI drive.
 - Never drive a Terminal Control session you did not start.

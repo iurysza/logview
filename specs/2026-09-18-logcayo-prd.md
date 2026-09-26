@@ -1,13 +1,13 @@
-# Logview V1 product requirements
+# Logcayo V1 product requirements
 
 Date: 18 September 2026  
 Status: Proposed specification. No application implementation accompanies this document.  
-Working name: `logview`. The public product name remains undecided.  
-Companion: [Technical design](2026-09-18-logview-technical-design.md).
+Working name: `logcayo`. The public product name remains undecided.  
+Companion: [Technical design](2026-09-18-logcayo-technical-design.md).
 
 ## Summary
 
-Logview is a keyboard-driven Android log viewer. It lets a developer follow incoming logs, stop following to inspect earlier rows, and narrow the view without losing the underlying history.
+Logcayo is a keyboard-driven Android log viewer. It lets a developer follow incoming logs, stop following to inspect earlier rows, and narrow the view without losing the underlying history.
 
 V1 establishes a reliable, testable engine before it adds a rich interface. The same engine runs against a connected device, a recorded byte stream, or a test source. Its behavior does not depend on OpenTUI or a physical phone.
 
@@ -50,7 +50,7 @@ Package-name tracking, automatic PID refresh after an app restart, and automatic
 This wireframe defines information and interaction, not a final visual theme. Row data is illustrative.
 
 ```text
-┌─ logview · replay: database-session ─────────────── SOURCE RUNNING ─┐
+┌─ logcayo · replay: database-session ─────────────── SOURCE RUNNING ─┐
 │ Level: ALL   Tag: —   PID: —   Text: database                      │
 ├──────────────────────────────────────────────────────────────────┤
 │ 12:41:17.912  I  Database     Opening connection                   │
@@ -142,11 +142,11 @@ Recorded timing uses host monotonic receipt offsets. Device timestamps remain lo
 The proposed command surface is:
 
 ```sh
-logview live --serial DEVICE
-logview record --serial DEVICE --out sessions/example.lvr.jsonl --duration 60
-logview replay sessions/example.lvr.jsonl
-logview replay sessions/example.lvr.jsonl --speed 4
-logview replay sessions/example.lvr.jsonl --speed instant --headless
+logcayo live --serial DEVICE
+logcayo record --serial DEVICE --out sessions/example.lvr.jsonl --duration 60
+logcayo replay sessions/example.lvr.jsonl
+logcayo replay sessions/example.lvr.jsonl --speed 4
+logcayo replay sessions/example.lvr.jsonl --speed instant --headless
 ```
 
 These commands do not exist yet. `--headless` produces a final JSON summary and view snapshot, without terminal setup. Application tests drive the same session API directly for intermediate assertions.

@@ -1,5 +1,5 @@
 import { SANITIZED_DEVICE_SERIAL, SANITIZED_LOGCAT, SANITIZED_STDERR } from "../../fixtures/real/sanitized-payload.ts";
-import { LOGCAT_ARGS } from "@logview/engine";
+import { LOGCAT_ARGS } from "@logcayo/engine";
 
 type StubName =
 	| "one-device"

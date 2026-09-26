@@ -11,7 +11,7 @@ import {
 	UnprocessableEntityError,
 	type Questions,
 } from "@typesafe-ai/sdk";
-import { err, ok, type ConfigurationError, type Result } from "@logview/core";
+import { err, ok, type ConfigurationError, type Result } from "@logcayo/core";
 import type { ClassifierError, ClassifyRequest, LogClassifier, Relevance } from "../semantic/contracts.ts";
 import { JEV_MODEL_ID } from "../semantic/contracts.ts";
 import { eventKey, relevanceInstructions, RELEVANCE_FALSE, RELEVANCE_TRUE } from "../semantic/prompt.ts";

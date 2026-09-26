@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { VisibleIndexStore } from "@logview/engine";
+import { VisibleIndexStore } from "@logcayo/engine";
 
 describe("visible index", () => {
 	test("appends, locates, windows, and prunes by retained prefix", () => {

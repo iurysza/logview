@@ -1,4 +1,4 @@
-import type { Result } from "@logview/core";
+import type { Result } from "@logcayo/core";
 
 export type SourceError = Readonly<{
 	kind:

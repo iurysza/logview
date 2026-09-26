@@ -10,13 +10,13 @@ import {
 	recordSession,
 	syntheticRecordingHeader,
 	uidRecordingHeader,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { ManualScheduler } from "../../../tests/support/manual-scheduler.ts";
 import { logcatLine, ScriptedSource, stdoutPacket } from "../../../tests/support/scripted-source.ts";
 
 describe("recording", () => {
 	test("records a scripted source and replays identical stdout bytes", async () => {
-		const dir = mkdtempSync(join(tmpdir(), "logview-record-"));
+		const dir = mkdtempSync(join(tmpdir(), "logcayo-record-"));
 		const path = join(dir, "session.lvr.jsonl");
 
 		const packets = [
@@ -77,7 +77,7 @@ describe("recording", () => {
 	});
 
 	test("replay resolves packages from the recording header without ADB", async () => {
-		const dir = mkdtempSync(join(tmpdir(), "logview-record-"));
+		const dir = mkdtempSync(join(tmpdir(), "logcayo-record-"));
 		const path = join(dir, "packages.lvr.jsonl");
 		const source = new ScriptedSource();
 		const scheduler = new ManualScheduler();
@@ -132,7 +132,7 @@ describe("recording", () => {
 	});
 
 	test("stops at the duration limit while the source waits idle", async () => {
-		const dir = mkdtempSync(join(tmpdir(), "logview-record-"));
+		const dir = mkdtempSync(join(tmpdir(), "logcayo-record-"));
 		const path = join(dir, "duration.lvr.jsonl");
 		const source = new ScriptedSource();
 		const scheduler = new ManualScheduler();
@@ -161,7 +161,7 @@ describe("recording", () => {
 	});
 
 	test("refuses to overwrite an existing destination", async () => {
-		const dir = mkdtempSync(join(tmpdir(), "logview-record-"));
+		const dir = mkdtempSync(join(tmpdir(), "logcayo-record-"));
 		const path = join(dir, "exists.lvr.jsonl");
 		await Bun.write(path, "x\n");
 		const source = new ScriptedSource();

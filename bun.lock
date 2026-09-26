@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "logview",
+      "name": "logcayo",
       "dependencies": {
         "effect": "3.22.2",
       },
@@ -15,39 +15,39 @@
       },
     },
     "packages/cli": {
-      "name": "@logview/cli",
+      "name": "@logcayo/cli",
       "version": "0.1.0",
       "bin": {
-        "logview": "./src/main.ts",
+        "logcayo": "./src/main.ts",
       },
       "dependencies": {
-        "@logview/core": "workspace:*",
-        "@logview/engine": "workspace:*",
+        "@logcayo/core": "workspace:*",
+        "@logcayo/engine": "workspace:*",
         "effect": "3.22.2",
       },
     },
     "packages/core": {
-      "name": "@logview/core",
+      "name": "@logcayo/core",
       "version": "0.1.0",
       "dependencies": {
         "effect": "3.22.2",
       },
     },
     "packages/engine": {
-      "name": "@logview/engine",
+      "name": "@logcayo/engine",
       "version": "0.1.0",
       "dependencies": {
-        "@logview/core": "workspace:*",
+        "@logcayo/core": "workspace:*",
         "@typesafe-ai/sdk": "0.6.0",
         "effect": "3.22.2",
       },
     },
     "packages/tui": {
-      "name": "@logview/tui",
+      "name": "@logcayo/tui",
       "version": "0.1.0",
       "dependencies": {
-        "@logview/core": "workspace:*",
-        "@logview/engine": "workspace:*",
+        "@logcayo/core": "workspace:*",
+        "@logcayo/engine": "workspace:*",
       },
       "devDependencies": {
         "@kitlangton/terminal-control": "0.4.1",
@@ -71,13 +71,13 @@
 
     "@kitlangton/terminal-control-linux-x64-gnu": ["@kitlangton/terminal-control-linux-x64-gnu@0.4.1", "", { "os": "linux", "cpu": "x64", "bin": { "termctrl": "bin/termctrl" } }, "sha512-5qgusRE1jUXYBeLM8xgiJgHxDAOjnF9fewQFb3JYVoANor6sf6hRcKKJQvbpHs72nNrD7R+kcQVd/Tj+Wckkgw=="],
 
-    "@logview/cli": ["@logview/cli@workspace:packages/cli"],
+    "@logcayo/cli": ["@logcayo/cli@workspace:packages/cli"],
 
-    "@logview/core": ["@logview/core@workspace:packages/core"],
+    "@logcayo/core": ["@logcayo/core@workspace:packages/core"],
 
-    "@logview/engine": ["@logview/engine@workspace:packages/engine"],
+    "@logcayo/engine": ["@logcayo/engine@workspace:packages/engine"],
 
-    "@logview/tui": ["@logview/tui@workspace:packages/tui"],
+    "@logcayo/tui": ["@logcayo/tui@workspace:packages/tui"],
 
     "@oxlint/binding-android-arm-eabi": ["@oxlint/binding-android-arm-eabi@1.83.0", "", { "os": "android", "cpu": "arm" }, "sha512-0yGY24EwsLk5YDe6F+VkmZyRHSwJDALa3nIrPpq7FXmp2lV2d0TzvBCGeZk+wgiULRGr5blhyr4QMp5KCXJUqA=="],
 

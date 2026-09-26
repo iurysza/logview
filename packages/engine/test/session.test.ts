@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { EMPTY_FILTER, ok } from "@logview/core";
-import type { PackageResolver } from "@logview/engine";
+import { EMPTY_FILTER, ok } from "@logcayo/core";
+import type { PackageResolver } from "@logcayo/engine";
 import { threadtimeLine } from "../../../tests/support/log-lines.ts";
 import { openScenario, tick } from "../../../tests/support/scenario.ts";
 

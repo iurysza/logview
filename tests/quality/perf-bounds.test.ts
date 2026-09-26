@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { DEFAULT_MAX_HISTORY_CHARGE_BYTES, logViewportHeight } from "@logview/core";
+import { DEFAULT_MAX_HISTORY_CHARGE_BYTES, logViewportHeight } from "@logcayo/core";
 import { measureSession } from "../../bench/session-bench.ts";
 
 describe("PRD structural performance bounds", () => {

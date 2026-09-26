@@ -1,4 +1,4 @@
-import { err, ok, MAX_PACKET_BYTES, type ConfigurationError, type Result } from "@logview/core";
+import { err, ok, MAX_PACKET_BYTES, type ConfigurationError, type Result } from "@logcayo/core";
 import { Effect, Match } from "effect";
 import type {
 	LogSource,

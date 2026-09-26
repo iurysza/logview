@@ -1,5 +1,5 @@
-import { emptyFramerState, frameBytes, type FramerState, type FramedLine } from "@logview/core";
-import { MAX_PACKET_BYTES } from "@logview/core";
+import { emptyFramerState, frameBytes, type FramerState, type FramedLine } from "@logcayo/core";
+import { MAX_PACKET_BYTES } from "@logcayo/core";
 import type { SourcePacket } from "./ports.ts";
 
 export type QueuePacket = {

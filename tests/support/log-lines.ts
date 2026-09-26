@@ -1,4 +1,4 @@
-import type { LogLevel } from "@logview/core";
+import type { LogLevel } from "@logcayo/core";
 
 export function threadtimeLine(
 	id: number,

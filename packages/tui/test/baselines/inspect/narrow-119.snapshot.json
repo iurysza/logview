@@ -34,7 +34,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "logview"
+      "text": "logcayo"
     },
     {
       "x": 7,
@@ -706,31 +706,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "Package     "
-    },
-    {
-      "x": 12,
-      "y": 6,
-      "foreground": {
-        "r": 244,
-        "g": 201,
-        "b": 93
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "Not recorded"
+      "text": "Package     Not recorded"
     },
     {
       "x": 24,
@@ -832,6 +808,30 @@
       "x": 0,
       "y": 8,
       "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                                                       "
+    },
+    {
+      "x": 0,
+      "y": 9,
+      "foreground": {
         "r": 69,
         "g": 150,
         "b": 255
@@ -854,7 +854,7 @@
     },
     {
       "x": 7,
-      "y": 8,
+      "y": 9,
       "foreground": {
         "r": 82,
         "g": 98,
@@ -878,39 +878,7 @@
     },
     {
       "x": 0,
-      "y": 9,
-      "foreground": {
-        "r": 126,
-        "g": 231,
-        "b": 135
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "日本語 ok",
-      "widths": [
-        2,
-        2,
-        2,
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "x": 9,
-      "y": 9,
+      "y": 10,
       "foreground": {
         "r": 195,
         "g": 205,
@@ -930,11 +898,153 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                                                              "
+      "text": "日本語 ok                                                                                                              ",
+      "widths": [
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "x": 0,
-      "y": 10,
+      "y": 11,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                                                       "
+    },
+    {
+      "x": 0,
+      "y": 12,
       "foreground": {
         "r": 69,
         "g": 150,
@@ -958,7 +1068,7 @@
     },
     {
       "x": 3,
-      "y": 10,
+      "y": 12,
       "foreground": {
         "r": 82,
         "g": 98,
@@ -982,7 +1092,7 @@
     },
     {
       "x": 0,
-      "y": 11,
+      "y": 13,
       "foreground": {
         "r": 82,
         "g": 98,
@@ -1060,54 +1170,6 @@
     },
     {
       "x": 55,
-      "y": 11,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "                                                                "
-    },
-    {
-      "x": 0,
-      "y": 12,
-      "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
-      },
-      "background": {
-        "r": 29,
-        "g": 38,
-        "b": 51
-      },
-      "attributes": {
-        "bold": false,
-        "italic": false,
-        "faint": false,
-        "invisible": false,
-        "strikethrough": false,
-        "overline": false,
-        "underline": null
-      },
-      "text": "                                                                                                                       "
-    },
-    {
-      "x": 0,
       "y": 13,
       "foreground": {
         "r": 195,
@@ -1128,7 +1190,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                                                                       "
+      "text": "                                                                "
     },
     {
       "x": 0,

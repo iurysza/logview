@@ -33,7 +33,7 @@ describe("tui pty smoke", () => {
 		const visible = stripANSI(stdout);
 
 		expect(code).toBe(0);
-		expect(visible.includes("logview")).toBe(true);
+		expect(visible.includes("logcayo")).toBe(true);
 		expect(visible.includes("q Quit") || visible.includes("REPLAY")).toBe(true);
 		expect(visible.includes("日本語")).toBe(true);
 		expect(visible.includes("filter by this tag")).toBe(true);

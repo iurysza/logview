@@ -1,4 +1,4 @@
-import { err, ok, MAX_PACKET_BYTES, type Result } from "@logview/core";
+import { err, ok, MAX_PACKET_BYTES, type Result } from "@logcayo/core";
 import type {
 	LogSource,
 	ProcessRunner,

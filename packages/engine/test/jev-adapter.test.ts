@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createJevClassifier } from "@logview/engine";
+import { createJevClassifier } from "@logcayo/engine";
 
 describe("Jev adapter", () => {
 	test("maps a TypeSafe noul batch onto relevance by event ID", async () => {

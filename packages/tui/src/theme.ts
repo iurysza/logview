@@ -1,4 +1,4 @@
-import type { LogLevel } from "@logview/core";
+import type { LogLevel } from "@logcayo/core";
 import { fgBold, fgOnly, type CellStyle, type Rgb } from "./catppuccin.ts";
 
 export type ThemeToken =

@@ -11,7 +11,7 @@ Replay opens a recording without a phone, lets the user leave the tail to inspec
 
 ## How to get to it (user POV)
 
-- Run `logview replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --speed instant`.
+- Run `logcayo replay tests/fixtures/real/sanitized-aosp-pattern.lvr.jsonl --speed instant`.
 - Press `↑` or `k` to leave tail.
 - Press `PageUp` or `Ctrl+U` to page up, and `PageDown` or `Ctrl+D` to page down.
 - Press `G` or End to jump to the newest event.
@@ -20,11 +20,11 @@ Replay opens a recording without a phone, lets the user leave the tail to inspec
 
 Preconditions:
 
-- `bun .agents/skills/verify-logview/doctor.ts` reports `ok`.
+- `bun .agents/skills/verify-logcayo/doctor.ts` reports `ok`.
 - No other recipe is using `--out generated/ui/replay`.
 
 - **Named scenario.** Run `bun run ui:verify --scenario replay --out generated/ui/replay`. The run waits for `REPLAY • END`, sends a split up-arrow, pages up, then types `G`.
-- **Open replay.** The first settled screen after launch shows `logview`, `REPLAY • END`, `sanitized-aosp-pattern.lvr.jsonl`, and `15 events`.
+- **Open replay.** The first settled screen after launch shows `logcayo`, `REPLAY • END`, `sanitized-aosp-pattern.lvr.jsonl`, and `15 events`.
 - **Leave tail.** After the up-arrow, `generated/ui/replay/browse/screen.txt` contains `REPLAY • BROWSE`.
 - **Return to tail.** After `G`, `generated/ui/replay/final/screen.txt` contains `REPLAY • END` and `日本語 ok`.
 - **Proof.** Inspect `generated/ui/replay/browse/screen.png` and `generated/ui/replay/final/screen.png`. The browse frame is not following. The final frame is back at the end and still shows the fixture label.

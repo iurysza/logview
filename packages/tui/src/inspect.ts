@@ -1,17 +1,17 @@
 import {
 	displayWidth,
-	escapeDisplayText,
 	messageText,
 	sanitizeDisplay,
 	tagText,
 	type LogEvent,
 	type LogLevel,
-} from "@logview/core";
-import type { PackageAttribution } from "@logview/engine";
+} from "@logcayo/core";
+import type { PackageAttribution } from "@logcayo/engine";
 import type { Rgb } from "./catppuccin.ts";
 import { type ChromeLine, type ChromeSpan, paintChromeLine } from "./chrome.ts";
 import type { PaintStyle } from "./color.ts";
 import { severityStyle, THEME } from "./theme.ts";
+import { wrapChromeLine } from "./wrap.ts";
 
 const LABEL_WIDTH = 12;
 
@@ -54,31 +54,28 @@ function section(label: string, width: number): ChromeLine {
 	];
 }
 
+const GUTTER: ChromeLine = [span("│  ", THEME.subtle)];
+
+const GUTTER_CONTINUATION: ChromeLine = [span("│    ", THEME.subtle)];
+
+const CAUSE_MARK: ChromeLine = [span("├─ ", THEME.subtle)];
+
+const RAW_WRAP: ChromeLine = [span("  ", THEME.subtle)];
+
+const RAW_CONTINUATION_WRAP: ChromeLine = [span("    ", THEME.subtle)];
+
 function inspectTimestamp(epochMicros: number): string {
 	return new Date(Math.floor(epochMicros / 1000)).toISOString().replace("T", " ").replace("Z", "");
 }
 
-function wrapDisplayText(text: string, width: number): string[] {
-	if (width <= 0) return [""];
-
-	const lines: string[] = [];
-	let line = "";
-	let used = 0;
-
-	for (const unit of escapeDisplayText(text)) {
-		if (unit.width > 0 && used + unit.width > width) {
-			lines.push(line);
-			line = "";
-			used = 0;
-		}
-
-		line += unit.display;
-		used += unit.width;
-	}
-
-	if (line.length > 0 || lines.length === 0) lines.push(line);
-
-	return lines;
+function pushWrapped(
+	lines: ChromeLine[],
+	content: ChromeLine,
+	width: number,
+	firstPrefix: ChromeLine,
+	restPrefix: ChromeLine,
+): void {
+	for (const row of wrapChromeLine(content, width, firstPrefix, restPrefix)) lines.push(row);
 }
 
 function isStackFrame(line: string): boolean {
@@ -92,29 +89,56 @@ function isStackTraceLine(line: string): boolean {
 		|| /^\s*[\w.$]+(?:Exception|Error)(?::|$)/.test(line);
 }
 
-function stackLine(line: string): ChromeLine {
+function appendContinuation(lines: ChromeLine[], line: string, width: number): void {
+	pushWrapped(lines, [span(line, THEME.muted)], width, GUTTER, GUTTER_CONTINUATION);
+}
+
+function appendStackLine(lines: ChromeLine[], line: string, width: number): void {
 	const clean = sanitizeDisplay(line).trim();
 	const frame = /^(at\s+.+?)(\([^()]*\))$/.exec(clean);
 
 	if (frame) {
-		return [span("│  ", THEME.subtle), span(frame[1]!, THEME.text), span(frame[2]!, THEME.cyan)];
+		pushWrapped(lines, [span(frame[1]!, THEME.text), span(frame[2]!, THEME.cyan)], width, GUTTER, GUTTER_CONTINUATION);
+
+		return;
 	}
 
 	const cause = /^(Caused by:|Suppressed:)(.*)$/.exec(clean);
 
 	if (cause) {
-		return [span("├─ ", THEME.subtle), span(cause[1]!, THEME.purple, { bold: true }), span(cause[2]!, THEME.text)];
+		pushWrapped(
+			lines,
+			[span(cause[1]!, THEME.purple, { bold: true }), span(cause[2]!, THEME.text)],
+			width,
+			CAUSE_MARK,
+			GUTTER_CONTINUATION,
+		);
+
+		return;
 	}
 
-	if (/^\.\.\. \d+ more$/.test(clean)) {
-		return [span("│  ", THEME.subtle), span(clean, THEME.muted)];
-	}
+	const color = /^\.\.\. \d+ more$/.test(clean) ? THEME.muted : THEME.text;
 
-	return [span("│  ", THEME.subtle), span(clean, THEME.text)];
+	pushWrapped(lines, [span(clean, color)], width, GUTTER, GUTTER_CONTINUATION);
 }
 
-function continuationLine(line: string): ChromeLine {
-	return [span("│  ", THEME.subtle), span(sanitizeDisplay(line), THEME.muted)];
+function appendRawHead(lines: ChromeLine[], text: string, width: number): void {
+	pushWrapped(lines, [span(text.trimStart(), THEME.subtle)], width, [], RAW_WRAP);
+}
+
+function appendRawContinuation(lines: ChromeLine[], text: string, width: number): void {
+	pushWrapped(lines, [span(text.trimStart(), THEME.subtle)], width, RAW_WRAP, RAW_CONTINUATION_WRAP);
+}
+
+function packageColor(attribution: PackageAttribution): Rgb {
+	if (attribution.kind === "unavailable" || attribution.kind === "resolving") return THEME.muted;
+
+	return THEME.text;
+}
+
+function pushSection(lines: ChromeLine[], label: string, width: number): void {
+	lines.push([]);
+	lines.push(section(label, width));
 }
 
 function action(key: string, label: string, value = ""): ChromeLine {
@@ -163,16 +187,13 @@ function inspectorContent(
 			: `UID ${metadata.uid} · PID ${metadata.pid} · TID ${metadata.tid}`;
 
 		lines.push(field("Process", process, THEME.cyan));
-		lines.push(field("Package", packageLabel(attribution), attribution.kind === "unavailable" ? THEME.amber : THEME.text));
+		lines.push(field("Package", packageLabel(attribution), packageColor(attribution)));
 		lines.push(field("Tag", sanitizeDisplay(tagText(event.rawText, metadata.tag)), THEME.green));
 
 		if (classification) lines.push(field("Jev", classification, THEME.purple));
 
-		lines.push(section("Message", width));
-
-		for (const messageLine of wrapDisplayText(messageText(event.rawText, metadata.message), width)) {
-			lines.push([{ text: messageLine, style: severityStyle(metadata.level) }]);
-		}
+		pushSection(lines, "Message", width);
+		pushWrapped(lines, [span(messageText(event.rawText, metadata.message), THEME.text)], width, [], []);
 	} else {
 		lines.push(field("Format", "Unparsed", THEME.amber));
 	}
@@ -187,17 +208,18 @@ function inspectorContent(
 				: `Stack Trace (${frameCount} ${frameCount === 1 ? "frame" : "frames"})`
 			: `Continuation (${event.continuations.length} ${event.continuations.length === 1 ? "line" : "lines"})`;
 
-		lines.push(section(title, width));
+		pushSection(lines, title, width);
 
 		for (const line of event.continuations) {
-			lines.push(isStackTrace ? stackLine(line) : continuationLine(line));
+			if (isStackTrace) appendStackLine(lines, line, width);
+			else appendContinuation(lines, line, width);
 		}
 	}
 
-	lines.push(section("Raw", width));
-	lines.push([span(sanitizeDisplay(event.rawText), THEME.subtle)]);
+	pushSection(lines, "Raw", width);
+	appendRawHead(lines, event.rawText, width);
 
-	for (const line of event.continuations) lines.push([span(sanitizeDisplay(line), THEME.subtle)]);
+	for (const line of event.continuations) appendRawContinuation(lines, line, width);
 
 	return lines;
 }

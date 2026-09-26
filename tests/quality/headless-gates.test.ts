@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CHROME_ROWS, logViewportHeight, MIN_TERMINAL_COLUMNS, MIN_TERMINAL_ROWS } from "@logview/core";
+import { CHROME_ROWS, logViewportHeight, MIN_TERMINAL_COLUMNS, MIN_TERMINAL_ROWS } from "@logcayo/core";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -14,6 +14,6 @@ describe("headless quality gates", () => {
 	test("engine source does not import OpenTUI", async () => {
 		const session = await readFile(join(import.meta.dir, "../../packages/engine/src/session.ts"), "utf8");
 		expect(session.includes("@opentui")).toBe(false);
-		expect(session.includes("@logview/tui")).toBe(false);
+		expect(session.includes("@logcayo/tui")).toBe(false);
 	});
 });

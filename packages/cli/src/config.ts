@@ -1,12 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { err, ok, type Result } from "@logview/core";
+import { err, ok, type Result } from "@logcayo/core";
 import {
 	DEFAULT_JEV_TIMEOUT_MS,
 	defaultSemanticOptions,
 	JEV_MODEL_ID,
 	type SemanticOptions,
-} from "@logview/engine";
+} from "@logcayo/engine";
 import { Either, Schema } from "effect";
 
 export type ConfigError = Readonly<{
@@ -14,7 +14,7 @@ export type ConfigError = Readonly<{
 	message: string;
 }>;
 
-export const DEFAULT_CONFIG_FILENAME = "logview.json";
+export const DEFAULT_CONFIG_FILENAME = "logcayo.json";
 
 const UnitInterval = Schema.Number.pipe(Schema.finite(), Schema.between(0, 1));
 
@@ -39,14 +39,14 @@ const FilterFileSchema = Schema.Struct({
 	text: Schema.optional(Schema.String),
 });
 
-const LogviewFileSchema = Schema.Struct({
+const LogcayoFileSchema = Schema.Struct({
 	semantic: Schema.optional(SemanticFileSchema),
 	filter: Schema.optional(FilterFileSchema),
 });
 
-const LogviewFileJsonSchema = Schema.parseJson(LogviewFileSchema);
+const LogcayoFileJsonSchema = Schema.parseJson(LogcayoFileSchema);
 
-export type LogviewFile = typeof LogviewFileSchema.Type;
+export type LogcayoFile = typeof LogcayoFileSchema.Type;
 
 export type CliOverlay = Readonly<{
 	enabled: boolean | null;
@@ -99,8 +99,8 @@ function configParseMessage(message: string): string {
 	return "invalid config";
 }
 
-export function decodeConfigJson(text: string): Result<LogviewFile, ConfigError> {
-	const decoded = Schema.decodeEither(LogviewFileJsonSchema, { onExcessProperty: "error" })(text);
+export function decodeConfigJson(text: string): Result<LogcayoFile, ConfigError> {
+	const decoded = Schema.decodeEither(LogcayoFileJsonSchema, { onExcessProperty: "error" })(text);
 
 	return Either.match(decoded, {
 		onLeft: (error) => err({ exit: 2, message: configParseMessage(error.message) }),
@@ -115,7 +115,7 @@ function isMissingFile(cause: unknown): boolean {
 export async function readConfigFile(
 	explicitPath: string | null,
 	cwd = process.cwd(),
-): Promise<Result<LogviewFile | null, ConfigError>> {
+): Promise<Result<LogcayoFile | null, ConfigError>> {
 	const path = explicitPath ?? join(cwd, DEFAULT_CONFIG_FILENAME);
 	const required = explicitPath !== null;
 
@@ -137,7 +137,7 @@ export async function readConfigFile(
 }
 
 export function resolveViewerSettings(
-	file: LogviewFile | null,
+	file: LogcayoFile | null,
 	overlay: CliOverlay,
 ): ResolvedViewer {
 	const defaults = defaultSemanticOptions();

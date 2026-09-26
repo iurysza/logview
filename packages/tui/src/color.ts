@@ -8,7 +8,7 @@ import {
 	type LogLevel,
 	type RowSpan,
 	type ViewRow,
-} from "@logview/core";
+} from "@logcayo/core";
 import { fgBold, fgOnly, paintStyled, RESET, rgbSgr, styleOn, type Rgb } from "./catppuccin.ts";
 import { highlightLogText } from "./highlight.ts";
 import { severityStyle, THEME } from "./theme.ts";

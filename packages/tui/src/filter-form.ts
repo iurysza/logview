@@ -1,4 +1,4 @@
-import { LIST_FOCUS, reduceInteraction, type FilterSpec, type InteractionInput, type InteractionState } from "@logview/core";
+import { LIST_FOCUS, reduceInteraction, type FilterSpec, type InteractionInput, type InteractionState } from "@logcayo/core";
 
 export function createFilterForm(activeFilter: FilterSpec): InteractionState {
 	return reduceInteraction(LIST_FOCUS, { kind: "key", key: "f", ctrl: false, shift: false }, activeFilter).state;

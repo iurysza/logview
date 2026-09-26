@@ -1,4 +1,4 @@
-import { EMPTY_CANDIDATES, tagText, type LogEvent, type QueryCandidates } from "@logview/core";
+import { EMPTY_CANDIDATES, tagText, type LogEvent, type QueryCandidates } from "@logcayo/core";
 
 const MAX_DISTINCT = 2_000;
 

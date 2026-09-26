@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { matches, matchesLocal, parseLogcatLine, prepareFilter } from "@logview/core";
-import { EMPTY_FILTER, eventChargeBytes, LIST_FOCUS, reduceInteraction } from "@logview/core";
+import { matches, matchesLocal, parseLogcatLine, prepareFilter } from "@logcayo/core";
+import { EMPTY_FILTER, eventChargeBytes, LIST_FOCUS, reduceInteraction } from "@logcayo/core";
 
 function parsedEvent(raw: string) {
 	const parsed = parseLogcatLine({

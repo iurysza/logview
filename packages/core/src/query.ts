@@ -4,7 +4,7 @@ import type { FilterSpec, Result, SearchMode, TextSlice } from "./types.ts";
 import { err, ok } from "./types.ts";
 
 /**
- * Filter query language shared by the TUI `/` editor and `logview query`.
+ * Filter query language shared by the TUI `/` editor and `logcayo query`.
  *
  *   query = term*            (terms separated by whitespace)
  *   term  = key ":" value | ["~"] value

@@ -30,7 +30,7 @@ import {
 	type StartError,
 	type ViewRow,
 	type ViewState,
-} from "@logview/core";
+} from "@logcayo/core";
 import type { LogClassifier, SemanticOptions, SemanticStats } from "./semantic/contracts.ts";
 import type { LogSource, PackageResolver, Scheduler, SourceNotice, SourceStatus, SourceTerminal } from "./ports.ts";
 
