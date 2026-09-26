@@ -1,0 +1,74 @@
+{
+  "clips": [
+    {
+      "from": "list",
+      "to": "lock",
+      "caption": "15 events. / lock narrows the list as you type.",
+      "speed": 1,
+      "hold_ms": 1200
+    },
+    {
+      "from": "lock",
+      "to": "level",
+      "caption": "level:W leaves one match, with lock highlighted.",
+      "speed": 1.55,
+      "hold_ms": 1400
+    },
+    {
+      "from": "level",
+      "to": "empty",
+      "caption": "tag:Nope matches nothing.",
+      "speed": 2,
+      "hold_ms": 1400
+    },
+    {
+      "from": "empty",
+      "to": "undo",
+      "caption": "u brings the last filter back.",
+      "speed": 1,
+      "hold_ms": 1100
+    },
+    {
+      "from": "undo",
+      "to": "clear",
+      "caption": "x clears every filter.",
+      "speed": 1,
+      "hold_ms": 900
+    },
+    {
+      "from": "clear",
+      "to": "history",
+      "caption": "Up recalls the last query.",
+      "speed": 1.1,
+      "hold_ms": 1000
+    },
+    {
+      "from": "history",
+      "to": "cancel",
+      "caption": "Esc restores the list.",
+      "speed": 1,
+      "hold_ms": 500
+    },
+    {
+      "from": "cancel",
+      "to": "help",
+      "caption": "Help shows query, clear, undo, and copy.",
+      "speed": 1,
+      "hold_ms": 1200
+    },
+    {
+      "from": "help",
+      "to": "dismissed",
+      "caption": "Esc closes help.",
+      "speed": 1.2,
+      "hold_ms": 400
+    },
+    {
+      "from": "dismissed",
+      "to": "quit",
+      "caption": "q quits.",
+      "speed": 1,
+      "hold_ms": 300
+    }
+  ]
+}
