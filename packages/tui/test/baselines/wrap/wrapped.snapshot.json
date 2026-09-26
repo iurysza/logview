@@ -4375,10 +4375,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Search"
+      "text": " Query"
     },
     {
-      "x": 35,
+      "x": 34,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -4402,7 +4402,7 @@
       "text": "  "
     },
     {
-      "x": 37,
+      "x": 36,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -4426,7 +4426,7 @@
       "text": " f "
     },
     {
-      "x": 40,
+      "x": 39,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -4450,7 +4450,7 @@
       "text": " Filters"
     },
     {
-      "x": 48,
+      "x": 47,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -4474,7 +4474,7 @@
       "text": "  "
     },
     {
-      "x": 50,
+      "x": 49,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -4495,10 +4495,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " G "
+      "text": " x "
     },
     {
-      "x": 53,
+      "x": 52,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -4519,7 +4519,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " Tail"
+      "text": " Clear"
     },
     {
       "x": 58,
@@ -4567,7 +4567,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " y "
+      "text": " u "
     },
     {
       "x": 63,
@@ -4591,7 +4591,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " Copy"
+      "text": " Undo"
     },
     {
       "x": 68,
@@ -4639,7 +4639,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " ? "
+      "text": " c "
     },
     {
       "x": 73,
@@ -4663,10 +4663,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Help"
+      "text": " Copy query"
     },
     {
-      "x": 78,
+      "x": 84,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -4690,7 +4690,151 @@
       "text": "  "
     },
     {
-      "x": 80,
+      "x": 86,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " G "
+    },
+    {
+      "x": 89,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Tail"
+    },
+    {
+      "x": 94,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 96,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " y "
+    },
+    {
+      "x": 99,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Copy"
+    },
+    {
+      "x": 104,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 106,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -4714,7 +4858,7 @@
       "text": " q "
     },
     {
-      "x": 83,
+      "x": 109,
       "y": 22,
       "foreground": {
         "r": 135,
@@ -4738,7 +4882,7 @@
       "text": " Quit"
     },
     {
-      "x": 88,
+      "x": 114,
       "y": 22,
       "foreground": {
         "r": 195,
@@ -4759,7 +4903,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                "
+      "text": "      "
     },
     {
       "x": 0,

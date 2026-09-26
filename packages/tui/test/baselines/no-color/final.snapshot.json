@@ -441,7 +441,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " TAIL    Enter  Inspect   /  Search   f  Filters   G  Tail   q  Quit    "
+      "text": " TAIL    Enter  Inspect   /  Query   f  Filters   x  Clear   q  Quit    "
     },
     {
       "x": 0,
