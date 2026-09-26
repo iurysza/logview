@@ -87,6 +87,8 @@ export type SemanticStats = Readonly<{
 	queryRevision: number;
 	threshold: number;
 	classifiedEvents: number;
+	/** Scored at or above the threshold. */
+	relevantEvents: number;
 	pendingEvents: number;
 	skippedEvents: number;
 	failedEvents: number;

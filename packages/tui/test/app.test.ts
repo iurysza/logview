@@ -162,6 +162,7 @@ const jevSnapshot: SessionSnapshot = {
 		queryRevision: 1,
 		threshold: 0.5,
 		classifiedEvents: 2,
+		relevantEvents: 1,
 		pendingEvents: 1,
 		skippedEvents: 1,
 		failedEvents: 1,
@@ -186,7 +187,8 @@ describe("tui chrome", () => {
 		expect(formatHints()).toContain("c Copy query");
 		expect(formatHints()).toContain("y Copy");
 		expect(formatHints()).not.toMatch(/\bw /);
-		expect(formatHints(LIST_FOCUS, "jev", true)).toContain("m Jev");
+		expect(formatHints(LIST_FOCUS, "jev", true)).toContain("m Use text");
+		expect(formatHints(LIST_FOCUS, "text", true)).toContain("m Ask Jev");
 		expect(layoutSession(snapshot, LIST_FOCUS).join("\n")).toContain("Quit");
 	});
 
@@ -265,7 +267,7 @@ describe("tui chrome", () => {
 
 		const frame = layoutFrame(snapshot, editing, 80, 16, "plain");
 
-		expect(frame[1]).toContain("/ pid:");
+		expect(frame[1]).toContain(" /  pid:");
 		expect(frame[1]).toContain("! PID must be a positive integer");
 		expect(frame.at(-2)).toContain("QUERY");
 	});
@@ -363,7 +365,9 @@ describe("tui chrome", () => {
 		expect(rows).not.toContain("pending");
 		expect(rows).not.toContain("not requested");
 		expect(plain.join("\n")).toContain(" skipped");
-		expect(plain.join("\n")).not.toContain("Jev");
+		expect(plain[0]).toContain("✦ Jev");
+		expect(rows).toContain("━╌╌╌╌ 0.10");
+		expect(rows).toContain("━━━━━ 0.90");
 		expect(ansi[3]).toContain(rgbSgr(THEME.subtle, "fg"));
 		expect(ansi[3]).toContain("low relevance");
 		expect(ansi[4]).toContain("high relevance");

@@ -78,6 +78,7 @@ const DATA_PUBLISH_MS = 1000 / 30;
 
 type SemanticVisibleCounts = {
 	classifiedEvents: number;
+	relevantEvents: number;
 	pendingEvents: number;
 	skippedEvents: number;
 	failedEvents: number;
@@ -148,6 +149,7 @@ class SessionImpl implements Session {
 	private queryRevision = 0;
 	private semanticVisibleCounts: SemanticVisibleCounts = {
 		classifiedEvents: 0,
+		relevantEvents: 0,
 		pendingEvents: 0,
 		skippedEvents: 0,
 		failedEvents: 0,
@@ -853,11 +855,15 @@ class SessionImpl implements Session {
 		return {
 			queryText: query?.text ?? this.activeFilter.text,
 			queryRevision: query?.revision ?? this.queryRevision,
-			threshold: query?.threshold ?? this.semanticOptions.threshold,
+			threshold: this.semanticThreshold(),
 			...this.semanticVisibleCounts,
 			inFlight: this.coordinator.inFlightCount,
 			lastError: this.semanticQueryActive() ? this.coordinator.lastError : null,
 		};
+	}
+
+	private semanticThreshold(): number {
+		return this.coordinator?.activeQuery()?.threshold ?? this.semanticOptions.threshold;
 	}
 
 	private semanticDisplayActive(): boolean {
@@ -867,6 +873,7 @@ class SessionImpl implements Session {
 	private clearSemanticVisibleCounts(): void {
 		this.semanticVisibleCounts = {
 			classifiedEvents: 0,
+			relevantEvents: 0,
 			pendingEvents: 0,
 			skippedEvents: 0,
 			failedEvents: 0,
@@ -915,6 +922,8 @@ class SessionImpl implements Session {
 	private adjustSemanticCount(mark: ClassificationMark, direction: 1 | -1): void {
 		if (mark.kind === "scored") {
 			this.semanticVisibleCounts.classifiedEvents += direction;
+
+			if (mark.relevance >= this.semanticThreshold()) this.semanticVisibleCounts.relevantEvents += direction;
 		} else if (mark.kind === "pending") {
 			this.semanticVisibleCounts.pendingEvents += direction;
 		} else if (mark.kind === "unknown" && mark.reason === "skipped") {

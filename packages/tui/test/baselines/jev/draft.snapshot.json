@@ -1,0 +1,4525 @@
+{
+  "cols": 120,
+  "rows": 24,
+  "foreground": {
+    "r": 201,
+    "g": 209,
+    "b": 217
+  },
+  "background": {
+    "r": 13,
+    "g": 17,
+    "b": 23
+  },
+  "spans": [
+    {
+      "x": 0,
+      "y": 0,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview"
+    },
+    {
+      "x": 7,
+      "y": 0,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 9,
+      "y": 0,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "sanitized-aosp-pattern.lvr.jsonl"
+    },
+    {
+      "x": 41,
+      "y": 0,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 43,
+      "y": 0,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "REPLAY • END"
+    },
+    {
+      "x": 55,
+      "y": 0,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  15 events  "
+    },
+    {
+      "x": 68,
+      "y": 0,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "0 filters"
+    },
+    {
+      "x": 77,
+      "y": 0,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                           "
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "foreground": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "background": {
+        "r": 199,
+        "g": 146,
+        "b": 234
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ✦ Jev "
+    },
+    {
+      "x": 7,
+      "y": 1,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ~database locks"
+    },
+    {
+      "x": 23,
+      "y": 1,
+      "foreground": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "background": {
+        "r": 199,
+        "g": 146,
+        "b": 234
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 24,
+      "y": 1,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "   Enter asks Jev"
+    },
+    {
+      "x": 41,
+      "y": 1,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                               "
+    },
+    {
+      "x": 0,
+      "y": 2,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  TIME          LVL      PID:TID TAG               MESSAGE"
+    },
+    {
+      "x": 58,
+      "y": 2,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                              "
+    },
+    {
+      "x": 0,
+      "y": 3,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.000  "
+    },
+    {
+      "x": 16,
+      "y": 3,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " I"
+    },
+    {
+      "x": 18,
+      "y": 3,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 3,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  1186:1186"
+    },
+    {
+      "x": 31,
+      "y": 3,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 3,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Zygote          "
+    },
+    {
+      "x": 48,
+      "y": 3,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 3,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Process "
+    },
+    {
+      "x": 58,
+      "y": 3,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "4321"
+    },
+    {
+      "x": 62,
+      "y": 3,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " created for com.example.logview.demo                     "
+    },
+    {
+      "x": 0,
+      "y": 4,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.000  "
+    },
+    {
+      "x": 16,
+      "y": 4,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " I"
+    },
+    {
+      "x": 18,
+      "y": 4,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 4,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  1234:1250"
+    },
+    {
+      "x": 31,
+      "y": 4,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 4,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "ActivityManager "
+    },
+    {
+      "x": 48,
+      "y": 4,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 4,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Start proc "
+    },
+    {
+      "x": 61,
+      "y": 4,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "4321"
+    },
+    {
+      "x": 65,
+      "y": 4,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": ":com.example.logview.demo/u0a42 for activity {com.exa… "
+    },
+    {
+      "x": 0,
+      "y": 5,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.001  "
+    },
+    {
+      "x": 16,
+      "y": 5,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " D"
+    },
+    {
+      "x": 18,
+      "y": 5,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 5,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4321"
+    },
+    {
+      "x": 31,
+      "y": 5,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 5,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview-demo    "
+    },
+    {
+      "x": 48,
+      "y": 5,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 5,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "session opened                                                        "
+    },
+    {
+      "x": 0,
+      "y": 6,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.002  "
+    },
+    {
+      "x": 16,
+      "y": 6,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " I"
+    },
+    {
+      "x": 18,
+      "y": 6,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 6,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4340"
+    },
+    {
+      "x": 31,
+      "y": 6,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 6,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Database        "
+    },
+    {
+      "x": 48,
+      "y": 6,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 6,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Opening connection                                                    "
+    },
+    {
+      "x": 0,
+      "y": 7,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.002  "
+    },
+    {
+      "x": 16,
+      "y": 7,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " D"
+    },
+    {
+      "x": 18,
+      "y": 7,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 7,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4340"
+    },
+    {
+      "x": 31,
+      "y": 7,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 7,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Database        "
+    },
+    {
+      "x": 48,
+      "y": 7,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 7,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "SELECT completed in "
+    },
+    {
+      "x": 70,
+      "y": 7,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "12"
+    },
+    {
+      "x": 72,
+      "y": 7,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ms                                             "
+    },
+    {
+      "x": 0,
+      "y": 8,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.002  "
+    },
+    {
+      "x": 16,
+      "y": 8,
+      "foreground": {
+        "r": 244,
+        "g": 201,
+        "b": 93
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " W"
+    },
+    {
+      "x": 18,
+      "y": 8,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 8,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4340"
+    },
+    {
+      "x": 31,
+      "y": 8,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 8,
+      "foreground": {
+        "r": 244,
+        "g": 201,
+        "b": 93
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Database        "
+    },
+    {
+      "x": 48,
+      "y": 8,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 8,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Retry after lock timeout                                              "
+    },
+    {
+      "x": 0,
+      "y": 9,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  │                                                "
+    },
+    {
+      "x": 51,
+      "y": 9,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "    at com.example.logview.demo.db.Store.lock(Store.java:88)"
+    },
+    {
+      "x": 111,
+      "y": 9,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "         "
+    },
+    {
+      "x": 0,
+      "y": 10,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  │                                                "
+    },
+    {
+      "x": 51,
+      "y": 10,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "    at com.example.logview.demo.db.Store.write(Store.java:41)"
+    },
+    {
+      "x": 112,
+      "y": 10,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "        "
+    },
+    {
+      "x": 0,
+      "y": 11,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003  "
+    },
+    {
+      "x": 16,
+      "y": 11,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " I"
+    },
+    {
+      "x": 18,
+      "y": 11,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 11,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4340"
+    },
+    {
+      "x": 31,
+      "y": 11,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 11,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Database        "
+    },
+    {
+      "x": 48,
+      "y": 11,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 11,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Transaction committed                                                 "
+    },
+    {
+      "x": 0,
+      "y": 12,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003  "
+    },
+    {
+      "x": 16,
+      "y": 12,
+      "foreground": {
+        "r": 255,
+        "g": 103,
+        "b": 120
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " E"
+    },
+    {
+      "x": 18,
+      "y": 12,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 12,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4321"
+    },
+    {
+      "x": 31,
+      "y": 12,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 12,
+      "foreground": {
+        "r": 255,
+        "g": 103,
+        "b": 120
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview-demo    "
+    },
+    {
+      "x": 48,
+      "y": 12,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 12,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "failed to parse "
+    },
+    {
+      "x": 66,
+      "y": 12,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "token"
+    },
+    {
+      "x": 71,
+      "y": 12,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "=REDACTED                                        "
+    },
+    {
+      "x": 0,
+      "y": 13,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003  "
+    },
+    {
+      "x": 16,
+      "y": 13,
+      "foreground": {
+        "r": 244,
+        "g": 201,
+        "b": 93
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " W"
+    },
+    {
+      "x": 18,
+      "y": 13,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 13,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4321"
+    },
+    {
+      "x": 31,
+      "y": 13,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 13,
+      "foreground": {
+        "r": 244,
+        "g": 201,
+        "b": 93
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview-demo    "
+    },
+    {
+      "x": 48,
+      "y": 13,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 13,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "stray sequence ^[["
+    },
+    {
+      "x": 68,
+      "y": 13,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "31"
+    },
+    {
+      "x": 70,
+      "y": 13,
+      "foreground": {
+        "r": 199,
+        "g": 146,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": true,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "m"
+    },
+    {
+      "x": 71,
+      "y": 13,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " in payload                                      "
+    },
+    {
+      "x": 0,
+      "y": 14,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003  "
+    },
+    {
+      "x": 16,
+      "y": 14,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " I"
+    },
+    {
+      "x": 18,
+      "y": 14,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 14,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4321"
+    },
+    {
+      "x": 31,
+      "y": 14,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 14,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview-demo    "
+    },
+    {
+      "x": 48,
+      "y": 14,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 14,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "café already open                                                     "
+    },
+    {
+      "x": 0,
+      "y": 15,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003  "
+    },
+    {
+      "x": 16,
+      "y": 15,
+      "foreground": {
+        "r": 255,
+        "g": 103,
+        "b": 120
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " F"
+    },
+    {
+      "x": 18,
+      "y": 15,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 15,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "        1:1"
+    },
+    {
+      "x": 31,
+      "y": 15,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 15,
+      "foreground": {
+        "r": 255,
+        "g": 103,
+        "b": 120
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "libc            "
+    },
+    {
+      "x": 48,
+      "y": 15,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 15,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "Fatal signal "
+    },
+    {
+      "x": 63,
+      "y": 15,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "11"
+    },
+    {
+      "x": 65,
+      "y": 15,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " (SIGSEGV), code "
+    },
+    {
+      "x": 82,
+      "y": 15,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "1"
+    },
+    {
+      "x": 83,
+      "y": 15,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": ", fault addr "
+    },
+    {
+      "x": 96,
+      "y": 15,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": true,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "0"
+    },
+    {
+      "x": 97,
+      "y": 15,
+      "foreground": {
+        "r": 255,
+        "g": 103,
+        "b": 120
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "x"
+    },
+    {
+      "x": 98,
+      "y": 15,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": true,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "0"
+    },
+    {
+      "x": 99,
+      "y": 15,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " in tid "
+    },
+    {
+      "x": 107,
+      "y": 15,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "4340"
+    },
+    {
+      "x": 111,
+      "y": 15,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " (logvi… "
+    },
+    {
+      "x": 0,
+      "y": 16,
+      "foreground": {
+        "r": 82,
+        "g": 98,
+        "b": 127
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  │                                                "
+    },
+    {
+      "x": 51,
+      "y": 16,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "not a header line"
+    },
+    {
+      "x": 68,
+      "y": 16,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                    "
+    },
+    {
+      "x": 0,
+      "y": 17,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.003   V  "
+    },
+    {
+      "x": 20,
+      "y": 17,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4321"
+    },
+    {
+      "x": 31,
+      "y": 17,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " logview-demo      "
+    },
+    {
+      "x": 50,
+      "y": 17,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "verbose heartbeat                                                     "
+    },
+    {
+      "x": 0,
+      "y": 18,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:54:59.999  "
+    },
+    {
+      "x": 16,
+      "y": 18,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " I"
+    },
+    {
+      "x": 18,
+      "y": 18,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 18,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4321"
+    },
+    {
+      "x": 31,
+      "y": 18,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 18,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview-demo    "
+    },
+    {
+      "x": 48,
+      "y": 18,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 18,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "clock went backward                                                   "
+    },
+    {
+      "x": 0,
+      "y": 19,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  08:55:00.004  "
+    },
+    {
+      "x": 16,
+      "y": 19,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " I"
+    },
+    {
+      "x": 18,
+      "y": 19,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 19,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  1001:1001"
+    },
+    {
+      "x": 31,
+      "y": 19,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 19,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "chatty          "
+    },
+    {
+      "x": 48,
+      "y": 19,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  uid"
+    },
+    {
+      "x": 53,
+      "y": 19,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "="
+    },
+    {
+      "x": 54,
+      "y": 19,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "10042"
+    },
+    {
+      "x": 59,
+      "y": 19,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "(u0_a42) expire "
+    },
+    {
+      "x": 75,
+      "y": 19,
+      "foreground": {
+        "r": 53,
+        "g": 212,
+        "b": 234
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "4"
+    },
+    {
+      "x": 76,
+      "y": 19,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " lines                                      "
+    },
+    {
+      "x": 0,
+      "y": 20,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "▸ "
+    },
+    {
+      "x": 2,
+      "y": 20,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "08:55:00.004  "
+    },
+    {
+      "x": 16,
+      "y": 20,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " I"
+    },
+    {
+      "x": 18,
+      "y": 20,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 20,
+      "y": 20,
+      "foreground": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  4321:4321"
+    },
+    {
+      "x": 31,
+      "y": 20,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " "
+    },
+    {
+      "x": 32,
+      "y": 20,
+      "foreground": {
+        "r": 126,
+        "g": 231,
+        "b": 135
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "logview-demo    "
+    },
+    {
+      "x": 48,
+      "y": 20,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 50,
+      "y": 20,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 28,
+        "g": 46,
+        "b": 74
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "日本語 ok                                                             ",
+      "widths": [
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "x": 0,
+      "y": 21,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                                                        "
+    },
+    {
+      "x": 0,
+      "y": 22,
+      "foreground": {
+        "r": 17,
+        "g": 24,
+        "b": 32
+      },
+      "background": {
+        "r": 69,
+        "g": 150,
+        "b": 255
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " QUERY "
+    },
+    {
+      "x": 7,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 9,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Enter "
+    },
+    {
+      "x": 16,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Ask Jev"
+    },
+    {
+      "x": 24,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 26,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Tab "
+    },
+    {
+      "x": 31,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Complete"
+    },
+    {
+      "x": 40,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 42,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ↑↓ "
+    },
+    {
+      "x": 46,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " History"
+    },
+    {
+      "x": 54,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 56,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Esc "
+    },
+    {
+      "x": 61,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Cancel"
+    },
+    {
+      "x": 68,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "  "
+    },
+    {
+      "x": 70,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 39,
+        "g": 52,
+        "b": 71
+      },
+      "attributes": {
+        "bold": true,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " ^C "
+    },
+    {
+      "x": 74,
+      "y": 22,
+      "foreground": {
+        "r": 135,
+        "g": 150,
+        "b": 181
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": " Quit"
+    },
+    {
+      "x": 79,
+      "y": 22,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                         "
+    },
+    {
+      "x": 0,
+      "y": 23,
+      "foreground": {
+        "r": 195,
+        "g": 205,
+        "b": 232
+      },
+      "background": {
+        "r": 29,
+        "g": 38,
+        "b": 51
+      },
+      "attributes": {
+        "bold": false,
+        "italic": false,
+        "faint": false,
+        "invisible": false,
+        "strikethrough": false,
+        "overline": false,
+        "underline": null
+      },
+      "text": "                                                                                                                        "
+    }
+  ]
+}

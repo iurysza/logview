@@ -514,7 +514,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "m            choose text or Jev search                                  "
+      "text": "~            ask Jev in the query: / ~database locks                    "
     },
     {
       "x": 0,
@@ -538,7 +538,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "h            fill empty list space                                      "
+      "text": "m            switch the current text between literal and Jev            "
     },
     {
       "x": 0,
@@ -562,7 +562,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "y            copy selected event                                        "
+      "text": "h            fill empty list space                                      "
     },
     {
       "x": 0,
@@ -586,7 +586,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "Enter        inspect event · t tag · p PID · y copy                     "
+      "text": "y            copy selected event                                        "
     },
     {
       "x": 0,
@@ -610,7 +610,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "/            query   x clear   u undo   c copy                          "
+      "text": "Enter        inspect event · t tag · p PID · y copy                     "
     },
     {
       "x": 0,
@@ -634,7 +634,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "f            change filters                                             "
+      "text": "/            query  Tab complete  x clear  u undo  c copy               "
     },
     {
       "x": 0,

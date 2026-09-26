@@ -55,6 +55,9 @@ export type QueryContext = Readonly<{
 
 export const TEXT_ONLY_CONTEXT: QueryContext = { semanticAvailable: false, candidates: EMPTY_CANDIDATES };
 
+/** A trailing `key:` is still being typed; Enter reports it, live edits do not. */
+const INCOMPLETE_KEY = /(^|\s)(level|tag|pid|pkg):$/;
+
 const JEV_UNAVAILABLE = "Jev is off. Start with --semantic and TYPESAFE_API_KEY";
 
 export type InteractionResult = Readonly<{
@@ -269,8 +272,9 @@ function applyQueryDraft(
 	env: QueryEnv,
 ): InteractionResult {
 	const parsed = parseDraft(draft, env.context);
+	const unfinished = !parsed.ok && INCOMPLETE_KEY.test(draft);
 
-	const next: QueryState = { ...state, draft, cursor, error: parsed.ok ? null : parsed.error, historyIndex };
+	const next: QueryState = { ...state, draft, cursor, error: parsed.ok || unfinished ? null : parsed.error, historyIndex };
 
 	if (!parsed.ok || parsed.value.searchMode === "jev") return done(next, null);
 

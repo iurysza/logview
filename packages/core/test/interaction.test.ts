@@ -159,8 +159,12 @@ describe("query editor", () => {
 		expect(invalid.active).toEqual(active);
 
 		if (invalid.state.focus !== "query") throw new Error("expected query editor");
-		expect(invalid.state.error?.field).toBe("pid");
+		expect(invalid.state.error).toBeNull();
 		expect(invalid.state.draft).toBe("pid:");
+
+		const bad = applyKey(invalid.state, "x", active);
+		expect(bad.command).toBeNull();
+		expect(bad.state.focus === "query" && bad.state.error?.field).toBe("pid");
 	});
 
 	test("Escape restores the filter from when the editor opened", () => {
@@ -295,6 +299,18 @@ describe("query editor", () => {
 
 		expect(entered.command).toBeNull();
 		expect(entered.state.focus === "query" && entered.state.error?.message).toContain("--semantic");
+	});
+
+	test("a trailing key: waits quietly while typing and errors only on Enter", () => {
+		let state = applyKey(LIST_FOCUS, "/", EMPTY_FILTER).state;
+
+		for (const key of [..."tag:"]) state = applyKey(state, key, EMPTY_FILTER).state;
+
+		expect(state.focus === "query" && state.error).toBeNull();
+
+		const entered = applyKey(state, "enter", EMPTY_FILTER);
+
+		expect(entered.state.focus === "query" && entered.state.error?.field).toBe("tag");
 	});
 
 	test("Tab accepts the ghost completion and applies the completed text query", () => {

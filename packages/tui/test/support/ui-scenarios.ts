@@ -2,6 +2,7 @@ import type { Session } from "@kitlangton/terminal-control";
 import { join } from "node:path";
 import { INSPECT_WIDE_COLUMNS } from "../../src/app.ts";
 import { THEME } from "../../src/theme.ts";
+import { startFakeJev, type FakeJev } from "./fake-jev.ts";
 import { cellsFromSnapshot } from "./styled-snapshot.ts";
 import {
 	capture,
@@ -37,6 +38,9 @@ export const UI_SCENARIO_NAMES = [
 	"no-color",
 	"quit",
 	"wrap",
+	"jev",
+	"jev-error",
+	"autocomplete",
 ] as const;
 
 export type UiScenarioName = (typeof UI_SCENARIO_NAMES)[number];
@@ -55,6 +59,8 @@ type ScenarioContext = Readonly<{
 	tool: TerminalControlTool;
 	cwd: string;
 	session: Session;
+	/** Local fake Jev server when the scenario sets `jev`; otherwise null. */
+	jev: FakeJev | null;
 	capture: (checkpoint: string, viewport: Viewport) => Promise<Capture>;
 }>;
 
@@ -62,6 +68,8 @@ type UiScenario = Readonly<{
 	name: UiScenarioName;
 	viewport: Viewport;
 	color: "always" | "never";
+	/** Starts a local fake Jev and launches with `--semantic`. */
+	jev?: "score" | "auth-error";
 	run: (context: ScenarioContext) => Promise<void>;
 }>;
 
@@ -74,7 +82,9 @@ export async function runUiScenario(options: {
 	const tool = await resolveTerminalControl(options.cwd);
 	const sourceRevision = await gitRevision(options.cwd);
 	const captures: ScenarioCapture[] = [];
+	const jev = scenario.jev === undefined ? null : startFakeJev(scenario.jev);
 
+	try {
 	await withTerminalSession(
 		tool,
 		{
@@ -86,9 +96,11 @@ export async function runUiScenario(options: {
 				REPLAY_FIXTURE,
 				"--speed",
 				"instant",
+				...(jev ? ["--semantic"] : ["--no-semantic"]),
 			],
 			viewport: scenario.viewport,
 			color: scenario.color,
+			env: jev?.env ?? {},
 		},
 		async (session) => {
 			await waitForText(session, REPLAY_DONE);
@@ -96,6 +108,7 @@ export async function runUiScenario(options: {
 				tool,
 				cwd: options.cwd,
 				session,
+				jev,
 				capture: async (checkpoint, viewport) => {
 					const saved = await capture(tool, session, {
 						cwd: options.cwd,
@@ -117,6 +130,9 @@ export async function runUiScenario(options: {
 			});
 		},
 	);
+	} finally {
+		await jev?.stop();
+	}
 
 	return { scenario: scenario.name, captures };
 }
@@ -224,14 +240,14 @@ const SCENARIOS: readonly UiScenario[] = [
 			await send(context.session, ["text:/"]);
 			await waitForText(context.session, "QUERY");
 			await send(context.session, ["text:Database"]);
-			await waitForText(context.session, "/ Database");
+			await waitForText(context.session, "/  Database");
 			await send(context.session, ["enter"]);
 			await waitForText(context.session, "Text / Database");
 			const applied = await context.capture("applied", DEFAULT_VIEWPORT);
 			expectText(applied, "Text / Database", "applied text filter");
 
 			await send(context.session, ["text:/", ...Array.from({ length: 8 }, () => "backspace"), "text:no-match"]);
-			await waitForText(context.session, "/ no-match");
+			await waitForText(context.session, "/  no-match");
 			await send(context.session, ["enter"]);
 			await waitForText(context.session, "No events match no-match");
 			await context.capture("final", DEFAULT_VIEWPORT);
@@ -299,6 +315,71 @@ const SCENARIOS: readonly UiScenario[] = [
 			);
 
 			if (colored) throw new Error("NO_COLOR replay contains styled cells");
+		},
+	},
+	{
+		name: "jev",
+		viewport: { cols: 120, rows: 24 },
+		color: "always",
+		jev: "score",
+		async run(context) {
+			await send(context.session, ["text:/"]);
+			await waitForText(context.session, "~question asks Jev");
+			await context.capture("empty-query", { cols: 120, rows: 24 });
+
+			await send(context.session, ["text:~database locks"]);
+			await waitForText(context.session, "Enter asks Jev");
+			await context.capture("draft", { cols: 120, rows: 24 });
+
+			context.jev?.hold();
+			await send(context.session, ["enter"]);
+			await waitForText(context.session, "asking");
+			await context.capture("asking", { cols: 120, rows: 24 });
+
+			context.jev?.release();
+			await waitForText(context.session, "relevant");
+			const scored = await context.capture("scored", { cols: 120, rows: 24 });
+
+			expectText(scored, "✦ Jev database locks", "scored");
+			expectText(scored, "━━━━━ 0.93", "scored");
+
+			await send(context.session, ["text:m"]);
+			await waitForText(context.session, "Text / database locks");
+			await context.capture("literal", { cols: 120, rows: 24 });
+		},
+	},
+	{
+		name: "jev-error",
+		viewport: { cols: 120, rows: 24 },
+		color: "always",
+		jev: "auth-error",
+		async run(context) {
+			await send(context.session, ["text:/"]);
+			await send(context.session, ["text:~database locks"]);
+			await send(context.session, ["enter"]);
+			await waitForText(context.session, "API key rejected");
+			await context.capture("final", { cols: 120, rows: 24 });
+		},
+	},
+	{
+		name: "autocomplete",
+		viewport: { cols: 120, rows: 24 },
+		color: "always",
+		async run(context) {
+			await send(context.session, ["text:/"]);
+			await send(context.session, ["text:ta"]);
+			await waitForText(context.session, "tag:");
+			await context.capture("key", { cols: 120, rows: 24 });
+
+			await send(context.session, ["tab"]);
+			await waitForText(context.session, "tag:logview-demo");
+			await context.capture("values", { cols: 120, rows: 24 });
+
+			await send(context.session, ["text:Da", "tab"]);
+			await waitForText(context.session, "4 of 15");
+			const accepted = await context.capture("accepted", { cols: 120, rows: 24 });
+
+			expectText(accepted, "tag:Database", "accepted");
 		},
 	},
 	{

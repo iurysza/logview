@@ -10,6 +10,8 @@ import {
 	tagText,
 	type InteractionSelection,
 	type InteractionState,
+	type QueryCandidates,
+	EMPTY_CANDIDATES,
 	err,
 	ok,
 	type Result,
@@ -30,6 +32,7 @@ import {
 import { copyToClipboard, formatClipboardEvent } from "./clipboard.ts";
 import { inspectorHeader, inspectorWidth, paintInspector } from "./inspect.ts";
 import { THEME } from "./theme.ts";
+import type { Rgb } from "./catppuccin.ts";
 
 export { formatFilter, formatFooter, formatHints, formatStatus };
 
@@ -68,11 +71,12 @@ function helpLines(width: number): string[] {
 		"PgUp PgDn / ^U ^D  move one page",
 		"G / End      follow newest logs · Home first event",
 		"w            toggle line wrapping",
-		"m            choose text or Jev search",
+		"~            ask Jev in the query: / ~database locks",
+		"m            switch the current text between literal and Jev",
 		"h            fill empty list space",
 		"y            copy selected event",
 		"Enter        inspect event · t tag · p PID · y copy",
-		"/            query   x clear   u undo   c copy",
+		"/            query  Tab complete  x clear  u undo  c copy",
 		"f            change filters",
 	];
 
@@ -83,24 +87,59 @@ function helpLines(width: number): string[] {
 	return fitted;
 }
 
-function jevNote(row: SessionSnapshot["rows"][number], compact: boolean): string {
-	if (row.classification.kind === "scored") return row.classification.relevance.toFixed(2);
+type JevNote = Readonly<{ bar: string; rest: string; label: string; color: "purple" | "subtle" | "red" | "muted" }>;
 
-	if (row.classification.kind === "pending") return "";
+const BAR_CELLS = 5;
 
-	if (row.classification.kind === "unrequested") return "";
+/** A 5-cell bar plus score, e.g. `━━━━╌ 0.93`; compact widths show only the score. */
+function jevNote(row: SessionSnapshot["rows"][number], compact: boolean, threshold: number): JevNote {
+	const mark = row.classification;
 
-	if (row.classification.kind === "unknown") {
-		if (row.classification.reason === "failed") return compact ? " fail" : " failed";
+	if (mark.kind === "scored") {
+		const filled = Math.max(1, Math.round(mark.relevance * BAR_CELLS));
+		const score = mark.relevance.toFixed(2);
 
-		if (row.classification.reason === "skipped") return compact ? " skip" : " skipped";
-
-		if (row.classification.reason === "too-large") return "too large";
-
-		return "unsupported";
+		return {
+			bar: compact ? "" : "━".repeat(filled),
+			rest: compact ? "" : "╌".repeat(BAR_CELLS - filled),
+			label: compact ? score : ` ${score}`,
+			color: mark.relevance >= threshold ? "purple" : "subtle",
+		};
 	}
 
-	return "";
+	if (mark.kind === "pending") return { bar: "", rest: "", label: "\uf017", color: "muted" };
+
+	if (mark.kind === "unrequested") return { bar: "", rest: "", label: "\uf10c", color: "subtle" };
+
+	if (mark.kind === "unknown") {
+		if (mark.reason === "failed") return { bar: "", rest: "", label: compact ? "\uf057 fail" : "\uf057 failed", color: "subtle" };
+
+		if (mark.reason === "skipped") return { bar: "", rest: "", label: compact ? "\uf05e skip" : "\uf05e skipped", color: "subtle" };
+
+		if (mark.reason === "too-large") return { bar: "", rest: "", label: "too large", color: "subtle" };
+
+		return { bar: "", rest: "", label: "unsupported", color: "subtle" };
+	}
+
+	return { bar: "", rest: "", label: "", color: "subtle" };
+}
+
+function paintJevNote(note: JevNote, width: number, style: PaintStyle, background: Rgb): string {
+	const color = THEME[note.color];
+	const text = padToWidth(`${note.bar}${note.rest}${note.label}`, width);
+
+	if (style === "plain") return text;
+
+	const bar = [...note.bar].length;
+	const rest = [...note.rest].length;
+	const chars = [...text];
+
+	return [
+		paintChrome(" ", color, style, background),
+		paintChrome(chars.slice(0, bar).join(""), color, style, background),
+		paintChrome(chars.slice(bar, bar + rest).join(""), THEME.subtle, style, background),
+		paintChrome(chars.slice(bar + rest, width - 1).join(""), color, style, background),
+	].join("");
 }
 
 function isBelowJevThreshold(row: SessionSnapshot["rows"][number], threshold: number): boolean {
@@ -142,10 +181,12 @@ function paintLogRows(
 			const dimmed = isBelowJevThreshold(row, semantic.threshold);
 			const logLine = paintRow(row, style, jevLayout.listWidth, { dimmed, filter });
 			const divider = style === "plain" ? "│" : paintChrome("│", THEME.subtle, style);
-			const note = row.kind === "header" ? jevNote(row, jevLayout.noteWidth < 14) : "";
-			const noteColor = dimmed ? THEME.subtle : THEME.muted;
 			const background = row.selected ? THEME.selection : THEME.canvas;
-			const noteLine = paintChrome(padToWidth(note, jevLayout.noteWidth), noteColor, style, background);
+			const note = row.kind === "header" ? jevNote(row, jevLayout.noteWidth < 14, semantic.threshold) : null;
+
+			const noteLine = note === null
+				? paintChrome(padToWidth("", jevLayout.noteWidth), THEME.subtle, style, background)
+				: paintJevNote(note, jevLayout.noteWidth, style, background);
 
 			lines.push(`${logLine}${divider}${noteLine}`);
 		}
@@ -205,6 +246,7 @@ function layoutLines(
 	columns: number,
 	rows: number,
 	listBackground = true,
+	candidates: QueryCandidates = EMPTY_CANDIDATES,
 ): readonly string[] {
 	if (rows <= 0 || columns <= 0) return [];
 
@@ -218,7 +260,7 @@ function layoutLines(
 
 	const header = [
 		paintStatus(snapshot, columns, style),
-		paintFilterLine(snapshot, interaction, columns, style),
+		paintFilterLine(snapshot, interaction, columns, style, candidates),
 		paintChromeLine(
 			projectColumnHeader(columns).map((span) => ({
 				text: span.text,
@@ -318,8 +360,9 @@ export function layoutFrame(
 	rows: number,
 	style: PaintStyle = "plain",
 	listBackground = true,
+	candidates: QueryCandidates = EMPTY_CANDIDATES,
 ): readonly string[] {
-	return layoutLines(snapshot, interaction, style, columns, rows, listBackground);
+	return layoutLines(snapshot, interaction, style, columns, rows, listBackground, candidates);
 }
 
 type KeyCommand = Readonly<{
@@ -503,7 +546,8 @@ export async function attachTui(
 			}
 
 			const current = resized ? session.snapshot() : (published ?? session.snapshot());
-			const frame = paintFrame(layoutLines(current, interaction, style, size.columns, size.rows, listBackground));
+			const candidates = interaction.focus === "query" ? session.queryCandidates() : EMPTY_CANDIDATES;
+			const frame = paintFrame(layoutLines(current, interaction, style, size.columns, size.rows, listBackground, candidates));
 
 			if (frame === lastFrame) return;
 
@@ -544,6 +588,7 @@ export async function attachTui(
 				snapshot.activeFilter,
 				selectionOf(snapshot),
 				snapshot.searchMode,
+				{ semanticAvailable: snapshot.semantic !== null, candidates: session.queryCandidates() },
 			);
 
 			if (result.effect?.kind === "copy") void copyToClipboard(result.effect.text);
