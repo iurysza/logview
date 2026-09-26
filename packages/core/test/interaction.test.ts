@@ -1,10 +1,27 @@
 import { describe, expect, test } from "bun:test";
-import { EMPTY_FILTER, LIST_FOCUS, reduceInteraction, type FilterSpec, type InteractionState, type SearchMode } from "@logview/core";
+import {
+	EMPTY_CANDIDATES,
+	EMPTY_FILTER,
+	LIST_FOCUS,
+	reduceInteraction,
+	type FilterSpec,
+	type InteractionState,
+	type QueryContext,
+	type SearchMode,
+} from "@logview/core";
 
 const pressKey = (key: string) => ({ kind: "key" as const, key, ctrl: false, shift: false });
 
-function applyKey(state: InteractionState, key: string, active: FilterSpec, searchMode: SearchMode = "text") {
-	const result = reduceInteraction(state, pressKey(key), active, { tag: null, pid: null }, searchMode);
+const JEV: QueryContext = { semanticAvailable: true, candidates: EMPTY_CANDIDATES };
+
+function applyKey(
+	state: InteractionState,
+	key: string,
+	active: FilterSpec,
+	searchMode: SearchMode = "text",
+	context?: QueryContext,
+) {
+	const result = reduceInteraction(state, pressKey(key), active, { tag: null, pid: null }, searchMode, context);
 	const next = result.command?.kind === "set-filter" ? result.command.filter : active;
 
 	return { state: result.state, active: next, command: result.command, effect: result.effect };
@@ -236,22 +253,64 @@ describe("query editor", () => {
 		expect(copied.effect).toEqual({ kind: "copy", text: "level:W tag:Database lock" });
 	});
 
-	test("Jev mode applies the query on Enter", () => {
-		let state = applyKey(LIST_FOCUS, "/", EMPTY_FILTER, "jev").state;
+	test("a ~ query waits for Enter, then applies in Jev mode", () => {
+		let state = applyKey(LIST_FOCUS, "/", EMPTY_FILTER, "text", JEV).state;
 
-		for (const key of ["l", "o", "c", "k"]) {
-			const step = applyKey(state, key, EMPTY_FILTER, "jev");
+		for (const key of ["~", "l", "o", "c", "k"]) {
+			const step = applyKey(state, key, EMPTY_FILTER, "text", JEV);
 			expect(step.command).toBeNull();
 			state = step.state;
 		}
 
-		const entered = applyKey(state, "enter", EMPTY_FILTER, "jev");
+		const entered = applyKey(state, "enter", EMPTY_FILTER, "text", JEV);
 
 		expect(entered.command).toEqual({
 			kind: "set-filter",
 			filter: { minLevel: null, tag: null, pid: null, packageName: null, text: "lock" },
+			searchMode: "jev",
 		});
 		expect(entered.state.focus).toBe("list");
+	});
+
+	test("plain words stay literal and live even when the session is in Jev mode", () => {
+		const opened = applyKey(LIST_FOCUS, "/", EMPTY_FILTER, "jev", JEV).state;
+		const typed = applyKey(opened, "x", EMPTY_FILTER, "jev", JEV);
+
+		expect(typed.command).toEqual({ kind: "set-filter", filter: { ...EMPTY_FILTER, text: "x" }, searchMode: "text" });
+	});
+
+	test("/ reopens a Jev query with its ~ prefix", () => {
+		const active = { ...EMPTY_FILTER, minLevel: "W" as const, text: "database locks" };
+		const opened = applyKey(LIST_FOCUS, "/", active, "jev", JEV).state;
+
+		expect(opened.focus === "query" && opened.draft).toBe("level:W ~database locks");
+	});
+
+	test("a ~ query without Jev shows how to enable it and applies nothing", () => {
+		let state = applyKey(LIST_FOCUS, "/", EMPTY_FILTER).state;
+
+		for (const key of ["~", "a"]) state = applyKey(state, key, EMPTY_FILTER).state;
+
+		const entered = applyKey(state, "enter", EMPTY_FILTER);
+
+		expect(entered.command).toBeNull();
+		expect(entered.state.focus === "query" && entered.state.error?.message).toContain("--semantic");
+	});
+
+	test("Tab accepts the ghost completion and applies the completed text query", () => {
+		const context: QueryContext = { semanticAvailable: false, candidates: { tags: ["Database", "Zygote"], pids: [], packages: [] } };
+		let state = applyKey(LIST_FOCUS, "/", EMPTY_FILTER, "text", context).state;
+
+		for (const key of ["t", "a"]) state = applyKey(state, key, EMPTY_FILTER, "text", context).state;
+
+		state = applyKey(state, "tab", EMPTY_FILTER, "text", context).state;
+		expect(state.focus === "query" && state.draft).toBe("tag:");
+
+		state = applyKey(state, "D", EMPTY_FILTER, "text", context).state;
+		const accepted = applyKey(state, "tab", EMPTY_FILTER, "text", context);
+
+		expect(accepted.state.focus === "query" && accepted.state.draft).toBe("tag:Database");
+		expect(accepted.command).toEqual({ kind: "set-filter", filter: { ...EMPTY_FILTER, tag: "Database" } });
 	});
 
 	test("history and undo keep the newest 20 entries", () => {

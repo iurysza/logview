@@ -1,7 +1,8 @@
 import type { CommandError, SessionCommand } from "./commands.ts";
 import { FILTER_FIELDS, type FilterField } from "./commands.ts";
 import { parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
-import { formatFilterQuery, parseFilterQuery, type QueryError } from "./query.ts";
+import { acceptCompletion, completeQuery, EMPTY_CANDIDATES, type QueryCandidates } from "./completion.ts";
+import { formatFilterQuery, formatQuery, parseQuery, type QueryError } from "./query.ts";
 import { EMPTY_FILTER, type FilterSpec, type SearchMode } from "./types.ts";
 
 const MEMORY_LIMIT = 20;
@@ -27,6 +28,7 @@ type InteractionFocus =
 			cursor: number;
 			error: QueryError | null;
 			origin: FilterSpec;
+			originMode: SearchMode;
 			historyIndex: number | null;
 	  };
 
@@ -44,6 +46,16 @@ export type InteractionInput =
 	| { kind: "edit-field"; value: string };
 
 export type InteractionEffect = Readonly<{ kind: "copy"; text: string }>;
+
+/** What the query editor can offer: Jev availability and completion values. */
+export type QueryContext = Readonly<{
+	semanticAvailable: boolean;
+	candidates: QueryCandidates;
+}>;
+
+export const TEXT_ONLY_CONTEXT: QueryContext = { semanticAvailable: false, candidates: EMPTY_CANDIDATES };
+
+const JEV_UNAVAILABLE = "Jev is off. Start with --semantic and TYPESAFE_API_KEY";
 
 export type InteractionResult = Readonly<{
 	state: InteractionState;
@@ -205,8 +217,8 @@ function openEditor(state: InteractionState, activeFilter: FilterSpec, field: Fi
 	};
 }
 
-function openQuery(state: InteractionState, activeFilter: FilterSpec): InteractionState {
-	const draft = formatFilterQuery(activeFilter);
+function openQuery(state: InteractionState, activeFilter: FilterSpec, searchMode: SearchMode): InteractionState {
+	const draft = formatQuery(activeFilter, searchMode);
 
 	return {
 		focus: "query",
@@ -214,72 +226,82 @@ function openQuery(state: InteractionState, activeFilter: FilterSpec): Interacti
 		cursor: [...draft].length,
 		error: null,
 		origin: activeFilter,
+		originMode: searchMode,
 		historyIndex: null,
 		history: state.history,
 		undo: state.undo,
 	};
 }
 
+type QueryEnv = Readonly<{
+	activeFilter: FilterSpec;
+	searchMode: SearchMode;
+	context: QueryContext;
+}>;
+
+function parseDraft(draft: string, context: QueryContext): ReturnType<typeof parseQuery> {
+	const parsed = parseQuery(draft);
+
+	if (parsed.ok && parsed.value.searchMode === "jev" && !context.semanticAvailable) {
+		return { ok: false, error: { kind: "invalid-filter", field: "text", message: JEV_UNAVAILABLE, offset: draft.indexOf("~") } };
+	}
+
+	return parsed;
+}
+
+function sameQuery(env: QueryEnv, filter: FilterSpec, searchMode: SearchMode): boolean {
+	return sameFilter(env.activeFilter, filter) && (filter.text.length === 0 || env.searchMode === searchMode);
+}
+
+function setFilter(filter: FilterSpec, searchMode: SearchMode, context: QueryContext): SessionCommand {
+	return context.semanticAvailable ? { kind: "set-filter", filter, searchMode } : { kind: "set-filter", filter };
+}
+
+/**
+ * Text queries apply on every edit. Jev queries (`~`) wait for Enter because
+ * each apply is a paid classification.
+ */
 function applyQueryDraft(
 	state: QueryState,
 	draft: string,
 	cursor: number,
 	historyIndex: number | null,
-	activeFilter: FilterSpec,
-	searchMode: SearchMode,
+	env: QueryEnv,
 ): InteractionResult {
-	const parsed = parseFilterQuery(draft);
+	const parsed = parseDraft(draft, env.context);
 
-	const next: QueryState = {
-		focus: "query",
-		draft,
-		cursor,
-		error: parsed.ok ? null : parsed.error,
-		origin: state.origin,
-		historyIndex,
-		history: state.history,
-		undo: state.undo,
-	};
+	const next: QueryState = { ...state, draft, cursor, error: parsed.ok ? null : parsed.error, historyIndex };
 
-	if (!parsed.ok || searchMode === "jev" || sameFilter(activeFilter, parsed.value)) return done(next, null);
+	if (!parsed.ok || parsed.value.searchMode === "jev") return done(next, null);
 
-	return done(next, { kind: "set-filter", filter: parsed.value });
+	if (sameQuery(env, parsed.value.filter, "text")) return done(next, null);
+
+	return done(next, setFilter(parsed.value.filter, "text", env.context));
 }
 
-function editQuery(
-	state: QueryState,
-	draft: string,
-	cursor: number,
-	activeFilter: FilterSpec,
-	searchMode: SearchMode,
-): InteractionResult {
-	return applyQueryDraft(state, draft, cursor, null, activeFilter, searchMode);
+function editQuery(state: QueryState, draft: string, cursor: number, env: QueryEnv): InteractionResult {
+	return applyQueryDraft(state, draft, cursor, null, env);
 }
 
-function commitQuery(state: QueryState, activeFilter: FilterSpec): InteractionResult {
-	const parsed = parseFilterQuery(state.draft);
+function commitQuery(state: QueryState, env: QueryEnv): InteractionResult {
+	const parsed = parseDraft(state.draft, env.context);
 
 	if (!parsed.ok) return done({ ...state, error: parsed.error }, null);
 
-	const filter = parsed.value;
+	const { filter, searchMode } = parsed.value;
 	const undo = sameFilter(state.origin, filter) ? state.undo : rememberFilter(state.undo, state.origin);
-	const command = sameFilter(activeFilter, filter) ? null : { kind: "set-filter" as const, filter };
+	const command = sameQuery(env, filter, searchMode) ? null : setFilter(filter, searchMode, env.context);
 
-	return done({ focus: "list", history: rememberQuery(state.history, formatFilterQuery(filter)), undo }, command);
+	return done({ focus: "list", history: rememberQuery(state.history, formatQuery(filter, searchMode)), undo }, command);
 }
 
-function cancelQuery(state: QueryState, activeFilter: FilterSpec): InteractionResult {
-	const command = sameFilter(activeFilter, state.origin) ? null : { kind: "set-filter" as const, filter: state.origin };
+function cancelQuery(state: QueryState, env: QueryEnv): InteractionResult {
+	const command = sameQuery(env, state.origin, state.originMode) ? null : setFilter(state.origin, state.originMode, env.context);
 
 	return done(showList(state), command);
 }
 
-function recallQuery(
-	state: QueryState,
-	activeFilter: FilterSpec,
-	searchMode: SearchMode,
-	older: boolean,
-): InteractionResult {
+function recallQuery(state: QueryState, env: QueryEnv, older: boolean): InteractionResult {
 	const history = state.history;
 
 	if (history.length === 0) return done(state, null);
@@ -296,19 +318,19 @@ function recallQuery(
 
 	const draft = history[index] ?? "";
 
-	return applyQueryDraft(state, draft, [...draft].length, index, activeFilter, searchMode);
+	return applyQueryDraft(state, draft, [...draft].length, index, env);
 }
 
-function insertQuery(state: QueryState, text: string, activeFilter: FilterSpec, searchMode: SearchMode): InteractionResult {
+function insertQuery(state: QueryState, text: string, env: QueryEnv): InteractionResult {
 	const chars = [...state.draft];
 	const cursor = Math.min(Math.max(state.cursor, 0), chars.length);
 
 	chars.splice(cursor, 0, text);
 
-	return editQuery(state, chars.join(""), cursor + 1, activeFilter, searchMode);
+	return editQuery(state, chars.join(""), cursor + 1, env);
 }
 
-function backspaceQuery(state: QueryState, activeFilter: FilterSpec, searchMode: SearchMode): InteractionResult {
+function backspaceQuery(state: QueryState, env: QueryEnv): InteractionResult {
 	const chars = [...state.draft];
 	const cursor = Math.min(Math.max(state.cursor, 0), chars.length);
 
@@ -316,7 +338,7 @@ function backspaceQuery(state: QueryState, activeFilter: FilterSpec, searchMode:
 
 	chars.splice(cursor - 1, 1);
 
-	return editQuery(state, chars.join(""), cursor - 1, activeFilter, searchMode);
+	return editQuery(state, chars.join(""), cursor - 1, env);
 }
 
 function moveQueryCursor(state: QueryState, cursor: number): InteractionResult {
@@ -325,32 +347,43 @@ function moveQueryCursor(state: QueryState, cursor: number): InteractionResult {
 	return done({ ...state, cursor: Math.min(Math.max(cursor, 0), length) }, null);
 }
 
-function reduceQuery(
-	state: QueryState,
-	key: string,
-	ctrl: boolean,
-	activeFilter: FilterSpec,
-	searchMode: SearchMode,
-): InteractionResult {
-	if (key === "escape") return cancelQuery(state, activeFilter);
+/** Tab, or Right at the end of the line, accepts the ghost suggestion. */
+function acceptQuerySuggestion(state: QueryState, env: QueryEnv): InteractionResult | null {
+	const completion = completeQuery(state.draft, state.cursor, env.context.candidates);
 
-	if (key === "enter") return commitQuery(state, activeFilter);
+	if (completion === null) return null;
 
-	if (key === "up") return recallQuery(state, activeFilter, searchMode, true);
+	const accepted = acceptCompletion(state.draft, state.cursor, completion);
 
-	if (key === "down") return recallQuery(state, activeFilter, searchMode, false);
+	return editQuery(state, accepted.draft, accepted.cursor, env);
+}
+
+function reduceQuery(state: QueryState, key: string, ctrl: boolean, env: QueryEnv): InteractionResult {
+	if (key === "escape") return cancelQuery(state, env);
+
+	if (key === "enter") return commitQuery(state, env);
+
+	if (key === "tab") return acceptQuerySuggestion(state, env) ?? done(state, null);
+
+	if (key === "up") return recallQuery(state, env, true);
+
+	if (key === "down") return recallQuery(state, env, false);
 
 	if (key === "left") return moveQueryCursor(state, state.cursor - 1);
 
-	if (key === "right") return moveQueryCursor(state, state.cursor + 1);
+	if (key === "right") {
+		if (state.cursor >= [...state.draft].length) return acceptQuerySuggestion(state, env) ?? done(state, null);
+
+		return moveQueryCursor(state, state.cursor + 1);
+	}
 
 	if (key === "home") return moveQueryCursor(state, 0);
 
 	if (key === "end") return moveQueryCursor(state, [...state.draft].length);
 
-	if (key === "backspace") return backspaceQuery(state, activeFilter, searchMode);
+	if (key === "backspace") return backspaceQuery(state, env);
 
-	if (key.length === 1 && !ctrl) return insertQuery(state, key, activeFilter, searchMode);
+	if (key.length === 1 && !ctrl) return insertQuery(state, key, env);
 
 	return done(state, null);
 }
@@ -422,7 +455,13 @@ function reduceOverlay(
 	return done(state, null);
 }
 
-function reduceList(state: InteractionState, key: string, ctrl: boolean, activeFilter: FilterSpec): InteractionResult {
+function reduceList(
+	state: InteractionState,
+	key: string,
+	ctrl: boolean,
+	activeFilter: FilterSpec,
+	searchMode: SearchMode,
+): InteractionResult {
 	if (key === "q") return done(state, null, true);
 
 	if (key === "enter") {
@@ -466,10 +505,10 @@ function reduceList(state: InteractionState, key: string, ctrl: boolean, activeF
 	}
 
 	if (!ctrl && (key === "c" || key === "C")) {
-		return done(state, null, false, { kind: "copy", text: formatFilterQuery(activeFilter) });
+		return done(state, null, false, { kind: "copy", text: formatQuery(activeFilter, searchMode) });
 	}
 
-	if (key === "/") return done(openQuery(state, activeFilter), null);
+	if (key === "/") return done(openQuery(state, activeFilter, searchMode), null);
 
 	if (key === "f") return done(openEditor(state, activeFilter, "minLevel"), null);
 
@@ -482,13 +521,16 @@ export function reduceInteraction(
 	activeFilter: FilterSpec,
 	selection: InteractionSelection = EMPTY_SELECTION,
 	searchMode: SearchMode = "text",
+	context: QueryContext = TEXT_ONLY_CONTEXT,
 ): InteractionResult {
+	const env: QueryEnv = { activeFilter, searchMode, context };
+
 	if (input.kind === "edit-field") {
 		if (state.focus === "filters") {
 			return done({ ...state, error: null, draft: { ...state.draft, [state.field]: input.value } }, null);
 		}
 
-		if (state.focus === "query") return editQuery(state, input.value, [...input.value].length, activeFilter, searchMode);
+		if (state.focus === "query") return editQuery(state, input.value, [...input.value].length, env);
 
 		return done(state, null);
 	}
@@ -497,11 +539,11 @@ export function reduceInteraction(
 
 	if (ctrl && (key === "c" || key === "C")) return done(state, null, true);
 
-	if (state.focus === "query") return reduceQuery(state, key, ctrl, activeFilter, searchMode);
+	if (state.focus === "query") return reduceQuery(state, key, ctrl, env);
 
 	if (state.focus === "filters") return reduceFilters(state, key, ctrl, shift, activeFilter);
 
 	if (state.focus === "inspect" || state.focus === "help") return reduceOverlay(state, key, activeFilter, selection);
 
-	return reduceList(state, key, ctrl, activeFilter);
+	return reduceList(state, key, ctrl, activeFilter, searchMode);
 }

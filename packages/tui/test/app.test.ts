@@ -166,6 +166,7 @@ const jevSnapshot: SessionSnapshot = {
 		skippedEvents: 1,
 		failedEvents: 1,
 		inFlight: 0,
+		lastError: null,
 	},
 };
 
@@ -256,6 +257,7 @@ describe("tui chrome", () => {
 			cursor: 4,
 			error: { kind: "invalid-filter" as const, field: "pid" as const, message: "PID must be a positive integer", offset: 4 },
 			origin: EMPTY_FILTER,
+			originMode: "text" as const,
 			historyIndex: null,
 			history: [],
 			undo: [],
