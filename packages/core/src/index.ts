@@ -88,7 +88,7 @@ export type { QueryError } from "./query.ts";
 
 export { LIST_FOCUS, INSPECT_FOCUS, HELP_FOCUS, EMPTY_SELECTION, reduceInteraction } from "./interaction.ts";
 
-export type { InteractionInput, InteractionResult, InteractionSelection, InteractionState } from "./interaction.ts";
+export type { InteractionEffect, InteractionInput, InteractionResult, InteractionSelection, InteractionState } from "./interaction.ts";
 
 export { parseLogcatLine, messageText, tagText } from "./logcat.ts";
 

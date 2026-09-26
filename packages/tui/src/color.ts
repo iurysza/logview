@@ -1,4 +1,14 @@
-import { clipToWidth, displayWidth, markerFor, type LogLevel, type RowSpan, type ViewRow } from "@logview/core";
+import {
+	clipToWidth,
+	displayWidth,
+	EMPTY_FILTER,
+	markerFor,
+	textMatchRanges,
+	type FilterSpec,
+	type LogLevel,
+	type RowSpan,
+	type ViewRow,
+} from "@logview/core";
 import { fgBold, fgOnly, paintStyled, RESET, rgbSgr, styleOn, type Rgb } from "./catppuccin.ts";
 import { highlightLogText } from "./highlight.ts";
 import { severityStyle, THEME } from "./theme.ts";
@@ -17,14 +27,43 @@ function levelStyle(level: LogLevel | null) {
 	return severityStyle(level);
 }
 
+function paintMessageSlice(text: string, bg: Rgb | null, dimmed: boolean): string {
+	if (dimmed) return paintStyled(text, styleOn(fgOnly(THEME.subtle), bg));
+
+	return highlightLogText(text, bg);
+}
+
+function paintMessage(text: string, bg: Rgb | null, filter: FilterSpec, dimmed: boolean): string {
+	const ranges = textMatchRanges(text, filter);
+
+	if (ranges.length === 0) return paintMessageSlice(text, bg, dimmed);
+
+	let out = "";
+	let cursor = 0;
+
+	for (const range of ranges) {
+		if (range.start > cursor) out += paintMessageSlice(text.slice(cursor, range.start), bg, dimmed);
+
+		out += paintMessageSlice(text.slice(range.start, range.end), THEME.match, dimmed);
+		cursor = range.end;
+	}
+
+	if (cursor < text.length) out += paintMessageSlice(text.slice(cursor), bg, dimmed);
+
+	return out;
+}
+
 export function paintSpan(
 	span: RowSpan,
 	level: LogLevel | null,
 	style: PaintStyle,
 	bg: Rgb | null = null,
 	dimmed = false,
+	filter: FilterSpec = EMPTY_FILTER,
 ): string {
 	if (style === "plain") return span.text;
+
+	if (span.role === "message") return paintMessage(span.text, bg, filter, dimmed);
 
 	if (dimmed) return paintStyled(span.text, styleOn(fgOnly(THEME.subtle), bg));
 
@@ -49,10 +88,11 @@ export function paintRow(
 	row: ViewRow,
 	style: PaintStyle,
 	columns?: number,
-	options: Readonly<{ dimmed?: boolean }> = {},
+	options: Readonly<{ dimmed?: boolean; filter?: FilterSpec }> = {},
 ): string {
 	const width = columns === undefined ? Number.MAX_SAFE_INTEGER : Math.max(0, columns);
 	const dimmed = options.dimmed === true;
+	const filter = options.filter ?? EMPTY_FILTER;
 	const bg = row.selected && row.kind === "header" ? THEME.selection : THEME.canvas;
 	const marker = markerFor(row);
 	const pieces: RowSpan[] = [{ text: marker, role: "gutter" }, ...row.spans];
@@ -75,7 +115,7 @@ export function paintRow(
 			const continuationStyle = piece.role === "gutter" ? fgOnly(THEME.subtle) : fgOnly(THEME.muted);
 			out += paintStyled(clipped.text, styleOn(continuationStyle, bg));
 		} else {
-			out += paintSpan({ ...piece, text: clipped.text }, row.level, style, bg, dimmed);
+			out += paintSpan({ ...piece, text: clipped.text }, row.level, style, bg, dimmed, filter);
 		}
 
 		used += clipped.width;

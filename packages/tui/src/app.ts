@@ -3,6 +3,7 @@ import {
 	EMPTY_SELECTION,
 	LIST_FOCUS,
 	classificationColumnLayout,
+	type FilterSpec,
 	padToWidth,
 	projectColumnHeader,
 	reduceInteraction,
@@ -16,6 +17,7 @@ import {
 import type { Session, SessionSnapshot, TerminalAttachment, UiError } from "@logview/engine";
 import { paintChrome, paintFilled, paintRow, paintStyleFromEnv, type PaintStyle } from "./color.ts";
 import {
+	emptyMatchCopy,
 	formatFilter,
 	formatFooter,
 	formatHints,
@@ -70,7 +72,7 @@ function helpLines(width: number): string[] {
 		"h            fill empty list space",
 		"y            copy selected event",
 		"Enter        inspect event · t tag · p PID · y copy",
-		"/            search event text",
+		"/            query   x clear   u undo   c copy",
 		"f            change filters",
 	];
 
@@ -112,14 +114,24 @@ function paintLogRows(
 	style: PaintStyle,
 	semantic: SessionSnapshot["semantic"],
 	listBackground: boolean,
+	emptyCopy: readonly string[] | null,
+	filter: FilterSpec,
 ): string[] {
 	const lines: string[] = [];
+
+	if (rows.length === 0 && emptyCopy) {
+		for (const text of emptyCopy) {
+			if (lines.length >= count) break;
+
+			lines.push(paintFilled(text, columns, style, THEME.muted, listBackground ? THEME.canvas : null));
+		}
+	}
 
 	if (semantic === null) {
 		for (const row of rows) {
 			if (lines.length >= count) break;
 
-			lines.push(paintRow(row, style, columns));
+			lines.push(paintRow(row, style, columns, { filter }));
 		}
 	} else {
 		const jevLayout = classificationColumnLayout(columns);
@@ -128,7 +140,7 @@ function paintLogRows(
 			if (lines.length >= count) break;
 
 			const dimmed = isBelowJevThreshold(row, semantic.threshold);
-			const logLine = paintRow(row, style, jevLayout.listWidth, { dimmed });
+			const logLine = paintRow(row, style, jevLayout.listWidth, { dimmed, filter });
 			const divider = style === "plain" ? "│" : paintChrome("│", THEME.subtle, style);
 			const note = row.kind === "header" ? jevNote(row, jevLayout.noteWidth < 14) : "";
 			const noteColor = dimmed ? THEME.subtle : THEME.muted;
@@ -226,7 +238,18 @@ function layoutLines(
 	const wideInspect = inspectOpen && columns >= INSPECT_WIDE_COLUMNS;
 	const logWidth = wideInspect ? Math.max(1, columns - inspectorWidth(columns) - 1) : columns;
 	const semantic = snapshot.searchMode === "jev" && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
-	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic, listBackground);
+
+	let body = paintLogRows(
+		snapshot.rows,
+		logWidth,
+		viewport,
+		style,
+		semantic,
+		listBackground,
+		emptyMatchCopy(snapshot),
+		snapshot.activeFilter,
+	);
+
 	const selectedRow = selectedHeaderRow(snapshot);
 	const classification = classificationLabel(selectedRow);
 
@@ -274,6 +297,18 @@ export function layoutSession(
 	listBackground = true,
 ): readonly string[] {
 	return layoutLines(snapshot, interaction, style, columns, rows, listBackground);
+}
+
+export function paintFrame(lines: readonly string[]): string {
+	let frame = "\x1b[?2026h\x1b[H";
+
+	for (let i = 0; i < lines.length; i += 1) {
+		frame += lines[i];
+
+		if (i < lines.length - 1) frame += "\r\n";
+	}
+
+	return `${frame}\x1b[?2026l`;
 }
 
 export function layoutFrame(
@@ -423,6 +458,7 @@ export async function attachTui(
 	let resolveDone: () => void = () => undefined;
 	let lastColumns = -1;
 	let lastRows = -1;
+	let lastFrame: string | null = null;
 	let resizeQueued = false;
 	let painting = false;
 	let inputTimer: ReturnType<typeof setTimeout> | null = null;
@@ -462,19 +498,16 @@ export async function attachTui(
 			if (resized) {
 				lastColumns = size.columns;
 				lastRows = size.rows;
+				lastFrame = null;
 				session.dispatch({ kind: "resize", columns: size.columns, rows: size.rows });
 			}
 
 			const current = resized ? session.snapshot() : (published ?? session.snapshot());
-			const lines = layoutLines(current, interaction, style, size.columns, size.rows, listBackground);
-			let frame = "\x1b[H\x1b[2J";
+			const frame = paintFrame(layoutLines(current, interaction, style, size.columns, size.rows, listBackground));
 
-			for (let i = 0; i < lines.length; i += 1) {
-				frame += lines[i];
+			if (frame === lastFrame) return;
 
-				if (i < lines.length - 1) frame += "\r\n";
-			}
-
+			lastFrame = frame;
 			process.stdout.write(frame);
 		} finally {
 			painting = false;
@@ -510,7 +543,10 @@ export async function attachTui(
 				{ kind: "key", key: mapped.key, ctrl: mapped.ctrl, shift: mapped.shift },
 				snapshot.activeFilter,
 				selectionOf(snapshot),
+				snapshot.searchMode,
 			);
+
+			if (result.effect?.kind === "copy") void copyToClipboard(result.effect.text);
 
 			interaction = result.state;
 

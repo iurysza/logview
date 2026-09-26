@@ -14,7 +14,8 @@ export type ThemeToken =
 	| "amber"
 	| "red"
 	| "cyan"
-	| "purple";
+	| "purple"
+	| "match";
 
 export const THEME: Readonly<Record<ThemeToken, Rgb>> = {
 	canvas: [17, 24, 32],
@@ -30,6 +31,7 @@ export const THEME: Readonly<Record<ThemeToken, Rgb>> = {
 	red: [255, 103, 120],
 	cyan: [53, 212, 234],
 	purple: [199, 146, 234],
+	match: [84, 70, 36],
 };
 
 export function severityStyle(level: LogLevel | null): CellStyle {

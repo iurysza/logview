@@ -33,6 +33,7 @@ export const UI_SCENARIO_NAMES = [
 	"filter",
 	"sizes",
 	"highlight",
+	"query",
 	"no-color",
 	"quit",
 	"wrap",
@@ -221,18 +222,18 @@ const SCENARIOS: readonly UiScenario[] = [
 		color: "always",
 		async run(context) {
 			await send(context.session, ["text:/"]);
-			await waitForText(context.session, "Edit Text:");
+			await waitForText(context.session, "QUERY");
 			await send(context.session, ["text:Database"]);
-			await waitForText(context.session, "Edit Text: Database");
-			await send(context.session, ["enter"]);
 			await waitForText(context.session, "/ Database");
+			await send(context.session, ["enter"]);
+			await waitForText(context.session, "Text / Database");
 			const applied = await context.capture("applied", DEFAULT_VIEWPORT);
 			expectText(applied, "Text / Database", "applied text filter");
 
 			await send(context.session, ["text:/", ...Array.from({ length: 8 }, () => "backspace"), "text:no-match"]);
-			await waitForText(context.session, "Edit Text: no-match");
+			await waitForText(context.session, "/ no-match");
 			await send(context.session, ["enter"]);
-			await waitForText(context.session, "Text / no-match");
+			await waitForText(context.session, "No events match no-match");
 			await context.capture("final", DEFAULT_VIEWPORT);
 		},
 	},
@@ -251,6 +252,19 @@ const SCENARIOS: readonly UiScenario[] = [
 			await resize(context.session, { cols: 39, rows: 7 });
 			await waitForText(context.session, "Terminal too small");
 			await context.capture("final", { cols: 39, rows: 7 });
+		},
+	},
+	{
+		name: "query",
+		viewport: { cols: 120, rows: 24 },
+		color: "always",
+		async run(context) {
+			await send(context.session, ["text:/"]);
+			await waitForText(context.session, "QUERY");
+			await send(context.session, ["text:level:W tag:Database lock"]);
+			await send(context.session, ["enter"]);
+			await waitForText(context.session, "1 of 15");
+			await context.capture("final", { cols: 120, rows: 24 });
 		},
 	},
 	{

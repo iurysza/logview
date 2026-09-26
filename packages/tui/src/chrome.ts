@@ -1,4 +1,13 @@
-import { clipToWidth, displayWidth, LIST_FOCUS, type FilterSpec, type InteractionState, type SearchMode } from "@logview/core";
+import {
+	clipToWidth,
+	displayWidth,
+	formatFilterQuery,
+	LIST_FOCUS,
+	type FilterSpec,
+	type InteractionState,
+	type QueryError,
+	type SearchMode,
+} from "@logview/core";
 import { type SessionSnapshot as EngineSessionSnapshot } from "@logview/engine";
 import { paintStyled, rgbSgr, styleOn, type CellStyle, type Rgb } from "./catppuccin.ts";
 import { type PaintStyle } from "./color.ts";
@@ -90,6 +99,15 @@ export function keyHints(
 		];
 	}
 
+	if (interaction.focus === "query") {
+		return [
+			{ key: "Enter", label: "Apply" },
+			{ key: "↑↓", label: "History" },
+			{ key: "Esc", label: "Cancel" },
+			{ key: "^C", label: "Quit" },
+		];
+	}
+
 	if (interaction.focus === "inspect") {
 		return [
 			{ key: "↑↓", label: "Move" },
@@ -103,14 +121,25 @@ export function keyHints(
 
 	return [
 		{ key: "Enter", label: "Inspect" },
-		{ key: "/", label: "Search" },
+		{ key: "/", label: "Query" },
 		{ key: "f", label: "Filters" },
+		{ key: "x", label: "Clear" },
+		{ key: "u", label: "Undo" },
+		{ key: "c", label: "Copy query" },
 		{ key: "G", label: "Tail" },
 		...(semanticAvailable ? [{ key: "m", label: searchMode === "jev" ? "Jev" : "Text" }] : []),
 		{ key: "y", label: "Copy" },
 		{ key: "?", label: "Help" },
 		{ key: "q", label: "Quit" },
 	];
+}
+
+export function eventCountLabel(snapshot: Snapshot): string {
+	if (activeFilterCount(snapshot.activeFilter) > 0) {
+		return `${snapshot.stats.matchedEvents} of ${snapshot.stats.retainedEvents}`;
+	}
+
+	return `${snapshot.stats.retainedEvents} events`;
 }
 
 export function formatHints(
@@ -122,7 +151,7 @@ export function formatHints(
 }
 
 export function formatStatus(snapshot: Snapshot): string {
-	return `logview   ${snapshot.label}   ${sourceStatusText(snapshot)}   ${snapshot.stats.retainedEvents} events   ${activeFilterCount(snapshot.activeFilter)} filters`;
+	return `logview   ${snapshot.label}   ${sourceStatusText(snapshot)}   ${eventCountLabel(snapshot)}   ${activeFilterCount(snapshot.activeFilter)} filters`;
 }
 
 export function formatFilter(snapshot: Snapshot): string {
@@ -139,6 +168,8 @@ export function formatFilter(snapshot: Snapshot): string {
 
 function displayBadge(snapshot: Snapshot, interaction: InteractionState): string {
 	if (interaction.focus === "filters") return "FILTER";
+
+	if (interaction.focus === "query") return "QUERY";
 
 	if (interaction.focus === "inspect") return "INSPECT";
 
@@ -193,7 +224,7 @@ export function paintStatus(snapshot: Snapshot, columns: number, style: PaintSty
 		plain("  "),
 		bold(sourceStatusText(snapshot), statusColor),
 		plain("  "),
-		plain(`${snapshot.stats.retainedEvents} events`, THEME.text),
+		plain(eventCountLabel(snapshot), THEME.text),
 		plain("  "),
 		plain(`${activeFilterCount(snapshot.activeFilter)} filters`, THEME.muted),
 	];
@@ -207,7 +238,7 @@ export function paintStatus(snapshot: Snapshot, columns: number, style: PaintSty
 		plain("  "),
 		bold(sourceStatusText(snapshot), statusColor),
 		plain("  "),
-		plain(`${snapshot.stats.retainedEvents} events`, THEME.text),
+		plain(eventCountLabel(snapshot), THEME.text),
 	];
 
 	return paintChromeLine(fitGroups(retained, columns), columns, style, THEME.bar);
@@ -217,7 +248,37 @@ function filterChip(label: string, active: boolean, color: Rgb = THEME.accent): 
 	return active ? bold(` ${label} `, color, THEME.chip) : plain(` ${label} `, THEME.muted);
 }
 
+function queryEditorSpans(draft: string, cursor: number, error: QueryError | null): ChromeSpan[] {
+	const chars = [...draft];
+	const index = Math.min(Math.max(cursor, 0), chars.length);
+	const atCursor = chars[index];
+
+	const spans: ChromeSpan[] = [
+		bold("/ ", THEME.accent),
+		plain(chars.slice(0, index).join(""), THEME.text),
+		bold(atCursor ?? " ", THEME.canvas, THEME.accent),
+	];
+
+	if (atCursor !== undefined) spans.push(plain(chars.slice(index + 1).join(""), THEME.text));
+
+	if (error) spans.push(plain(`  ! ${error.message}`, THEME.red));
+
+	return spans;
+}
+
+export function emptyMatchCopy(snapshot: Snapshot): readonly [string, string] | null {
+	if (snapshot.rows.length > 0 || snapshot.stats.retainedEvents === 0 || snapshot.notice === "applying-filter") return null;
+
+	if (activeFilterCount(snapshot.activeFilter) === 0) return null;
+
+	return [`No events match ${formatFilterQuery(snapshot.activeFilter)}`, "x clear · u undo"];
+}
+
 export function paintFilterLine(snapshot: Snapshot, interaction: InteractionState, columns: number, style: PaintStyle): string {
+	if (interaction.focus === "query") {
+		return paintChromeLine(queryEditorSpans(interaction.draft, interaction.cursor, interaction.error), columns, style, THEME.bar);
+	}
+
 	if (interaction.focus === "filters") {
 		const names = { minLevel: "Level", tag: "Tag", pid: "PID", packageName: "Package", text: "Text" } as const;
 		const draft = interaction.draft[interaction.field];
