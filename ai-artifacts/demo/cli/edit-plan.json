@@ -1,0 +1,53 @@
+{
+  "clips": [
+    {
+      "from": "b1-start",
+      "to": "b1-end",
+      "speed": 1,
+      "caption": "One query language, two sources",
+      "hold_ms": 4200
+    },
+    {
+      "from": "b2-start",
+      "to": "b2-end",
+      "speed": 1,
+      "caption": "Check: lock level:e becomes level:E lock",
+      "hold_ms": 4200
+    },
+    {
+      "from": "b3-start",
+      "to": "b3-end",
+      "speed": 1,
+      "caption": "Stream warning-and-higher logs as JSON",
+      "hold_ms": 4200
+    },
+    {
+      "from": "b4-start",
+      "to": "b4-end",
+      "speed": 1,
+      "caption": "Tag + text: one matching log",
+      "hold_ms": 4200
+    },
+    {
+      "from": "b5-start",
+      "to": "b5-end",
+      "speed": 1,
+      "caption": "Two events, then stop: limit",
+      "hold_ms": 4200
+    },
+    {
+      "from": "b6-start",
+      "to": "b6-end",
+      "speed": 1,
+      "caption": "Bad PID: JSON error, exit 2",
+      "hold_ms": 4200
+    },
+    {
+      "from": "b7-start",
+      "to": "b7-end",
+      "speed": 1,
+      "caption": "Live fake device, same query and timeout",
+      "hold_ms": 4200
+    }
+  ]
+}
