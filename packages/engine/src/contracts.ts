@@ -20,6 +20,7 @@ import {
 	type FilterSpec,
 	type LineDisplay,
 	type LogEvent,
+	type QueryCandidates,
 	type Result,
 	type SearchMode,
 	type SessionCommand,
@@ -94,6 +95,8 @@ export interface Session {
 	dispatch(command: SessionCommand): Result<void, CommandError>;
 	snapshot(): SessionSnapshot;
 	readMatches(after: EventId | null, limit: number): readonly LogEvent[];
+	/** Tags, PIDs and packages seen so far, most frequent first, for query completion. */
+	queryCandidates(): QueryCandidates;
 	subscribe(listener: (snapshot: SessionSnapshot) => void): () => void;
 	readonly sourceDone: Promise<SourceTerminal>;
 	stop(): Promise<void>;

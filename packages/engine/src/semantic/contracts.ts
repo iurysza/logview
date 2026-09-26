@@ -80,6 +80,8 @@ export type SemanticOptions = Readonly<{
 	redactionVersion: string;
 }>;
 
+export type SemanticErrorKind = Exclude<ClassifierError["kind"], "cancelled">;
+
 export type SemanticStats = Readonly<{
 	queryText: string;
 	queryRevision: number;
@@ -89,6 +91,8 @@ export type SemanticStats = Readonly<{
 	skippedEvents: number;
 	failedEvents: number;
 	inFlight: number;
+	/** Last batch failure for the active query. Cleared by the next success or query. */
+	lastError: SemanticErrorKind | null;
 }>;
 
 export function defaultSemanticOptions(): SemanticOptions {

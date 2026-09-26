@@ -27,6 +27,7 @@ import {
 	type LineDisplay,
 	type LogEvent,
 	type PreparedFilter,
+	type QueryCandidates,
 	type Result,
 	type SearchMode,
 	type SessionCommand,
@@ -61,6 +62,7 @@ import type {
 import { isSourcePacket, isSourceTerminal } from "./ports.ts";
 import { FilterJob } from "./reindex.ts";
 import { VisibleIndexStore } from "./visible-index.ts";
+import { QueryVocabulary } from "./vocabulary.ts";
 import { classifierItemFromEvent } from "./semantic/items.ts";
 import { SemanticCoordinator, type SemanticMarkChange } from "./semantic/coordinator.ts";
 import {
@@ -118,6 +120,7 @@ class SessionImpl implements Session {
 	private rows: number;
 	private lineDisplay: LineDisplay = "clip";
 	private searchMode: SearchMode = "text";
+	private readonly vocabulary = new QueryVocabulary();
 	private framer: FramerState = emptyFramerState();
 	private nextEventId = 1;
 	private revision = 0;
@@ -219,7 +222,7 @@ class SessionImpl implements Session {
 			Match.when({ kind: "toggle-line-display" }, () => this.commandToggleLineDisplay()),
 			Match.when({ kind: "request-package-attribution" }, () => this.commandPackageAttribution()),
 			Match.when({ kind: "toggle-search-mode" }, () => this.commandToggleSearchMode()),
-			Match.when({ kind: "set-filter" }, (set) => this.commandFilter(set.filter)),
+			Match.when({ kind: "set-filter" }, (set) => this.commandSetFilter(set.filter, set.searchMode)),
 			Match.when({ kind: "resize" }, (resize) => this.commandResize(resize.columns, resize.rows)),
 			Match.exhaustive,
 		);
@@ -295,6 +298,20 @@ class SessionImpl implements Session {
 		this.publishImmediate();
 
 		return ok(undefined);
+	}
+
+	private commandSetFilter(filter: FilterSpec, searchMode: SearchMode | undefined): Result<void, CommandError> {
+		if (searchMode === "jev" && !this.coordinator) {
+			return err({ kind: "invalid-filter", field: "text", message: "Jev is not enabled for this session" });
+		}
+
+		if (searchMode !== undefined) this.searchMode = searchMode;
+
+		return this.commandFilter(filter);
+	}
+
+	queryCandidates(): QueryCandidates {
+		return this.vocabulary.candidates();
 	}
 
 	private commandPackageAttribution(): Result<void, CommandError> {
@@ -395,6 +412,10 @@ class SessionImpl implements Session {
 			}),
 			Match.when({ kind: "package-table" }, (event) => {
 				this.recordedPackageTable = event.packageTable;
+
+				if (event.packageTable.kind === "recorded" && event.packageTable.table !== null) {
+					this.rememberPackages(event.packageTable.table);
+				}
 			}),
 			Match.when({ kind: "notice" }, (notice) => {
 				this.addNotice(notice);
@@ -525,6 +546,8 @@ class SessionImpl implements Session {
 		this.admittedEvents += events.length;
 
 		for (const event of events) {
+			this.vocabulary.add(event);
+
 			if (event.metadata === null) this.unparsedEvents += 1;
 
 			if (event.omittedBytes > 0) {
@@ -726,6 +749,14 @@ class SessionImpl implements Session {
 		this.publishImmediate();
 	}
 
+	private rememberPackages(table: PackageTable): void {
+		const names: string[] = [];
+
+		for (const entry of table) names.push(...entry.packages);
+
+		this.vocabulary.setPackages(names);
+	}
+
 	private async loadPackageTable(refresh = false): Promise<PackageTable | null> {
 		if (this.recordedPackageTable !== null) {
 			return this.recordedPackageTable.kind === "recorded" ? this.recordedPackageTable.table : null;
@@ -735,6 +766,8 @@ class SessionImpl implements Session {
 
 		if (!resolver) return null;
 		const loaded = await (refresh && resolver.refresh ? resolver.refresh() : resolver.load());
+
+		if (loaded.ok) this.rememberPackages(loaded.value);
 
 		return loaded.ok ? loaded.value : null;
 	}
@@ -823,6 +856,7 @@ class SessionImpl implements Session {
 			threshold: query?.threshold ?? this.semanticOptions.threshold,
 			...this.semanticVisibleCounts,
 			inFlight: this.coordinator.inFlightCount,
+			lastError: this.semanticQueryActive() ? this.coordinator.lastError : null,
 		};
 	}
 

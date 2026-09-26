@@ -6,6 +6,7 @@ import type {
 	ClassifierItem,
 	ClassifyRequest,
 	LogClassifier,
+	SemanticErrorKind,
 	SemanticOptions,
 	SemanticQuery,
 } from "./contracts.ts";
@@ -30,6 +31,7 @@ export class SemanticCoordinator {
 	private flushCancel: Cancel | null = null;
 	private inFlight = 0;
 	private stopped = false;
+	private failure: SemanticErrorKind | null = null;
 	private readonly urgent: EventId[] = [];
 	private readonly backfill: EventId[] = [];
 	private readonly queued = new Set<EventId>();
@@ -55,6 +57,10 @@ export class SemanticCoordinator {
 		return this.query;
 	}
 
+	get lastError(): SemanticErrorKind | null {
+		return this.failure;
+	}
+
 	setQuery(query: SemanticQuery | null): void {
 		this.generation.abort();
 		this.generation = new AbortController();
@@ -66,6 +72,7 @@ export class SemanticCoordinator {
 		this.retried.clear();
 		this.inFlightRequests.clear();
 		this.annotations.clear();
+		this.failure = null;
 		this.query = query;
 		this.notifyIdle();
 	}
@@ -293,10 +300,13 @@ export class SemanticCoordinator {
 		const validated = validateClassifyResponse(request, result.value);
 
 		if (!validated.ok) {
+			this.failure = "invalid-response";
 			this.failBatch(request);
 
 			return;
 		}
+
+		this.failure = null;
 
 		for (const item of validated.value.results) this.setAnnotation(item);
 
@@ -324,6 +334,7 @@ export class SemanticCoordinator {
 
 		if (error.kind === "cancelled") return;
 
+		this.failure = error.kind;
 		this.failBatch(request);
 	}
 

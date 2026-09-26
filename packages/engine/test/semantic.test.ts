@@ -524,3 +524,76 @@ describe("semantic classification", () => {
 		await scenario.session.stop();
 	});
 });
+
+describe("semantic query line", () => {
+	const empty = { minLevel: null, tag: null, pid: null, packageName: null, text: "" } as const;
+
+	test("set-filter can pick the search mode, so ~ and plain text share one command", async () => {
+		const classifier = new ScriptedClassifier();
+		const scenario = await openScenario({ maxEvents: 20, classifier, semantic: { flushDelayMs: 0 } });
+
+		try {
+			await scenario.deliver([1, 2], (id) => ({ message: id === 1 ? "database lock" : "network timeout" }));
+			scenario.session.dispatch({ kind: "set-filter", filter: { ...empty, text: "database" }, searchMode: "text" });
+
+			const literal = await scenario.waitUntil((current) => current.pendingFilter === null);
+			expect(literal.searchMode).toBe("text");
+			expect(literal.rows.map((row) => row.id)).toEqual([1]);
+			expect(classifier.pending).toHaveLength(0);
+
+			scenario.session.dispatch({ kind: "set-filter", filter: { ...empty, text: "storage trouble" }, searchMode: "jev" });
+			await scenario.waitUntil(() => classifier.pending.length === 1);
+			expect(scenario.session.snapshot().searchMode).toBe("jev");
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
+	test("asking Jev without a classifier is an invalid filter", async () => {
+		const scenario = await openScenario();
+
+		try {
+			const result = scenario.session.dispatch({ kind: "set-filter", filter: { ...empty, text: "x" }, searchMode: "jev" });
+
+			expect(result.ok).toBe(false);
+			expect(scenario.session.snapshot().searchMode).toBe("text");
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+
+	test("an auth failure is reported once in the snapshot and clears with the query", async () => {
+		const failing: LogClassifier = { classifyBatch: async () => err({ kind: "auth" }) };
+		const scenario = await openScenario({ maxEvents: 20, classifier: failing, semantic: { flushDelayMs: 0 } });
+
+		try {
+			await scenario.deliver([1, 2]);
+			scenario.session.dispatch({ kind: "set-filter", filter: { ...empty, text: "database" } });
+
+			const failed = await scenario.waitUntil((current) => current.semantic?.lastError === "auth");
+			expect(failed.semantic?.failedEvents).toBe(2);
+
+			scenario.session.dispatch({ kind: "set-filter", filter: empty });
+			expect(scenario.session.snapshot().semantic?.lastError).toBeNull();
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+});
+
+describe("query completion candidates", () => {
+	test("tags and PIDs come back most frequent first without scanning history", async () => {
+		const scenario = await openScenario({ maxEvents: 3 });
+
+		try {
+			await scenario.deliver([1, 2, 3, 4, 5], (id) => ({ tag: id === 3 ? "Rare" : "Common", pid: id === 5 ? 99 : 7 }));
+
+			const candidates = scenario.session.queryCandidates();
+			expect(candidates.tags).toEqual(["Common", "Rare"]);
+			expect(candidates.pids).toEqual([7, 99]);
+			expect(scenario.session.queryCandidates()).toBe(candidates);
+		} finally {
+			await scenario.session.stop();
+		}
+	});
+});

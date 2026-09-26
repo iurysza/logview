@@ -128,6 +128,7 @@ export type {
 	Relevance,
 	SemanticOptions,
 	SemanticQuery,
+	SemanticErrorKind,
 	SemanticStats,
 } from "./semantic/contracts.ts";
 
