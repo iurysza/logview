@@ -1,18 +1,36 @@
 import type { CommandError, SessionCommand } from "./commands.ts";
 import { FILTER_FIELDS, type FilterField } from "./commands.ts";
 import { parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
-import type { FilterSpec } from "./types.ts";
+import { formatFilterQuery, parseFilterQuery, type QueryError } from "./query.ts";
+import { EMPTY_FILTER, type FilterSpec, type SearchMode } from "./types.ts";
 
-export type InteractionState =
+const MEMORY_LIMIT = 20;
+
+type InteractionMemory = Readonly<{
+	history: readonly string[];
+	undo: readonly FilterSpec[];
+}>;
+
+type InteractionFocus =
 	| { focus: "list" }
 	| { focus: "inspect" }
 	| { focus: "help" }
 	| {
 			focus: "filters";
 			field: FilterField;
-			draft: { minLevel: string; tag: string; pid: string; packageName: string; text: string };
+			draft: FilterDraft;
 			error: CommandError | null;
+	  }
+	| {
+			focus: "query";
+			draft: string;
+			cursor: number;
+			error: QueryError | null;
+			origin: FilterSpec;
+			historyIndex: number | null;
 	  };
+
+export type InteractionState = InteractionFocus & InteractionMemory;
 
 export type InteractionSelection = Readonly<{
 	tag: string | null;
@@ -25,17 +43,22 @@ export type InteractionInput =
 	| { kind: "key"; key: string; ctrl: boolean; shift: boolean }
 	| { kind: "edit-field"; value: string };
 
+export type InteractionEffect = Readonly<{ kind: "copy"; text: string }>;
+
 export type InteractionResult = Readonly<{
 	state: InteractionState;
 	command: SessionCommand | null;
 	quit: boolean;
+	effect: InteractionEffect | null;
 }>;
 
-export const LIST_FOCUS: InteractionState = { focus: "list" };
+const EMPTY_MEMORY: InteractionMemory = { history: [], undo: [] };
 
-export const INSPECT_FOCUS: InteractionState = { focus: "inspect" };
+export const LIST_FOCUS: InteractionState = { focus: "list", ...EMPTY_MEMORY };
 
-export const HELP_FOCUS: InteractionState = { focus: "help" };
+export const INSPECT_FOCUS: InteractionState = { focus: "inspect", ...EMPTY_MEMORY };
+
+export const HELP_FOCUS: InteractionState = { focus: "help", ...EMPTY_MEMORY };
 
 type FilterDraft = Readonly<{
 	minLevel: string;
@@ -45,9 +68,18 @@ type FilterDraft = Readonly<{
 	text: string;
 }>;
 
+type QueryState = Extract<InteractionState, { focus: "query" }>;
+
+type FiltersState = Extract<InteractionState, { focus: "filters" }>;
+
 type CommitDraftResult = Readonly<{
 	command: SessionCommand | null;
 	error: CommandError | null;
+}>;
+
+type FilterCommit = Readonly<{
+	undo: readonly FilterSpec[];
+	command: SessionCommand | null;
 }>;
 
 function draftFromFilter(filter: FilterSpec): FilterDraft {
@@ -66,6 +98,47 @@ function nextField(field: FilterField, reverse: boolean): FilterField {
 	const next = (index + delta + FILTER_FIELDS.length) % FILTER_FIELDS.length;
 
 	return FILTER_FIELDS[next]!;
+}
+
+function sameFilter(left: FilterSpec, right: FilterSpec): boolean {
+	return (
+		left.minLevel === right.minLevel &&
+		left.tag === right.tag &&
+		left.pid === right.pid &&
+		left.packageName === right.packageName &&
+		left.text === right.text
+	);
+}
+
+function rememberQuery(history: readonly string[], query: string): readonly string[] {
+	const next = [query, ...history];
+
+	return next.length <= MEMORY_LIMIT ? next : next.slice(0, MEMORY_LIMIT);
+}
+
+function rememberFilter(undo: readonly FilterSpec[], filter: FilterSpec): readonly FilterSpec[] {
+	const next = [filter, ...undo];
+
+	return next.length <= MEMORY_LIMIT ? next : next.slice(0, MEMORY_LIMIT);
+}
+
+function commitFilter(undo: readonly FilterSpec[], active: FilterSpec, next: FilterSpec): FilterCommit {
+	if (sameFilter(active, next)) return { undo, command: null };
+
+	return { undo: rememberFilter(undo, active), command: { kind: "set-filter", filter: next } };
+}
+
+function done(
+	state: InteractionState,
+	command: SessionCommand | null,
+	quit = false,
+	effect: InteractionEffect | null = null,
+): InteractionResult {
+	return { state, command, quit, effect };
+}
+
+function showList(state: InteractionState, undo: readonly FilterSpec[] = state.undo): InteractionState {
+	return { focus: "list", history: state.history, undo };
 }
 
 function commitDraft(
@@ -100,10 +173,7 @@ function commitDraft(
 	return { command: { kind: "set-filter", filter: prepared.value.spec }, error: null };
 }
 
-function appendToDraft(
-	state: Extract<InteractionState, { focus: "filters" }>,
-	text: string,
-): InteractionState {
+function appendToDraft(state: FiltersState, text: string): InteractionState {
 	const current = state.draft[state.field];
 
 	return {
@@ -113,7 +183,7 @@ function appendToDraft(
 	};
 }
 
-function backspaceDraft(state: Extract<InteractionState, { focus: "filters" }>): InteractionState {
+function backspaceDraft(state: FiltersState): InteractionState {
 	const current = state.draft[state.field];
 	const next = [...current].slice(0, -1).join("");
 
@@ -124,16 +194,291 @@ function backspaceDraft(state: Extract<InteractionState, { focus: "filters" }>):
 	};
 }
 
-function openEditor(
-	activeFilter: FilterSpec,
-	field: FilterField,
-): InteractionState {
+function openEditor(state: InteractionState, activeFilter: FilterSpec, field: FilterField): InteractionState {
 	return {
 		focus: "filters",
 		field,
 		draft: draftFromFilter(activeFilter),
 		error: null,
+		history: state.history,
+		undo: state.undo,
 	};
+}
+
+function openQuery(state: InteractionState, activeFilter: FilterSpec): InteractionState {
+	const draft = formatFilterQuery(activeFilter);
+
+	return {
+		focus: "query",
+		draft,
+		cursor: [...draft].length,
+		error: null,
+		origin: activeFilter,
+		historyIndex: null,
+		history: state.history,
+		undo: state.undo,
+	};
+}
+
+function editQuery(
+	state: QueryState,
+	draft: string,
+	cursor: number,
+	activeFilter: FilterSpec,
+	searchMode: SearchMode,
+): InteractionResult {
+	const parsed = parseFilterQuery(draft);
+
+	const next: QueryState = {
+		focus: "query",
+		draft,
+		cursor,
+		error: parsed.ok ? null : parsed.error,
+		origin: state.origin,
+		historyIndex: null,
+		history: state.history,
+		undo: state.undo,
+	};
+
+	if (!parsed.ok || searchMode === "jev") return done(next, null);
+
+	const committed = commitFilter(state.undo, activeFilter, parsed.value);
+
+	return done({ ...next, undo: committed.undo }, committed.command);
+}
+
+function commitQuery(state: QueryState, activeFilter: FilterSpec): InteractionResult {
+	const parsed = parseFilterQuery(state.draft);
+
+	if (!parsed.ok) return done({ ...state, error: parsed.error }, null);
+
+	const committed = commitFilter(state.undo, activeFilter, parsed.value);
+
+	return done(
+		{ focus: "list", history: rememberQuery(state.history, formatFilterQuery(parsed.value)), undo: committed.undo },
+		committed.command,
+	);
+}
+
+function cancelQuery(state: QueryState, activeFilter: FilterSpec): InteractionResult {
+	const committed = commitFilter(state.undo, activeFilter, state.origin);
+
+	return done(showList(state, committed.undo), committed.command);
+}
+
+function recallQuery(
+	state: QueryState,
+	activeFilter: FilterSpec,
+	searchMode: SearchMode,
+	older: boolean,
+): InteractionResult {
+	const history = state.history;
+
+	if (history.length === 0) return done(state, null);
+
+	const index = older
+		? state.historyIndex === null
+			? 0
+			: Math.min(state.historyIndex + 1, history.length - 1)
+		: state.historyIndex === null || state.historyIndex === 0
+			? state.historyIndex
+			: state.historyIndex - 1;
+
+	if (index === null || index === state.historyIndex) return done(state, null);
+
+	const draft = history[index] ?? "";
+	const parsed = parseFilterQuery(draft);
+
+	const next: QueryState = {
+		...state,
+		draft,
+		cursor: [...draft].length,
+		historyIndex: index,
+		error: parsed.ok ? null : parsed.error,
+	};
+
+	if (!parsed.ok || searchMode === "jev") return done(next, null);
+
+	const committed = commitFilter(state.undo, activeFilter, parsed.value);
+
+	return done({ ...next, undo: committed.undo }, committed.command);
+}
+
+function insertQuery(state: QueryState, text: string, activeFilter: FilterSpec, searchMode: SearchMode): InteractionResult {
+	const chars = [...state.draft];
+	const cursor = Math.min(Math.max(state.cursor, 0), chars.length);
+
+	chars.splice(cursor, 0, text);
+
+	return editQuery(state, chars.join(""), cursor + 1, activeFilter, searchMode);
+}
+
+function backspaceQuery(state: QueryState, activeFilter: FilterSpec, searchMode: SearchMode): InteractionResult {
+	const chars = [...state.draft];
+	const cursor = Math.min(Math.max(state.cursor, 0), chars.length);
+
+	if (cursor === 0) return done(state, null);
+
+	chars.splice(cursor - 1, 1);
+
+	return editQuery(state, chars.join(""), cursor - 1, activeFilter, searchMode);
+}
+
+function moveQueryCursor(state: QueryState, cursor: number): InteractionResult {
+	const length = [...state.draft].length;
+
+	return done({ ...state, cursor: Math.min(Math.max(cursor, 0), length) }, null);
+}
+
+function reduceQuery(
+	state: QueryState,
+	key: string,
+	ctrl: boolean,
+	activeFilter: FilterSpec,
+	searchMode: SearchMode,
+): InteractionResult {
+	if (key === "escape") return cancelQuery(state, activeFilter);
+
+	if (key === "enter") return commitQuery(state, activeFilter);
+
+	if (key === "up") return recallQuery(state, activeFilter, searchMode, true);
+
+	if (key === "down") return recallQuery(state, activeFilter, searchMode, false);
+
+	if (key === "left") return moveQueryCursor(state, state.cursor - 1);
+
+	if (key === "right") return moveQueryCursor(state, state.cursor + 1);
+
+	if (key === "home") return moveQueryCursor(state, 0);
+
+	if (key === "end") return moveQueryCursor(state, [...state.draft].length);
+
+	if (key === "backspace") return backspaceQuery(state, activeFilter, searchMode);
+
+	if (key.length === 1 && !ctrl) return insertQuery(state, key, activeFilter, searchMode);
+
+	return done(state, null);
+}
+
+function reduceFilters(state: FiltersState, key: string, ctrl: boolean, shift: boolean, activeFilter: FilterSpec): InteractionResult {
+	if (key === "escape") return done(showList(state), null);
+
+	if (key === "enter") {
+		const result = commitDraft(state.draft, activeFilter);
+
+		if (result.error || result.command === null || result.command.kind !== "set-filter") {
+			return done({ ...state, error: result.error }, null);
+		}
+
+		const committed = commitFilter(state.undo, activeFilter, result.command.filter);
+
+		return done(showList(state, committed.undo), committed.command);
+	}
+
+	if (key === "tab") {
+		return done({ ...state, field: nextField(state.field, shift), error: null }, null);
+	}
+
+	if (key === "backspace") return done(backspaceDraft(state), null);
+
+	if (key.length === 1 && !ctrl) return done(appendToDraft(state, key), null);
+
+	return done(state, null);
+}
+
+function reduceOverlay(
+	state: InteractionState,
+	key: string,
+	activeFilter: FilterSpec,
+	selection: InteractionSelection,
+): InteractionResult {
+	if (key === "escape" || key === "enter") return done(showList(state), null);
+
+	if (state.focus === "inspect" && key === "t" && selection.tag) {
+		const prepared = prepareFilter({ ...activeFilter, tag: selection.tag });
+
+		if (!prepared.ok) return done(state, null);
+
+		const committed = commitFilter(state.undo, activeFilter, prepared.value.spec);
+
+		return done(showList(state, committed.undo), committed.command);
+	}
+
+	if (state.focus === "inspect" && key === "p" && selection.pid !== null) {
+		const prepared = prepareFilter({ ...activeFilter, pid: selection.pid });
+
+		if (!prepared.ok) return done(state, null);
+
+		const committed = commitFilter(state.undo, activeFilter, prepared.value.spec);
+
+		return done(showList(state, committed.undo), committed.command);
+	}
+
+	if (key === "q") return done(state, null, true);
+
+	if (key === "up" || key === "k") return done(state, { kind: "move", delta: -1 });
+
+	if (key === "down" || key === "j") return done(state, { kind: "move", delta: 1 });
+
+	if (key === "?") {
+		return done(state.focus === "help" ? showList(state) : { focus: "help", history: state.history, undo: state.undo }, null);
+	}
+
+	return done(state, null);
+}
+
+function reduceList(state: InteractionState, key: string, ctrl: boolean, activeFilter: FilterSpec): InteractionResult {
+	if (key === "q") return done(state, null, true);
+
+	if (key === "enter") {
+		return done({ focus: "inspect", history: state.history, undo: state.undo }, { kind: "request-package-attribution" });
+	}
+
+	if (key === "?") return done({ focus: "help", history: state.history, undo: state.undo }, null);
+
+	if (key === "up" || key === "k") return done(state, { kind: "move", delta: -1 });
+
+	if (key === "down" || key === "j") return done(state, { kind: "move", delta: 1 });
+
+	if (key === "pageup" || (ctrl && (key === "u" || key === "U"))) return done(state, { kind: "page", delta: -1 });
+
+	if (key === "pagedown" || (ctrl && (key === "d" || key === "D"))) return done(state, { kind: "page", delta: 1 });
+
+	if (key === "home") return done(state, { kind: "oldest" });
+
+	if (key === "end" || key === "G") return done(state, { kind: "tail" });
+
+	if (key === "w" || key === "W") return done(state, { kind: "toggle-line-display" });
+
+	if (key === "m" || key === "M") return done(state, { kind: "toggle-search-mode" });
+
+	if (!ctrl && (key === "x" || key === "X")) {
+		const committed = commitFilter(state.undo, activeFilter, EMPTY_FILTER);
+
+		return done({ ...state, undo: committed.undo }, committed.command);
+	}
+
+	if (!ctrl && (key === "u" || key === "U")) {
+		const restored = state.undo[0];
+
+		if (restored === undefined) return done(state, null);
+
+		const undo = state.undo.slice(1);
+
+		if (sameFilter(activeFilter, restored)) return done({ ...state, undo }, null);
+
+		return done({ ...state, undo }, { kind: "set-filter", filter: restored });
+	}
+
+	if (!ctrl && (key === "c" || key === "C")) {
+		return done(state, null, false, { kind: "copy", text: formatFilterQuery(activeFilter) });
+	}
+
+	if (key === "/") return done(openQuery(state, activeFilter), null);
+
+	if (key === "f") return done(openEditor(state, activeFilter, "minLevel"), null);
+
+	return done(state, null);
 }
 
 export function reduceInteraction(
@@ -141,159 +486,27 @@ export function reduceInteraction(
 	input: InteractionInput,
 	activeFilter: FilterSpec,
 	selection: InteractionSelection = EMPTY_SELECTION,
+	searchMode: SearchMode = "text",
 ): InteractionResult {
 	if (input.kind === "edit-field") {
-		if (state.focus !== "filters") {
-			return { state, command: null, quit: false };
+		if (state.focus === "filters") {
+			return done({ ...state, error: null, draft: { ...state.draft, [state.field]: input.value } }, null);
 		}
 
-		return {
-			state: {
-				...state,
-				error: null,
-				draft: { ...state.draft, [state.field]: input.value },
-			},
-			command: null,
-			quit: false,
-		};
+		if (state.focus === "query") return editQuery(state, input.value, [...input.value].length, activeFilter, searchMode);
+
+		return done(state, null);
 	}
 
 	const { key, ctrl, shift } = input;
 
-	if (ctrl && (key === "c" || key === "C")) {
-		return { state, command: null, quit: true };
-	}
+	if (ctrl && (key === "c" || key === "C")) return done(state, null, true);
 
-	if (state.focus === "filters") {
-		if (key === "escape") {
-			return { state: LIST_FOCUS, command: null, quit: false };
-		}
+	if (state.focus === "query") return reduceQuery(state, key, ctrl, activeFilter, searchMode);
 
-		if (key === "enter") {
-			const onlyText = state.field === "text" && state.draft.minLevel === (activeFilter.minLevel ?? "ALL");
-			const result = commitDraft(state.draft, activeFilter);
+	if (state.focus === "filters") return reduceFilters(state, key, ctrl, shift, activeFilter);
 
-			if (result.error) {
-				return { state: { ...state, error: result.error }, command: null, quit: false };
-			}
+	if (state.focus === "inspect" || state.focus === "help") return reduceOverlay(state, key, activeFilter, selection);
 
-			void onlyText;
-
-			return { state: LIST_FOCUS, command: result.command, quit: false };
-		}
-
-		if (key === "tab") {
-			return {
-				state: { ...state, field: nextField(state.field, shift), error: null },
-				command: null,
-				quit: false,
-			};
-		}
-
-		if (key === "backspace") {
-			return { state: backspaceDraft(state), command: null, quit: false };
-		}
-
-		if (key.length === 1 && !ctrl) {
-			return { state: appendToDraft(state, key), command: null, quit: false };
-		}
-
-		return { state, command: null, quit: false };
-	}
-
-	if (state.focus === "inspect" || state.focus === "help") {
-		if (key === "escape" || key === "enter") {
-			return { state: LIST_FOCUS, command: null, quit: false };
-		}
-
-		if (state.focus === "inspect" && key === "t" && selection.tag) {
-			const spec: FilterSpec = { ...activeFilter, tag: selection.tag };
-			const prepared = prepareFilter(spec);
-
-			if (!prepared.ok) return { state, command: null, quit: false };
-
-			return { state: LIST_FOCUS, command: { kind: "set-filter", filter: prepared.value.spec }, quit: false };
-		}
-
-		if (state.focus === "inspect" && key === "p" && selection.pid !== null) {
-			const spec: FilterSpec = { ...activeFilter, pid: selection.pid };
-			const prepared = prepareFilter(spec);
-
-			if (!prepared.ok) return { state, command: null, quit: false };
-
-			return { state: LIST_FOCUS, command: { kind: "set-filter", filter: prepared.value.spec }, quit: false };
-		}
-
-		if (key === "q") {
-			return { state, command: null, quit: true };
-		}
-
-		if (key === "up" || key === "k") {
-			return { state, command: { kind: "move", delta: -1 }, quit: false };
-		}
-
-		if (key === "down" || key === "j") {
-			return { state, command: { kind: "move", delta: 1 }, quit: false };
-		}
-
-		if (key === "?") {
-			return { state: state.focus === "help" ? LIST_FOCUS : HELP_FOCUS, command: null, quit: false };
-		}
-
-		return { state, command: null, quit: false };
-	}
-
-	if (key === "q") {
-		return { state, command: null, quit: true };
-	}
-
-	if (key === "enter") {
-		return { state: INSPECT_FOCUS, command: { kind: "request-package-attribution" }, quit: false };
-	}
-
-	if (key === "?") {
-		return { state: HELP_FOCUS, command: null, quit: false };
-	}
-
-	if (key === "up" || key === "k") {
-		return { state, command: { kind: "move", delta: -1 }, quit: false };
-	}
-
-	if (key === "down" || key === "j") {
-		return { state, command: { kind: "move", delta: 1 }, quit: false };
-	}
-
-	if (key === "pageup" || (ctrl && (key === "u" || key === "U"))) {
-		return { state, command: { kind: "page", delta: -1 }, quit: false };
-	}
-
-	if (key === "pagedown" || (ctrl && (key === "d" || key === "D"))) {
-		return { state, command: { kind: "page", delta: 1 }, quit: false };
-	}
-
-	if (key === "home") {
-		return { state, command: { kind: "oldest" }, quit: false };
-	}
-
-	if (key === "end" || key === "G") {
-		return { state, command: { kind: "tail" }, quit: false };
-	}
-
-	if (key === "w" || key === "W") {
-		return { state, command: { kind: "toggle-line-display" }, quit: false };
-	}
-
-	if (key === "m" || key === "M") {
-		return { state, command: { kind: "toggle-search-mode" }, quit: false };
-	}
-
-	if (key === "/") {
-		return { state: openEditor(activeFilter, "text"), command: null, quit: false };
-	}
-
-	if (key === "f") {
-		return { state: openEditor(activeFilter, "minLevel"), command: null, quit: false };
-	}
-
-	return { state, command: null, quit: false };
+	return reduceList(state, key, ctrl, activeFilter);
 }
