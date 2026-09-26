@@ -82,6 +82,10 @@ export type { FrameStep, FramedLine, FramerState } from "./framing.ts";
 
 export { foldText, matches, matchesLocal, parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
 
+export { formatFilterQuery, parseFilterQuery, QUERY_KEYS, textMatchRanges } from "./query.ts";
+
+export type { QueryError } from "./query.ts";
+
 export { LIST_FOCUS, INSPECT_FOCUS, HELP_FOCUS, EMPTY_SELECTION, reduceInteraction } from "./interaction.ts";
 
 export type { InteractionInput, InteractionResult, InteractionSelection, InteractionState } from "./interaction.ts";
