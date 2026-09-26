@@ -58,13 +58,15 @@ table{border-collapse:collapse;width:100%;margin-top:14px;font-size:15px}td,th{b
 .contract{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:18px}
 .eq{font-size:34px;color:var(--gr);animation:pulse 2s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.25)}}
 .ids{display:flex;gap:6px;flex-wrap:wrap}.ids i{font-style:normal;background:var(--s0);border-radius:6px;padding:2px 8px;font-size:14px}
+.shot{margin:0}.shot figcaption{color:var(--mu);font-size:14px;margin-top:6px}
+.shot img{width:100%;border-radius:10px;border:1px solid var(--s0);display:block}
 video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-top:16px;background:#000}
 .muted{color:var(--mu)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}section{opacity:1;transform:none}}
 </style>
 </head>
 <body>
-<nav><div><a href="#why">Why</a><a href="#how">How it fits</a><a href="#lang">Query language</a><a href="#tui">TUI</a><a href="#cli">Agent CLI</a><a href="#proof">Proof</a><a href="#videos">Videos</a></div></nav>
+<nav><div><a href="#why">Why</a><a href="#how">How it fits</a><a href="#lang">Query language</a><a href="#tui">TUI</a><a href="#cli">Agent CLI</a><a href="#jev">Ask Jev</a><a href="#proof">Proof</a><a href="#videos">Videos</a></div></nav>
 <main>
 
 <section id="why" class="in">
@@ -185,6 +187,73 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
   <p class="muted">Exit codes: <b>0</b> done (zero matches is fine) · <b>1</b> source failed · <b>2</b> bad arguments or query. Read-only: it never writes a file.</p>
 </section>
 
+<section id="jev">
+  <div class="kicker">Ask Jev</div>
+  <h2>A <span class="mono">~</span> asks a question. Everything else stays literal.</h2>
+  <p class="muted">Plain text still filters live as you type. Put <kbd>~</kbd> in front and the same line asks Jev instead, only when you press <kbd>Enter</kbd>, because every question is a paid call. The CLI reads the same syntax.</p>
+  <svg viewBox="0 0 900 360" width="100%" role="img" aria-label="Query line and CLI parse through parseQuery; text mode filters locally, Jev mode goes through the Session's semantic coordinator">
+    <g font-size="15" fill="#cdd6f4">
+      <rect x="20" y="40" width="200" height="84" rx="14" fill="#1e1e2e" stroke="#cba6f7"/>
+      <text x="120" y="72" text-anchor="middle" font-weight="700">TUI query line</text>
+      <text x="120" y="96" text-anchor="middle" class="mono" fill="#cba6f7" font-size="13">~database locks⏎</text>
+      <rect x="20" y="220" width="200" height="84" rx="14" fill="#1e1e2e" stroke="#89b4fa"/>
+      <text x="120" y="252" text-anchor="middle" font-weight="700">logview query</text>
+      <text x="120" y="276" text-anchor="middle" class="mono" fill="#89b4fa" font-size="13">'~…' or --semantic</text>
+      <rect x="290" y="120" width="200" height="104" rx="16" fill="#1e1e2e" stroke="#f9e2af" stroke-width="2"/>
+      <text x="390" y="152" text-anchor="middle" font-weight="800">@logview/core</text>
+      <text x="390" y="176" text-anchor="middle" class="mono" fill="#f9e2af" font-size="13">parseQuery</text>
+      <text x="390" y="198" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">→ filter + searchMode</text>
+      <rect x="560" y="30" width="320" height="300" rx="16" fill="#181825" stroke="#94e2d5"/>
+      <text x="720" y="58" text-anchor="middle" font-weight="800">@logview/engine · Session</text>
+      <rect x="585" y="80" width="270" height="56" rx="10" fill="#1e1e2e" stroke="#a6e3a1"/>
+      <text x="720" y="104" text-anchor="middle">text: local match, live</text>
+      <text x="720" y="124" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">level · tag · pid · pkg · text</text>
+      <rect x="585" y="152" width="270" height="72" rx="10" fill="#1e1e2e" stroke="#cba6f7"/>
+      <text x="720" y="178" text-anchor="middle">jev: keys first, then</text>
+      <text x="720" y="200" text-anchor="middle" class="mono" fill="#cba6f7" font-size="13">SemanticCoordinator → Jev</text>
+      <text x="720" y="216" text-anchor="middle" class="mono" fill="#9399b2" font-size="11">score · threshold · lastError</text>
+      <rect x="585" y="240" width="270" height="72" rx="10" fill="#1e1e2e" stroke="#45475a"/>
+      <text x="720" y="264" text-anchor="middle">snapshot</text>
+      <text x="720" y="286" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">rows · belowThreshold dim|hide</text>
+      <text x="720" y="303" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">classificationOf · queryCandidates</text>
+    </g>
+    <g fill="none" stroke-width="2.5">
+      <path class="flow" d="M220 82 C260 82 250 150 290 150" stroke="#cba6f7"/>
+      <path class="flow" d="M220 262 C260 262 250 196 290 196" stroke="#89b4fa"/>
+      <path class="flow" d="M490 160 C530 160 540 108 585 108" stroke="#a6e3a1"/>
+      <path class="flow" d="M490 184 C530 184 540 188 585 188" stroke="#cba6f7"/>
+    </g>
+    <text x="390" y="345" text-anchor="middle" fill="#9399b2" font-size="13">One classifier path: the CLI drives the same Session and coordinator as the TUI.</text>
+  </svg>
+
+  <h3>Query line: before and after</h3>
+  <div class="ba">
+    <figure class="shot"><img src="jev/shots/before-query.png" alt="Before: query line with no mode indicator"><figcaption><span class="tag" style="background:#f38ba833;color:var(--re)">BEFORE</span> No sign of mode. Jev or text depended on a startup flag.</figcaption></figure>
+    <figure class="shot"><img src="jev/shots/after-query-jev.png" alt="After: ✦ Jev badge and Enter asks Jev hint"><figcaption><span class="tag" style="background:#a6e3a133;color:var(--gr)">AFTER</span> <kbd>~</kbd> turns the badge purple. The hint says Enter asks Jev.</figcaption></figure>
+  </div>
+
+  <h3>Scores: dim or hide</h3>
+  <div class="ba">
+    <figure class="shot"><img src="jev/shots/after-scored.png" alt="Scored rows with relevance bars, weak rows dimmed"><figcaption>Weak rows dim. A bar and score sit on the right. The status bar counts relevant rows.</figcaption></figure>
+    <figure class="shot"><img src="jev/shots/after-hidden.png" alt="Weak rows hidden, status shows 11 hidden"><figcaption><kbd>v</kbd> hides weak rows and says how many. <kbd>v</kbd> again shows them.</figcaption></figure>
+  </div>
+
+  <h3>Errors and completion</h3>
+  <div class="ba">
+    <figure class="shot"><img src="jev/shots/after-error.png" alt="API key rejected in status bar, quiet failed rows"><figcaption>A rejected key shows once, in the status bar. Rows stay calm.</figcaption></figure>
+    <figure class="shot"><img src="jev/shots/after-complete.png" alt="Ghost completion for tag values"><figcaption><kbd>Tab</kbd> takes the grey suggestion. Values come from this session, most frequent first.</figcaption></figure>
+  </div>
+
+  <h3>Agent CLI</h3>
+  <div class="term mono" style="font-size:14px;white-space:pre;overflow-x:auto"><span class="p">$</span> logview query capture.lvr.jsonl '~database locks' --limit 2
+<span class="ev">{"type":"event","id":4,"tag":"Database","message":"Opening connection",…,"score":0.71,"verdict":"relevant"}</span>
+<span class="ev">{"type":"event","id":5,"tag":"Database","message":"SELECT completed in 12 ms",…,"score":0.71,"verdict":"relevant"}</span>
+<span class="sum">{"type":"summary","query":"~database locks","emitted":2,…,"jev":{"threshold":0.5,"relevant":4,"belowThreshold":11,"unscored":0,"error":null}}</span>
+<span class="p">$</span> TYPESAFE_API_KEY= logview query capture.lvr.jsonl '~database locks'; echo $?
+<span class="err">{"type":"error","kind":"missing-api-key","field":"TYPESAFE_API_KEY",…}</span>
+2</div>
+</section>
+
 <section id="proof">
   <div class="kicker">Proof</div>
   <h2>Both doors, same event IDs</h2>
@@ -205,6 +274,8 @@ video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-
   <p class="muted">Recorded from the real app with Terminal Control.</p>
   <h3>Terminal UI</h3>
   <video src="tui/tui-query.mp4" controls muted loop playsinline poster="tui/poster.png"></video>
+  <h3>Ask Jev, hide weak rows, Tab completion</h3>
+  <video src="jev/jev-demo.mp4" controls muted loop playsinline poster="jev/poster.png"></video>
   <h3>Agent CLI</h3>
   <video src="cli/agent-cli.mp4" controls muted loop playsinline poster="cli/poster.png"></video>
 </section>

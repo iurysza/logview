@@ -1,0 +1,16 @@
+{
+  "clips": [
+    { "from": "list", "to": "open", "caption": "Jev is on. / opens the query line: type to filter, ~question asks Jev.", "speed": 1, "hold_ms": 1400 },
+    { "from": "open", "to": "literal", "caption": "Plain text filters live as you type.", "speed": 1.2, "hold_ms": 1100 },
+    { "from": "literal", "to": "draft", "caption": "A leading ~ switches the badge to ✦ Jev. Nothing is sent yet.", "speed": 1.6, "hold_ms": 1600 },
+    { "from": "draft", "to": "asking", "caption": "Enter asks Jev once. Rows wait with a clock icon.", "speed": 1, "hold_ms": 1200 },
+    { "from": "asking", "to": "scored", "caption": "Scores arrive. Weak rows dim; relevance bars sit on the right.", "speed": 1, "hold_ms": 2200 },
+    { "from": "scored", "to": "hidden", "caption": "v hides weak rows. The status bar counts what is hidden.", "speed": 1, "hold_ms": 2000 },
+    { "from": "hidden", "to": "shown", "caption": "v again brings them back.", "speed": 1, "hold_ms": 700 },
+    { "from": "shown", "to": "text", "caption": "m turns the same words into a literal text filter.", "speed": 1, "hold_ms": 1500 },
+    { "from": "text", "to": "tag", "caption": "Tab after tag: offers the most frequent tag as grey ghost text.", "speed": 2.5, "hold_ms": 1500 },
+    { "from": "tag", "to": "values", "caption": "Typing narrows it. Other matches line up beside it.", "speed": 2.5, "hold_ms": 1500 },
+    { "from": "values", "to": "accepted", "caption": "Tab accepts, Enter applies: tag:Database.", "speed": 1, "hold_ms": 1800 },
+    { "from": "accepted", "to": "quit", "caption": "q quits.", "speed": 1, "hold_ms": 200 }
+  ]
+}
