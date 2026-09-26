@@ -3,6 +3,7 @@ import {
 	EMPTY_SELECTION,
 	LIST_FOCUS,
 	classificationColumnLayout,
+	type FilterSpec,
 	padToWidth,
 	projectColumnHeader,
 	reduceInteraction,
@@ -114,6 +115,7 @@ function paintLogRows(
 	semantic: SessionSnapshot["semantic"],
 	listBackground: boolean,
 	emptyCopy: readonly string[] | null,
+	filter: FilterSpec,
 ): string[] {
 	const lines: string[] = [];
 
@@ -129,7 +131,7 @@ function paintLogRows(
 		for (const row of rows) {
 			if (lines.length >= count) break;
 
-			lines.push(paintRow(row, style, columns));
+			lines.push(paintRow(row, style, columns, { filter }));
 		}
 	} else {
 		const jevLayout = classificationColumnLayout(columns);
@@ -138,7 +140,7 @@ function paintLogRows(
 			if (lines.length >= count) break;
 
 			const dimmed = isBelowJevThreshold(row, semantic.threshold);
-			const logLine = paintRow(row, style, jevLayout.listWidth, { dimmed });
+			const logLine = paintRow(row, style, jevLayout.listWidth, { dimmed, filter });
 			const divider = style === "plain" ? "│" : paintChrome("│", THEME.subtle, style);
 			const note = row.kind === "header" ? jevNote(row, jevLayout.noteWidth < 14) : "";
 			const noteColor = dimmed ? THEME.subtle : THEME.muted;
@@ -236,7 +238,18 @@ function layoutLines(
 	const wideInspect = inspectOpen && columns >= INSPECT_WIDE_COLUMNS;
 	const logWidth = wideInspect ? Math.max(1, columns - inspectorWidth(columns) - 1) : columns;
 	const semantic = snapshot.searchMode === "jev" && snapshot.activeFilter.text.length > 0 ? snapshot.semantic : null;
-	let body = paintLogRows(snapshot.rows, logWidth, viewport, style, semantic, listBackground, emptyMatchCopy(snapshot));
+
+	let body = paintLogRows(
+		snapshot.rows,
+		logWidth,
+		viewport,
+		style,
+		semantic,
+		listBackground,
+		emptyMatchCopy(snapshot),
+		snapshot.activeFilter,
+	);
+
 	const selectedRow = selectedHeaderRow(snapshot);
 	const classification = classificationLabel(selectedRow);
 

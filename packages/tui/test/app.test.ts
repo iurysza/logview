@@ -14,7 +14,7 @@ import {
 	layoutSession,
 	renderRowText,
 } from "../src/app.ts";
-import { paintStyleFromEnv } from "../src/color.ts";
+import { paintRow, paintStyleFromEnv } from "../src/color.ts";
 import { rgbSgr } from "../src/catppuccin.ts";
 import { THEME } from "../src/theme.ts";
 import { paintLogList, visiblePoolSize } from "../src/log-list.ts";
@@ -416,6 +416,29 @@ describe("tui chrome", () => {
 		expect(renderRowText(row, "plain")).not.toContain("\u001b");
 		expect(paintStyleFromEnv("1", undefined)).toBe("plain");
 		expect(paintStyleFromEnv(undefined, undefined)).toBe("ansi");
+	});
+
+	test("text matches highlight the message and plain rows stay unstyled", () => {
+		const row: ViewRow = {
+			id: 1,
+			selected: false,
+			level: "W",
+			kind: "header",
+			spans: [{ text: "Retry after lock timeout", role: "message" }],
+			clipped: false,
+			classification: NONE_CLASSIFICATION,
+		};
+
+		const filter = { ...EMPTY_FILTER, text: "lock" };
+
+		const folded: ViewRow = {
+			...row,
+			spans: [{ text: "İ", role: "message" }],
+		};
+
+		expect(paintRow(row, "ansi", 40, { filter })).toContain(rgbSgr(THEME.match, "bg"));
+		expect(paintRow(row, "plain", 40, { filter })).not.toContain("\u001b");
+		expect(paintRow(folded, "ansi", 40, { filter: { ...EMPTY_FILTER, text: "i" } })).not.toContain(rgbSgr(THEME.match, "bg"));
 	});
 
 	test("decodes terminal keys used by the list and filter editor", () => {
