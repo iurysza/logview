@@ -15,6 +15,7 @@ import {
 	validateDimensions,
 	type CommandError,
 	type ConfigurationError,
+	type EventId,
 	type FilterRevision,
 	type FilterSpec,
 	type LineDisplay,
@@ -92,6 +93,7 @@ export interface Session {
 	start(): Result<void, StartError>;
 	dispatch(command: SessionCommand): Result<void, CommandError>;
 	snapshot(): SessionSnapshot;
+	readMatches(after: EventId | null, limit: number): readonly LogEvent[];
 	subscribe(listener: (snapshot: SessionSnapshot) => void): () => void;
 	readonly sourceDone: Promise<SourceTerminal>;
 	stop(): Promise<void>;

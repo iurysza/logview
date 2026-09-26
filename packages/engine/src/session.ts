@@ -21,6 +21,7 @@ import {
 	NONE_CLASSIFICATION,
 	type ClassificationMark,
 	type CommandError,
+	type EventId,
 	type FilterSpec,
 	type FramerState,
 	type LineDisplay,
@@ -226,6 +227,24 @@ class SessionImpl implements Session {
 
 	snapshot(): SessionSnapshot {
 		return this.buildSnapshot();
+	}
+
+	readMatches(after: EventId | null, limit: number): readonly LogEvent[] {
+		if (!Number.isSafeInteger(limit) || limit < 1) return [];
+
+		const matches: LogEvent[] = [];
+		let rank = after === null ? 0 : (this.activeIndex.locate(after).nextRank ?? this.activeIndex.size);
+
+		while (rank < this.activeIndex.size && matches.length < limit) {
+			const id = this.activeIndex.at(rank++);
+
+			if (id === null) break;
+			const event = this.history.get(id);
+
+			if (event) matches.push(event);
+		}
+
+		return matches;
 	}
 
 	subscribe(listener: (snapshot: SessionSnapshot) => void): () => void {
