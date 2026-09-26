@@ -299,6 +299,18 @@ export function layoutSession(
 	return layoutLines(snapshot, interaction, style, columns, rows, listBackground);
 }
 
+export function paintFrame(lines: readonly string[]): string {
+	let frame = "\x1b[?2026h\x1b[H";
+
+	for (let i = 0; i < lines.length; i += 1) {
+		frame += lines[i];
+
+		if (i < lines.length - 1) frame += "\r\n";
+	}
+
+	return `${frame}\x1b[?2026l`;
+}
+
 export function layoutFrame(
 	snapshot: SessionSnapshot,
 	interaction: InteractionState,
@@ -446,6 +458,7 @@ export async function attachTui(
 	let resolveDone: () => void = () => undefined;
 	let lastColumns = -1;
 	let lastRows = -1;
+	let lastFrame: string | null = null;
 	let resizeQueued = false;
 	let painting = false;
 	let inputTimer: ReturnType<typeof setTimeout> | null = null;
@@ -485,19 +498,16 @@ export async function attachTui(
 			if (resized) {
 				lastColumns = size.columns;
 				lastRows = size.rows;
+				lastFrame = null;
 				session.dispatch({ kind: "resize", columns: size.columns, rows: size.rows });
 			}
 
 			const current = resized ? session.snapshot() : (published ?? session.snapshot());
-			const lines = layoutLines(current, interaction, style, size.columns, size.rows, listBackground);
-			let frame = "\x1b[H\x1b[2J";
+			const frame = paintFrame(layoutLines(current, interaction, style, size.columns, size.rows, listBackground));
 
-			for (let i = 0; i < lines.length; i += 1) {
-				frame += lines[i];
+			if (frame === lastFrame) return;
 
-				if (i < lines.length - 1) frame += "\r\n";
-			}
-
+			lastFrame = frame;
 			process.stdout.write(frame);
 		} finally {
 			painting = false;

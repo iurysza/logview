@@ -12,6 +12,7 @@ import {
 	formatStatus,
 	layoutFrame,
 	layoutSession,
+	paintFrame,
 	renderRowText,
 } from "../src/app.ts";
 import { paintRow, paintStyleFromEnv } from "../src/color.ts";
@@ -265,6 +266,15 @@ describe("tui chrome", () => {
 		expect(frame[1]).toContain("/ pid:");
 		expect(frame[1]).toContain("! PID must be a positive integer");
 		expect(frame.at(-2)).toContain("QUERY");
+	});
+
+	test("frames synchronize output and overwrite in place", () => {
+		const frame = paintFrame(["abc", "def"]);
+
+		expect(frame.startsWith("\x1b[?2026h\x1b[H")).toBe(true);
+		expect(frame.endsWith("\x1b[?2026l")).toBe(true);
+		expect(frame).toContain("abc\r\ndef");
+		expect(frame).not.toContain("\x1b[2J");
 	});
 
 	test("ansi status fits 48 columns like the plain branch", () => {
