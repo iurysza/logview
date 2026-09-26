@@ -106,7 +106,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "  15 events                                        "
+      "text": "  0 of 15                                          "
     },
     {
       "x": 0,
@@ -304,9 +304,9 @@
       "x": 46,
       "y": 1,
       "foreground": {
-        "r": 199,
-        "g": 146,
-        "b": 234
+        "r": 69,
+        "g": 150,
+        "b": 255
       },
       "background": {
         "r": 39,
@@ -400,9 +400,9 @@
       "x": 0,
       "y": 3,
       "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
         "r": 17,
@@ -418,15 +418,15 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                        "
+      "text": "No events match no-match                                                "
     },
     {
       "x": 0,
       "y": 4,
       "foreground": {
-        "r": 195,
-        "g": 205,
-        "b": 232
+        "r": 135,
+        "g": 150,
+        "b": 181
       },
       "background": {
         "r": 17,
@@ -442,7 +442,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "                                                                        "
+      "text": "x clear · u undo                                                        "
     },
     {
       "x": 0,
@@ -826,10 +826,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Search"
+      "text": " Query"
     },
     {
-      "x": 35,
+      "x": 34,
       "y": 14,
       "foreground": {
         "r": 195,
@@ -853,7 +853,7 @@
       "text": "  "
     },
     {
-      "x": 37,
+      "x": 36,
       "y": 14,
       "foreground": {
         "r": 195,
@@ -877,7 +877,7 @@
       "text": " f "
     },
     {
-      "x": 40,
+      "x": 39,
       "y": 14,
       "foreground": {
         "r": 135,
@@ -901,7 +901,7 @@
       "text": " Filters"
     },
     {
-      "x": 48,
+      "x": 47,
       "y": 14,
       "foreground": {
         "r": 195,
@@ -925,7 +925,7 @@
       "text": "  "
     },
     {
-      "x": 50,
+      "x": 49,
       "y": 14,
       "foreground": {
         "r": 195,
@@ -946,10 +946,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " G "
+      "text": " x "
     },
     {
-      "x": 53,
+      "x": 52,
       "y": 14,
       "foreground": {
         "r": 135,
@@ -970,7 +970,7 @@
         "overline": false,
         "underline": null
       },
-      "text": " Tail"
+      "text": " Clear"
     },
     {
       "x": 58,

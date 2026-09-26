@@ -1,4 +1,5 @@
 export type {
+	BelowThreshold,
 	HeadlessOutput,
 	PackageAttribution,
 	Session,
@@ -128,6 +129,7 @@ export type {
 	Relevance,
 	SemanticOptions,
 	SemanticQuery,
+	SemanticErrorKind,
 	SemanticStats,
 } from "./semantic/contracts.ts";
 

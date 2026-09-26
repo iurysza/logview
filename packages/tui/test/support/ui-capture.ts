@@ -66,6 +66,7 @@ export async function withTerminalSession<T>(
 		command: readonly [string, ...string[]];
 		viewport: Viewport;
 		color: "always" | "never";
+		env?: Readonly<Record<string, string>>;
 	},
 	action: (session: Session) => Promise<T>,
 ): Promise<T> {
@@ -81,6 +82,7 @@ export async function withTerminalSession<T>(
 			cwd: options.cwd,
 			viewport: options.viewport,
 			color: options.color,
+			env: options.env ?? {},
 		});
 		result = await action(session);
 	} catch (cause) {

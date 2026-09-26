@@ -5,6 +5,31 @@ import { threadtimeLine } from "../../../tests/support/log-lines.ts";
 import { openScenario, tick } from "../../../tests/support/scenario.ts";
 
 describe("headless session", () => {
+	test("readMatches walks only the published active index in id order", async () => {
+		const scenario = await openScenario({ maxEvents: 4 });
+		await scenario.deliver([1, 2, 3, 4]);
+
+		expect(scenario.session.readMatches(null, 2).map((event) => event.id)).toEqual([1, 2]);
+		expect(scenario.session.readMatches(2, 10).map((event) => event.id)).toEqual([3, 4]);
+		expect(scenario.session.readMatches(2, 0)).toEqual([]);
+
+		const filter = scenario.session.dispatch({ kind: "set-filter", filter: { ...EMPTY_FILTER, text: "event-3" } });
+		expect(filter.ok).toBe(true);
+
+		// A pending filter never replaces the published index early.
+		if (scenario.session.snapshot().pendingFilter !== null) {
+			expect(scenario.session.readMatches(null, 10).map((event) => event.id)).toEqual([1, 2, 3, 4]);
+		}
+
+		await scenario.waitUntil((snapshot) => snapshot.pendingFilter === null && snapshot.activeFilter.text === "event-3");
+		expect(scenario.session.readMatches(null, 10).map((event) => event.id)).toEqual([3]);
+		expect(scenario.session.readMatches(1, 10).map((event) => event.id)).toEqual([3]);
+		await scenario.deliver([5, 6]);
+		expect(scenario.session.readMatches(null, 10).map((event) => event.id)).toEqual([3]);
+		expect(scenario.session.readMatches(2, 10).map((event) => event.id)).toEqual([3]);
+		await scenario.finish();
+		await scenario.session.stop();
+	});
 	test("the PRD acceptance scenario: tail, browse, eviction, filter, resume", async () => {
 		const scenario = await openScenario({ maxEvents: 8, rows: 8, columns: 120 });
 		const keep = new Set([8, 10, 14]);

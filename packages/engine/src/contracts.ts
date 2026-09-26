@@ -15,10 +15,13 @@ import {
 	validateDimensions,
 	type CommandError,
 	type ConfigurationError,
+	type EventId,
 	type FilterRevision,
 	type FilterSpec,
 	type LineDisplay,
 	type LogEvent,
+	type QueryCandidates,
+	type ClassificationMark,
 	type Result,
 	type SearchMode,
 	type SessionCommand,
@@ -65,6 +68,8 @@ export type SessionSnapshot = Readonly<{
 	view: ViewState;
 	lineDisplay: LineDisplay;
 	searchMode: SearchMode;
+	/** Jev rows scored below the threshold: dimmed in place or hidden from the list. */
+	belowThreshold: BelowThreshold;
 	rows: readonly ViewRow[];
 	selectedEvent: LogEvent | null;
 	packageAttribution: PackageAttribution;
@@ -88,10 +93,17 @@ export type SessionOptions = Readonly<{
 	initialFilter: FilterSpec;
 }>;
 
+export type BelowThreshold = "dim" | "hide";
+
 export interface Session {
 	start(): Result<void, StartError>;
 	dispatch(command: SessionCommand): Result<void, CommandError>;
 	snapshot(): SessionSnapshot;
+	readMatches(after: EventId | null, limit: number): readonly LogEvent[];
+	/** Tags, PIDs and packages seen so far, most frequent first, for query completion. */
+	queryCandidates(): QueryCandidates;
+	/** Jev result for one retained event under the active query; `none` when Jev is not active. */
+	classificationOf(id: EventId): ClassificationMark;
 	subscribe(listener: (snapshot: SessionSnapshot) => void): () => void;
 	readonly sourceDone: Promise<SourceTerminal>;
 	stop(): Promise<void>;

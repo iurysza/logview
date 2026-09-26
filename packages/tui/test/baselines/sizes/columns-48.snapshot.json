@@ -1372,10 +1372,10 @@
         "overline": false,
         "underline": null
       },
-      "text": " Search"
+      "text": " Query"
     },
     {
-      "x": 35,
+      "x": 34,
       "y": 10,
       "foreground": {
         "r": 195,
@@ -1399,7 +1399,7 @@
       "text": "  "
     },
     {
-      "x": 37,
+      "x": 36,
       "y": 10,
       "foreground": {
         "r": 195,
@@ -1423,7 +1423,7 @@
       "text": " q "
     },
     {
-      "x": 40,
+      "x": 39,
       "y": 10,
       "foreground": {
         "r": 135,
@@ -1447,7 +1447,7 @@
       "text": " Quit"
     },
     {
-      "x": 45,
+      "x": 44,
       "y": 10,
       "foreground": {
         "r": 195,
@@ -1468,7 +1468,7 @@
         "overline": false,
         "underline": null
       },
-      "text": "   "
+      "text": "    "
     },
     {
       "x": 0,

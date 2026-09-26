@@ -40,21 +40,26 @@ describe("filters and interaction", () => {
 
 	test("slash, text edit, and enter produce a text-filter command", () => {
 		const opened = reduceInteraction(LIST_FOCUS, { kind: "key", key: "/", ctrl: false, shift: false }, EMPTY_FILTER);
-		expect(opened.state.focus).toBe("filters");
+		expect(opened.state.focus).toBe("query");
 
 		const typed = reduceInteraction(opened.state, { kind: "edit-field", value: "database" }, EMPTY_FILTER);
+
+		expect(typed.command).toEqual({
+			kind: "set-filter",
+			filter: { minLevel: null, tag: null, pid: null, packageName: null, text: "database" },
+		});
 
 		const committed = reduceInteraction(
 			typed.state,
 			{ kind: "key", key: "enter", ctrl: false, shift: false },
-			EMPTY_FILTER,
+			{ minLevel: null, tag: null, pid: null, packageName: null, text: "database" },
 		);
 
-		expect(committed.command).toEqual({
-			kind: "set-filter",
-			filter: { minLevel: null, tag: null, pid: null, packageName: null, text: "database" },
-		});
-		expect(committed.state).toEqual(LIST_FOCUS);
+		expect(committed.command).toBeNull();
+		expect(committed.state.focus).toBe("list");
+
+		if (committed.state.focus !== "list") return;
+		expect(committed.state.history).toEqual(["database"]);
 	});
 
 	test("escape discards a draft and q is text inside the editor", () => {
@@ -72,7 +77,7 @@ describe("filters and interaction", () => {
 		const q = reduceInteraction(opened.state, { kind: "key", key: "q", ctrl: false, shift: false }, EMPTY_FILTER);
 		expect(q.quit).toBe(false);
 
-		if (q.state.focus === "filters") expect(q.state.draft.text.endsWith("q")).toBe(true);
+		if (q.state.focus === "query") expect(q.state.draft.endsWith("q")).toBe(true);
 	});
 
 	test("text filter matches continuation lines of a grouped event", () => {

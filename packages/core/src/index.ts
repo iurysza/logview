@@ -82,9 +82,31 @@ export type { FrameStep, FramedLine, FramerState } from "./framing.ts";
 
 export { foldText, matches, matchesLocal, parseLevelField, parsePidField, prepareFilter } from "./filters.ts";
 
-export { LIST_FOCUS, INSPECT_FOCUS, HELP_FOCUS, EMPTY_SELECTION, reduceInteraction } from "./interaction.ts";
+export { formatFilterQuery, formatQuery, parseFilterQuery, parseQuery, QUERY_KEYS, textMatchRanges } from "./query.ts";
 
-export type { InteractionInput, InteractionResult, InteractionSelection, InteractionState } from "./interaction.ts";
+export type { ParsedQuery, QueryError } from "./query.ts";
+
+export { acceptCompletion, completeQuery, EMPTY_CANDIDATES, LEVEL_CANDIDATES } from "./completion.ts";
+
+export type { CompletedDraft, QueryCandidates, QueryCompletion } from "./completion.ts";
+
+export {
+	LIST_FOCUS,
+	INSPECT_FOCUS,
+	HELP_FOCUS,
+	EMPTY_SELECTION,
+	reduceInteraction,
+	TEXT_ONLY_CONTEXT,
+} from "./interaction.ts";
+
+export type {
+	InteractionEffect,
+	InteractionInput,
+	InteractionResult,
+	InteractionSelection,
+	InteractionState,
+	QueryContext,
+} from "./interaction.ts";
 
 export { parseLogcatLine, messageText, tagText } from "./logcat.ts";
 

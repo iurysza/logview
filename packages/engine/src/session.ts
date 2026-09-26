@@ -21,11 +21,13 @@ import {
 	NONE_CLASSIFICATION,
 	type ClassificationMark,
 	type CommandError,
+	type EventId,
 	type FilterSpec,
 	type FramerState,
 	type LineDisplay,
 	type LogEvent,
 	type PreparedFilter,
+	type QueryCandidates,
 	type Result,
 	type SearchMode,
 	type SessionCommand,
@@ -39,6 +41,7 @@ import {
 	defaultSessionOptions,
 	validateSessionOptions,
 	visibleLogRows,
+	type BelowThreshold,
 	type PackageAttribution,
 	type Session,
 	type SessionDependencies,
@@ -60,6 +63,7 @@ import type {
 import { isSourcePacket, isSourceTerminal } from "./ports.ts";
 import { FilterJob } from "./reindex.ts";
 import { VisibleIndexStore } from "./visible-index.ts";
+import { QueryVocabulary } from "./vocabulary.ts";
 import { classifierItemFromEvent } from "./semantic/items.ts";
 import { SemanticCoordinator, type SemanticMarkChange } from "./semantic/coordinator.ts";
 import {
@@ -75,6 +79,7 @@ const DATA_PUBLISH_MS = 1000 / 30;
 
 type SemanticVisibleCounts = {
 	classifiedEvents: number;
+	relevantEvents: number;
 	pendingEvents: number;
 	skippedEvents: number;
 	failedEvents: number;
@@ -117,6 +122,10 @@ class SessionImpl implements Session {
 	private rows: number;
 	private lineDisplay: LineDisplay = "clip";
 	private searchMode: SearchMode = "text";
+	private belowThreshold: BelowThreshold = "dim";
+	/** Relevant-only view of activeIndex; rebuilt lazily while hide is on. */
+	private hiddenView: VisibleIndexStore | null = null;
+	private readonly vocabulary = new QueryVocabulary();
 	private framer: FramerState = emptyFramerState();
 	private nextEventId = 1;
 	private revision = 0;
@@ -144,6 +153,7 @@ class SessionImpl implements Session {
 	private queryRevision = 0;
 	private semanticVisibleCounts: SemanticVisibleCounts = {
 		classifiedEvents: 0,
+		relevantEvents: 0,
 		pendingEvents: 0,
 		skippedEvents: 0,
 		failedEvents: 0,
@@ -218,7 +228,8 @@ class SessionImpl implements Session {
 			Match.when({ kind: "toggle-line-display" }, () => this.commandToggleLineDisplay()),
 			Match.when({ kind: "request-package-attribution" }, () => this.commandPackageAttribution()),
 			Match.when({ kind: "toggle-search-mode" }, () => this.commandToggleSearchMode()),
-			Match.when({ kind: "set-filter" }, (set) => this.commandFilter(set.filter)),
+			Match.when({ kind: "toggle-below-threshold" }, () => this.commandToggleBelowThreshold()),
+			Match.when({ kind: "set-filter" }, (set) => this.commandSetFilter(set.filter, set.searchMode)),
 			Match.when({ kind: "resize" }, (resize) => this.commandResize(resize.columns, resize.rows)),
 			Match.exhaustive,
 		);
@@ -226,6 +237,24 @@ class SessionImpl implements Session {
 
 	snapshot(): SessionSnapshot {
 		return this.buildSnapshot();
+	}
+
+	readMatches(after: EventId | null, limit: number): readonly LogEvent[] {
+		if (!Number.isSafeInteger(limit) || limit < 1) return [];
+
+		const matches: LogEvent[] = [];
+		let rank = after === null ? 0 : (this.activeIndex.locate(after).nextRank ?? this.activeIndex.size);
+
+		while (rank < this.activeIndex.size && matches.length < limit) {
+			const id = this.activeIndex.at(rank++);
+
+			if (id === null) break;
+			const event = this.history.get(id);
+
+			if (event) matches.push(event);
+		}
+
+		return matches;
 	}
 
 	subscribe(listener: (snapshot: SessionSnapshot) => void): () => void {
@@ -278,6 +307,24 @@ class SessionImpl implements Session {
 		return ok(undefined);
 	}
 
+	private commandSetFilter(filter: FilterSpec, searchMode: SearchMode | undefined): Result<void, CommandError> {
+		if (searchMode === "jev" && !this.coordinator) {
+			return err({ kind: "invalid-filter", field: "text", message: "Jev is not enabled for this session" });
+		}
+
+		if (searchMode !== undefined) this.searchMode = searchMode;
+
+		return this.commandFilter(filter);
+	}
+
+	classificationOf(id: EventId): ClassificationMark {
+		return this.classificationMark(id);
+	}
+
+	queryCandidates(): QueryCandidates {
+		return this.vocabulary.candidates();
+	}
+
 	private commandPackageAttribution(): Result<void, CommandError> {
 		void this.resolveSelectedPackageAttribution();
 
@@ -291,6 +338,42 @@ class SessionImpl implements Session {
 		this.publishImmediate();
 
 		return ok(undefined);
+	}
+
+	private commandToggleBelowThreshold(): Result<void, CommandError> {
+		this.belowThreshold = this.belowThreshold === "dim" ? "hide" : "dim";
+		this.hiddenView = null;
+		this.applyNavigation({ kind: "resize" }, 0);
+		this.bump();
+		this.publishImmediate();
+
+		return ok(undefined);
+	}
+
+	/** The ranks the list scrolls through. Hide mode drops scored rows below the threshold. */
+	private viewIndex(): VisibleIndexStore {
+		if (this.belowThreshold === "dim" || !this.semanticQueryActive()) return this.activeIndex;
+
+		if (this.hiddenView !== null) return this.hiddenView;
+
+		const threshold = this.semanticThreshold();
+		const kept: number[] = [];
+
+		for (let rank = 0; rank < this.activeIndex.size; rank += 1) {
+			const id = this.activeIndex.at(rank);
+
+			if (id === null) continue;
+
+			const mark = this.classificationMark(id);
+
+			if (mark.kind !== "scored" || mark.relevance >= threshold) kept.push(id);
+		}
+
+		const view = new VisibleIndexStore();
+		view.append(kept);
+		this.hiddenView = view;
+
+		return view;
 	}
 
 	private commandToggleSearchMode(): Result<void, CommandError> {
@@ -376,6 +459,10 @@ class SessionImpl implements Session {
 			}),
 			Match.when({ kind: "package-table" }, (event) => {
 				this.recordedPackageTable = event.packageTable;
+
+				if (event.packageTable.kind === "recorded" && event.packageTable.table !== null) {
+					this.rememberPackages(event.packageTable.table);
+				}
 			}),
 			Match.when({ kind: "notice" }, (notice) => {
 				this.addNotice(notice);
@@ -506,6 +593,8 @@ class SessionImpl implements Session {
 		this.admittedEvents += events.length;
 
 		for (const event of events) {
+			this.vocabulary.add(event);
+
 			if (event.metadata === null) this.unparsedEvents += 1;
 
 			if (event.omittedBytes > 0) {
@@ -707,6 +796,14 @@ class SessionImpl implements Session {
 		this.publishImmediate();
 	}
 
+	private rememberPackages(table: PackageTable): void {
+		const names: string[] = [];
+
+		for (const entry of table) names.push(...entry.packages);
+
+		this.vocabulary.setPackages(names);
+	}
+
 	private async loadPackageTable(refresh = false): Promise<PackageTable | null> {
 		if (this.recordedPackageTable !== null) {
 			return this.recordedPackageTable.kind === "recorded" ? this.recordedPackageTable.table : null;
@@ -716,6 +813,8 @@ class SessionImpl implements Session {
 
 		if (!resolver) return null;
 		const loaded = await (refresh && resolver.refresh ? resolver.refresh() : resolver.load());
+
+		if (loaded.ok) this.rememberPackages(loaded.value);
 
 		return loaded.ok ? loaded.value : null;
 	}
@@ -801,10 +900,15 @@ class SessionImpl implements Session {
 		return {
 			queryText: query?.text ?? this.activeFilter.text,
 			queryRevision: query?.revision ?? this.queryRevision,
-			threshold: query?.threshold ?? this.semanticOptions.threshold,
+			threshold: this.semanticThreshold(),
 			...this.semanticVisibleCounts,
 			inFlight: this.coordinator.inFlightCount,
+			lastError: this.semanticQueryActive() ? this.coordinator.lastError : null,
 		};
+	}
+
+	private semanticThreshold(): number {
+		return this.coordinator?.activeQuery()?.threshold ?? this.semanticOptions.threshold;
 	}
 
 	private semanticDisplayActive(): boolean {
@@ -814,6 +918,7 @@ class SessionImpl implements Session {
 	private clearSemanticVisibleCounts(): void {
 		this.semanticVisibleCounts = {
 			classifiedEvents: 0,
+			relevantEvents: 0,
 			pendingEvents: 0,
 			skippedEvents: 0,
 			failedEvents: 0,
@@ -862,6 +967,8 @@ class SessionImpl implements Session {
 	private adjustSemanticCount(mark: ClassificationMark, direction: 1 | -1): void {
 		if (mark.kind === "scored") {
 			this.semanticVisibleCounts.classifiedEvents += direction;
+
+			if (mark.relevance >= this.semanticThreshold()) this.semanticVisibleCounts.relevantEvents += direction;
 		} else if (mark.kind === "pending") {
 			this.semanticVisibleCounts.pendingEvents += direction;
 		} else if (mark.kind === "unknown" && mark.reason === "skipped") {
@@ -875,25 +982,27 @@ class SessionImpl implements Session {
 		cause: Parameters<typeof planNavigation>[1],
 		newMatchingArrivals: number,
 	): void {
+		this.hiddenView = null;
+		const index = this.viewIndex();
 		const visibleHeight = Math.max(1, logViewportHeight(this.rows));
 		const projectionColumns = this.projectionColumns();
 
 		const plan = planNavigation(this.view, cause, {
-			count: this.activeIndex.size,
+			count: index.size,
 			visibleHeight,
 			rowHeightAt: (rank) => {
-				const id = this.activeIndex.at(rank);
+				const id = index.at(rank);
 				const event = id === null ? null : this.history.get(id);
 
 				return event ? eventScreenRows(event, projectionColumns, this.lineDisplay) : 1;
 			},
-			top: this.activeIndex.locate(this.view.topId),
-			selected: this.activeIndex.locate(this.view.selectedId),
+			top: index.locate(this.view.topId),
+			selected: index.locate(this.view.selectedId),
 			newMatchingArrivals,
 		});
 
-		const selectedId = plan.selectedRank === null ? null : this.activeIndex.at(plan.selectedRank);
-		const topId = plan.topRank === null ? null : this.activeIndex.at(plan.topRank);
+		const selectedId = plan.selectedRank === null ? null : index.at(plan.selectedRank);
+		const topId = plan.topRank === null ? null : index.at(plan.topRank);
 
 		this.view = materializeNavigation(plan, { topId, selectedId });
 	}
@@ -903,14 +1012,15 @@ class SessionImpl implements Session {
 	}
 
 	private buildSnapshot(): SessionSnapshot {
+		const index = this.viewIndex();
 		const height = visibleLogRows(this.rows);
-		const topRank = this.view.topId === null ? 0 : (this.activeIndex.locate(this.view.topId).exactRank ?? 0);
+		const topRank = this.view.topId === null ? 0 : (index.locate(this.view.topId).exactRank ?? 0);
 		const events: LogEvent[] = [];
 		let used = 0;
 		let rank = topRank;
 
-		while (rank < this.activeIndex.size && used < height) {
-			const id = this.activeIndex.at(rank);
+		while (rank < index.size && used < height) {
+			const id = index.at(rank);
 			rank += 1;
 
 			if (id === null) break;
@@ -965,6 +1075,7 @@ class SessionImpl implements Session {
 			view: this.view,
 			lineDisplay: this.lineDisplay,
 			searchMode: this.searchMode,
+			belowThreshold: this.belowThreshold,
 			rows: this.classifyRows(projectRows(events, this.view.selectedId, projectionColumns, height, this.lineDisplay)),
 			selectedEvent,
 			packageAttribution: this.packageAttribution,
@@ -1016,6 +1127,7 @@ class SessionImpl implements Session {
 	}
 
 	private bump(): void {
+		this.hiddenView = null;
 		this.revision += 1;
 	}
 

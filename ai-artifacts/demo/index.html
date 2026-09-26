@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>logview · one filter, two doors</title>
+<style>
+:root{--bg:#11111b;--base:#1e1e2e;--s0:#313244;--s1:#45475a;--tx:#cdd6f4;--mu:#9399b2;--bl:#89b4fa;--gr:#a6e3a1;--ye:#f9e2af;--pe:#fab387;--re:#f38ba8;--mv:#cba6f7;--te:#94e2d5}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+main{max-width:980px;margin:0 auto;padding:0 24px 120px}
+nav{position:sticky;top:0;z-index:5;background:#11111bcc;backdrop-filter:blur(8px);border-bottom:1px solid var(--s0)}
+nav div{max-width:980px;margin:0 auto;padding:10px 24px;display:flex;gap:18px;font-size:14px;overflow-x:auto}
+nav a{color:var(--mu);text-decoration:none;white-space:nowrap}nav a:hover{color:var(--tx)}
+section{padding:72px 0 8px;opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+section.in{opacity:1;transform:none}
+.kicker{color:var(--mv);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.05;margin:10px 0 16px}
+h2{font-size:30px;margin:6px 0 10px}
+.lead{font-size:20px;color:var(--mu);max-width:680px}
+.tldr{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:28px}
+.card{background:var(--base);border:1px solid var(--s0);border-radius:14px;padding:16px 18px}
+.card b{display:block;font-size:15px;margin-bottom:4px}.card span{color:var(--mu);font-size:15px}
+.big{font-size:34px;font-weight:800}
+/* typing query */
+.term{background:var(--base);border:1px solid var(--s0);border-radius:12px;padding:18px 20px;font-size:18px;margin-top:26px;position:relative}
+.term .p{color:var(--mv)}.caret{display:inline-block;width:10px;height:1.1em;background:var(--tx);vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+/* diagram */
+svg text{font-family:ui-sans-serif,system-ui,sans-serif}
+.flow{stroke-dasharray:6 8;animation:dash 1.2s linear infinite}@keyframes dash{to{stroke-dashoffset:-28}}
+.dot{offset-rotate:0deg;animation:travel 3.2s cubic-bezier(.6,0,.4,1) infinite}
+@keyframes travel{from{offset-distance:0%}to{offset-distance:100%}}
+/* chips */
+.anat{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 8px;font-size:19px}
+.chip{padding:8px 12px;border-radius:10px;background:var(--s0);cursor:default;transition:transform .2s,box-shadow .2s}
+.chip:hover{transform:translateY(-3px);box-shadow:0 6px 18px #0006}
+.explain{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.explain div{border-left:3px solid;padding:4px 12px;font-size:15px;color:var(--mu)}.explain b{color:var(--tx)}
+/* before/after */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:720px){.ba{grid-template-columns:1fr}}
+.screen{background:#181825;border:1px solid var(--s0);border-radius:12px;overflow:hidden;font-size:13.5px}
+.screen .bar{background:var(--base);padding:6px 12px;color:var(--mu);display:flex;gap:10px;white-space:nowrap;overflow:hidden}
+.screen .row{padding:3px 12px;white-space:pre;overflow:hidden}
+.screen .sel{background:#1e2a44}.hl{background:#5c4f2a;color:var(--ye);border-radius:3px}
+.tag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px}
+.before .tag{background:#f38ba833;color:var(--re)}.after .tag{background:#a6e3a133;color:var(--gr)}
+ul.wins{padding-left:0;list-style:none}ul.wins li{padding:6px 0 6px 30px;position:relative}
+ul.wins li:before{content:"";position:absolute;left:4px;top:13px;width:12px;height:12px;border-radius:4px;background:var(--gr)}
+kbd{font-family:inherit;background:var(--s0);border:1px solid var(--s1);border-bottom-width:3px;border-radius:6px;padding:1px 7px;font-size:14px}
+/* ndjson stream */
+.stream .row{opacity:0;transform:translateX(-10px);transition:all .35s}.stream .row.on{opacity:1;transform:none}
+.ev{color:var(--te)}.sum{color:var(--ye)}.err{color:var(--re)}
+table{border-collapse:collapse;width:100%;margin-top:14px;font-size:15px}td,th{border-bottom:1px solid var(--s0);padding:8px 10px;text-align:left}th{color:var(--mu);font-weight:600}
+/* contract */
+.contract{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:18px}
+.eq{font-size:34px;color:var(--gr);animation:pulse 2s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.25)}}
+.ids{display:flex;gap:6px;flex-wrap:wrap}.ids i{font-style:normal;background:var(--s0);border-radius:6px;padding:2px 8px;font-size:14px}
+.shot{margin:0}.shot figcaption{color:var(--mu);font-size:14px;margin-top:6px}
+.shot img{width:100%;border-radius:10px;border:1px solid var(--s0);display:block}
+video,img.media{width:100%;border-radius:12px;border:1px solid var(--s0);margin-top:16px;background:#000}
+.muted{color:var(--mu)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}section{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<nav><div><a href="#why">Why</a><a href="#how">How it fits</a><a href="#lang">Query language</a><a href="#tui">TUI</a><a href="#cli">Agent CLI</a><a href="#jev">Ask Jev</a><a href="#proof">Proof</a><a href="#videos">Videos</a></div></nav>
+<main>
+
+<section id="why" class="in">
+  <div class="kicker">logview · feature/tui-filtering-agent-cli</div>
+  <h1>One filter.<br>Two doors.</h1>
+  <p class="lead">You type a filter in the terminal UI. An agent runs the <em>same string</em> in a CLI. Both go through one parser and one matcher. Same answer, every time.</p>
+  <div class="term mono"><span class="p">/</span> <span id="typed"></span><span class="caret"></span></div>
+  <div class="tldr">
+    <div class="card"><div class="big" style="color:var(--mv)">1</div><b>query language</b><span>in core, used by both</span></div>
+    <div class="card"><div class="big" style="color:var(--bl)">0</div><b>duplicated filters</b><span>tests fail if someone adds one</span></div>
+    <div class="card"><div class="big" style="color:var(--gr)">11</div><b>shared test cases</b><span>same event IDs from TUI and CLI</span></div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="kicker">How it fits</div>
+  <h2>Thin doors, shared core</h2>
+  <p class="muted">The UI and the CLI only turn keys or arguments into a query string. Everything after that is shared.</p>
+  <svg viewBox="0 0 900 330" width="100%" role="img" aria-label="TUI and CLI both call parseFilterQuery in core, then the engine Session">
+    <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#cba6f7"/><stop offset="1" stop-color="#89b4fa"/></linearGradient></defs>
+    <g font-size="15" fill="#cdd6f4">
+      <rect x="20" y="40" width="190" height="80" rx="14" fill="#1e1e2e" stroke="#cba6f7"/>
+      <text x="115" y="75" text-anchor="middle" font-weight="700">TUI  /  editor</text><text x="115" y="100" text-anchor="middle" fill="#9399b2" font-size="13">keys → query string</text>
+      <rect x="20" y="210" width="190" height="80" rx="14" fill="#1e1e2e" stroke="#89b4fa"/>
+      <text x="115" y="245" text-anchor="middle" font-weight="700">logview query</text><text x="115" y="270" text-anchor="middle" fill="#9399b2" font-size="13">argv → query string</text>
+      <rect x="320" y="115" width="230" height="100" rx="16" fill="#1e1e2e" stroke="url(#g)" stroke-width="2.5"/>
+      <text x="435" y="150" text-anchor="middle" font-weight="800">@logview/core</text>
+      <text x="435" y="175" text-anchor="middle" class="mono" fill="#f9e2af" font-size="13">parseFilterQuery</text>
+      <text x="435" y="197" text-anchor="middle" class="mono" fill="#a6e3a1" font-size="13">matches</text>
+      <rect x="660" y="115" width="220" height="100" rx="16" fill="#1e1e2e" stroke="#94e2d5"/>
+      <text x="770" y="150" text-anchor="middle" font-weight="800">@logview/engine</text>
+      <text x="770" y="175" text-anchor="middle" fill="#9399b2" font-size="13">Session · active index</text>
+      <text x="770" y="197" text-anchor="middle" class="mono" fill="#94e2d5" font-size="13">readMatches()</text>
+    </g>
+    <g fill="none" stroke-width="2.5">
+      <path id="p1" class="flow" d="M210 80 C270 80 270 150 320 150" stroke="#cba6f7"/>
+      <path id="p2" class="flow" d="M210 250 C270 250 270 180 320 180" stroke="#89b4fa"/>
+      <path id="p3" class="flow" d="M550 165 L660 165" stroke="#94e2d5"/>
+    </g>
+    <circle r="7" fill="#cba6f7" class="dot" style="offset-path:path('M210 80 C270 80 270 150 320 150 L660 165')"/>
+    <circle r="7" fill="#89b4fa" class="dot" style="offset-path:path('M210 250 C270 250 270 180 320 180 L660 165');animation-delay:1.6s"/>
+    <text x="435" y="300" text-anchor="middle" fill="#f38ba8" font-size="13">Architecture tests: the CLI never imports the TUI · filter text is parsed only in core</text>
+  </svg>
+</section>
+
+<section id="lang">
+  <div class="kicker">Query language</div>
+  <h2>Words search text. <span class="mono">key:value</span> narrows.</h2>
+  <div class="anat mono">
+    <span class="chip" style="color:var(--pe)">level:W</span>
+    <span class="chip" style="color:var(--bl)">tag:Database</span>
+    <span class="chip" style="color:var(--te)">pid:4321</span>
+    <span class="chip" style="color:var(--gr)">pkg:com.example.app</span>
+    <span class="chip" style="color:var(--mv)">lock timeout</span>
+  </div>
+  <div class="explain">
+    <div style="border-color:var(--pe)"><b>level:W</b> warning and worse</div>
+    <div style="border-color:var(--bl)"><b>tag:</b> exact tag</div>
+    <div style="border-color:var(--te)"><b>pid:</b> one process</div>
+    <div style="border-color:var(--gr)"><b>pkg:</b> an app, by UID</div>
+    <div style="border-color:var(--mv)"><b>other words</b> text, any case</div>
+  </div>
+  <p class="muted">Quotes keep spacing: <code>"a  b"</code>. Typos stay visible: <code>lvl:W</code> is just text. Repeating a key is an error. Every filter prints back in one canonical form, and parsing that form gives the same filter. More than 3,000 checks cover this.</p>
+</section>
+
+<section id="tui">
+  <div class="kicker">Terminal UI</div>
+  <h2>What changed on screen</h2>
+  <div class="ba">
+    <div class="screen before mono">
+      <div class="bar"><span class="tag">BEFORE</span> logview · REPLAY · END · <b>15 events</b></div>
+      <div class="row muted"> Level all  Tag any  PID any  Text / lock</div>
+      <div class="row"> W 4321 Database  Retry after lock timeout</div>
+      <div class="row"> I 4321 logview-demo  clock went backward</div>
+      <div class="row muted"> </div>
+      <div class="row muted"> Enter applies. No count. No undo.</div>
+    </div>
+    <div class="screen after mono">
+      <div class="bar"><span class="tag">AFTER</span> logview · REPLAY · END · <b style="color:var(--gr)">2 of 15</b></div>
+      <div class="row" style="color:var(--mv)"> / lock▌</div>
+      <div class="row sel"> W 4321 Database  Retry after <span class="hl">lock</span> timeout</div>
+      <div class="row"> I 4321 logview-demo  c<span class="hl">lock</span> went backward</div>
+      <div class="row muted"> </div>
+      <div class="row muted"> Filters as you type · x clear · u undo · c copy</div>
+    </div>
+  </div>
+  <ul class="wins">
+    <li><kbd>/</kbd> opens one query line. Results update while you type. <kbd>Esc</kbd> puts the old filter back.</li>
+    <li><kbd>x</kbd> clears all filters. <kbd>u</kbd> undoes the last change. <kbd>↑</kbd> <kbd>↓</kbd> recall earlier queries.</li>
+    <li>The status line shows <b>matched of total</b>, not just the total.</li>
+    <li>Zero matches says why, instead of showing a blank list.</li>
+    <li>Matching text is highlighted, using the same ranges as the matcher.</li>
+    <li><kbd>c</kbd> copies the query, ready to paste into the CLI.</li>
+    <li>No flicker: no full-screen clear, synchronized output, and identical frames are skipped.</li>
+  </ul>
+</section>
+
+<section id="cli">
+  <div class="kicker">Agent CLI</div>
+  <h2>Ask once, get JSON lines</h2>
+  <div class="term mono" style="font-size:14px">
+    <div><span class="p">$</span> logview query capture.lvr.jsonl 'level:W tag:Database lock'</div>
+    <div class="stream" id="stream">
+      <div class="row ev">{"v":1,"type":"event","id":6,"level":"W","tag":"Database","message":"Retry after lock timeout",…}</div>
+      <div class="row sum">{"v":1,"type":"summary","query":"level:W tag:Database lock","emitted":1,"matched":1,"stop":"eof"}</div>
+      <div class="row"><span class="p">$</span> logview query capture.lvr.jsonl 'pid:0'</div>
+      <div class="row err">{"v":1,"type":"error","kind":"invalid-filter","field":"pid","message":"PID must be a positive integer","offset":0}</div>
+    </div>
+  </div>
+  <table>
+    <tr><th>Need</th><th>Flag</th></tr>
+    <tr><td>Stop after N events</td><td class="mono">--limit 20</td></tr>
+    <tr><td>Only recent events</td><td class="mono">--since 5m <span class="muted">(live)</span> · --since 2026-09-26T12:00Z</td></tr>
+    <tr><td>Bounded live capture</td><td class="mono">--live --timeout 10s <span class="muted">(default)</span></td></tr>
+    <tr><td>Check a query first</td><td class="mono">--check 'level:e db'</td></tr>
+    <tr><td>Plain text, like grep</td><td class="mono">--format text</td></tr>
+  </table>
+  <p class="muted">Exit codes: <b>0</b> done (zero matches is fine) · <b>1</b> source failed · <b>2</b> bad arguments or query. Read-only: it never writes a file.</p>
+</section>
+
+<section id="jev">
+  <div class="kicker">Ask Jev</div>
+  <h2>A <span class="mono">~</span> asks a question. Everything else stays literal.</h2>
+  <p class="muted">Plain text still filters live as you type. Put <kbd>~</kbd> in front and the same line asks Jev instead, only when you press <kbd>Enter</kbd>, because every question is a paid call. The CLI reads the same syntax.</p>
+  <svg viewBox="0 0 900 360" width="100%" role="img" aria-label="Query line and CLI parse through parseQuery; text mode filters locally, Jev mode goes through the Session's semantic coordinator">
+    <g font-size="15" fill="#cdd6f4">
+      <rect x="20" y="40" width="200" height="84" rx="14" fill="#1e1e2e" stroke="#cba6f7"/>
+      <text x="120" y="72" text-anchor="middle" font-weight="700">TUI query line</text>
+      <text x="120" y="96" text-anchor="middle" class="mono" fill="#cba6f7" font-size="13">~database locks⏎</text>
+      <rect x="20" y="220" width="200" height="84" rx="14" fill="#1e1e2e" stroke="#89b4fa"/>
+      <text x="120" y="252" text-anchor="middle" font-weight="700">logview query</text>
+      <text x="120" y="276" text-anchor="middle" class="mono" fill="#89b4fa" font-size="13">'~…' or --semantic</text>
+      <rect x="290" y="120" width="200" height="104" rx="16" fill="#1e1e2e" stroke="#f9e2af" stroke-width="2"/>
+      <text x="390" y="152" text-anchor="middle" font-weight="800">@logview/core</text>
+      <text x="390" y="176" text-anchor="middle" class="mono" fill="#f9e2af" font-size="13">parseQuery</text>
+      <text x="390" y="198" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">→ filter + searchMode</text>
+      <rect x="560" y="30" width="320" height="300" rx="16" fill="#181825" stroke="#94e2d5"/>
+      <text x="720" y="58" text-anchor="middle" font-weight="800">@logview/engine · Session</text>
+      <rect x="585" y="80" width="270" height="56" rx="10" fill="#1e1e2e" stroke="#a6e3a1"/>
+      <text x="720" y="104" text-anchor="middle">text: local match, live</text>
+      <text x="720" y="124" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">level · tag · pid · pkg · text</text>
+      <rect x="585" y="152" width="270" height="72" rx="10" fill="#1e1e2e" stroke="#cba6f7"/>
+      <text x="720" y="178" text-anchor="middle">jev: keys first, then</text>
+      <text x="720" y="200" text-anchor="middle" class="mono" fill="#cba6f7" font-size="13">SemanticCoordinator → Jev</text>
+      <text x="720" y="216" text-anchor="middle" class="mono" fill="#9399b2" font-size="11">score · threshold · lastError</text>
+      <rect x="585" y="240" width="270" height="72" rx="10" fill="#1e1e2e" stroke="#45475a"/>
+      <text x="720" y="264" text-anchor="middle">snapshot</text>
+      <text x="720" y="286" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">rows · belowThreshold dim|hide</text>
+      <text x="720" y="303" text-anchor="middle" class="mono" fill="#9399b2" font-size="12">classificationOf · queryCandidates</text>
+    </g>
+    <g fill="none" stroke-width="2.5">
+      <path class="flow" d="M220 82 C260 82 250 150 290 150" stroke="#cba6f7"/>
+      <path class="flow" d="M220 262 C260 262 250 196 290 196" stroke="#89b4fa"/>
+      <path class="flow" d="M490 160 C530 160 540 108 585 108" stroke="#a6e3a1"/>
+      <path class="flow" d="M490 184 C530 184 540 188 585 188" stroke="#cba6f7"/>
+    </g>
+    <text x="390" y="345" text-anchor="middle" fill="#9399b2" font-size="13">One classifier path: the CLI drives the same Session and coordinator as the TUI.</text>
+  </svg>
+
+  <h3>Query line: before and after</h3>
+  <div class="ba">
+    <figure class="shot"><img src="jev/shots/before-query.png" alt="Before: query line with no mode indicator"><figcaption><span class="tag" style="background:#f38ba833;color:var(--re)">BEFORE</span> No sign of mode. Jev or text depended on a startup flag.</figcaption></figure>
+    <figure class="shot"><img src="jev/shots/after-query-jev.png" alt="After: ✦ Jev badge and Enter asks Jev hint"><figcaption><span class="tag" style="background:#a6e3a133;color:var(--gr)">AFTER</span> <kbd>~</kbd> turns the badge purple. The hint says Enter asks Jev.</figcaption></figure>
+  </div>
+
+  <h3>Scores: dim or hide</h3>
+  <div class="ba">
+    <figure class="shot"><img src="jev/shots/after-scored.png" alt="Scored rows with relevance bars, weak rows dimmed"><figcaption>Weak rows dim. A bar and score sit on the right. The status bar counts relevant rows.</figcaption></figure>
+    <figure class="shot"><img src="jev/shots/after-hidden.png" alt="Weak rows hidden, status shows 11 hidden"><figcaption><kbd>v</kbd> hides weak rows and says how many. <kbd>v</kbd> again shows them.</figcaption></figure>
+  </div>
+
+  <h3>Errors and completion</h3>
+  <div class="ba">
+    <figure class="shot"><img src="jev/shots/after-error.png" alt="API key rejected in status bar, quiet failed rows"><figcaption>A rejected key shows once, in the status bar. Rows stay calm.</figcaption></figure>
+    <figure class="shot"><img src="jev/shots/after-complete.png" alt="Ghost completion for tag values"><figcaption><kbd>Tab</kbd> takes the grey suggestion. Values come from this session, most frequent first.</figcaption></figure>
+  </div>
+
+  <h3>Agent CLI</h3>
+  <div class="term mono" style="font-size:14px;white-space:pre;overflow-x:auto"><span class="p">$</span> logview query capture.lvr.jsonl '~database locks' --limit 2
+<span class="ev">{"type":"event","id":4,"tag":"Database","message":"Opening connection",…,"score":0.71,"verdict":"relevant"}</span>
+<span class="ev">{"type":"event","id":5,"tag":"Database","message":"SELECT completed in 12 ms",…,"score":0.71,"verdict":"relevant"}</span>
+<span class="sum">{"type":"summary","query":"~database locks","emitted":2,…,"jev":{"threshold":0.5,"relevant":4,"belowThreshold":11,"unscored":0,"error":null}}</span>
+<span class="p">$</span> TYPESAFE_API_KEY= logview query capture.lvr.jsonl '~database locks'; echo $?
+<span class="err">{"type":"error","kind":"missing-api-key","field":"TYPESAFE_API_KEY",…}</span>
+2</div>
+</section>
+
+<section id="proof">
+  <div class="kicker">Proof</div>
+  <h2>Both doors, same event IDs</h2>
+  <p class="muted">One table of 11 queries runs through the CLI and through the TUI key by key. If the two ever disagree, a test fails.</p>
+  <div class="contract">
+    <div class="card"><b>TUI · type <code>tag:Database lock</code></b><div class="ids"><i>6</i></div></div>
+    <div class="eq">=</div>
+    <div class="card"><b>CLI · <code>query … 'tag:Database lock'</code></b><div class="ids"><i>6</i></div></div>
+    <div class="card"><b>TUI · <code>level:w</code></b><div class="ids"><i>6</i><i>8</i><i>9</i><i>11</i></div></div>
+    <div class="eq">=</div>
+    <div class="card"><b>CLI · <code>level:w</code></b><div class="ids"><i>6</i><i>8</i><i>9</i><i>11</i></div></div>
+  </div>
+</section>
+
+<section id="videos">
+  <div class="kicker">Videos</div>
+  <h2>See it run</h2>
+  <p class="muted">Recorded from the real app with Terminal Control.</p>
+  <h3>Terminal UI</h3>
+  <video src="tui/tui-query.mp4" controls muted loop playsinline poster="tui/poster.png"></video>
+  <h3>Ask Jev, hide weak rows, Tab completion</h3>
+  <video src="jev/jev-demo.mp4" controls muted loop playsinline poster="jev/poster.png"></video>
+  <h3>Agent CLI</h3>
+  <video src="cli/agent-cli.mp4" controls muted loop playsinline poster="cli/poster.png"></video>
+</section>
+
+</main>
+<script>
+const queries=["lock","level:W lock","level:W tag:Database lock"];
+const el=document.getElementById("typed");let qi=0,ci=0,del=false;
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function tick(){const q=queries[qi];
+ if(reduce){el.textContent=queries[2];return}
+ if(!del){el.textContent=q.slice(0,++ci);if(ci===q.length){del=true;return setTimeout(tick,1500)}}
+ else{el.textContent=q.slice(0,--ci);if(ci===0){del=false;qi=(qi+1)%queries.length}}
+ setTimeout(tick,del?25:70)}
+tick();
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add("in");
+ if(e.target.id==="cli")[...document.querySelectorAll("#stream .row")].forEach((r,i)=>setTimeout(()=>r.classList.add("on"),300+i*550))}),{threshold:.2});
+document.querySelectorAll("section").forEach(s=>io.observe(s));
+</script>
+</body>
+</html>

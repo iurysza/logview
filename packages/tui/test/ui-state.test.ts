@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { EMPTY_FILTER, INSPECT_FOCUS, LIST_FOCUS, displayWidth } from "@logview/core";
+import { join } from "node:path";
+import { EMPTY_FILTER, EMPTY_SELECTION, INSPECT_FOCUS, LIST_FOCUS, displayWidth, formatFilterQuery, reduceInteraction, type InteractionState } from "@logview/core";
+import { createRecordingFiles, createReplaySource, createSession, defaultSessionOptions } from "@logview/engine";
 import { layoutFrame } from "../src/app.ts";
+import { FILTER_CONTRACT_CASES, FILTER_CONTRACT_FIXTURE } from "../../../tests/contract/filter-cases.ts";
+import { ManualScheduler } from "../../../tests/support/manual-scheduler.ts";
 import { openScenario } from "../../../tests/support/scenario.ts";
 
 describe("UI state scenarios", () => {
@@ -72,4 +76,75 @@ describe("UI state scenarios", () => {
 
 		await scenario.session.stop();
 	});
+});
+
+describe("query contract", () => {
+	for (const contract of FILTER_CONTRACT_CASES) {
+		test(contract.query.length === 0 ? "empty query matches every event" : contract.query, async () => {
+			const scheduler = new ManualScheduler();
+
+			const replay = createReplaySource(
+				{ path: join(import.meta.dir, "../../..", FILTER_CONTRACT_FIXTURE), speed: { kind: "instant" }, allowPartial: false },
+				{ files: createRecordingFiles(), scheduler },
+			);
+
+			expect(replay.ok).toBe(true);
+
+			if (!replay.ok) return;
+
+			const created = createSession(
+				defaultSessionOptions({ sessionId: "query-contract", sourceKind: "replay", rows: 60, columns: 120 }),
+				{ source: replay.value, scheduler },
+			);
+
+			expect(created.ok).toBe(true);
+
+			if (!created.ok) return;
+
+			const session = created.value;
+			expect(session.start().ok).toBe(true);
+			await scheduler.runUntilIdle();
+			await session.sourceDone;
+			await scheduler.runUntilIdle();
+
+			let interaction: InteractionState = LIST_FOCUS;
+
+			const typeKey = async (key: string): Promise<void> => {
+				const snapshot = session.snapshot();
+
+				const result = reduceInteraction(
+					interaction,
+					{ kind: "key", key, ctrl: false, shift: false },
+					snapshot.activeFilter,
+					EMPTY_SELECTION,
+					snapshot.searchMode,
+				);
+
+				interaction = result.state;
+
+				if (!result.command) return;
+
+				expect(session.dispatch(result.command).ok).toBe(true);
+				await scheduler.runUntilIdle();
+			};
+
+			await typeKey("/");
+
+			if (interaction.focus === "query") {
+				const draft = [...interaction.draft];
+
+				for (let index = 0; index < draft.length; index += 1) await typeKey("backspace");
+			}
+
+			for (const char of contract.query) await typeKey(char);
+			await typeKey("enter");
+			await scheduler.runUntilIdle();
+
+			const ids = session.readMatches(null, 1000).map((event) => event.id);
+
+			expect(ids).toEqual([...contract.expectedIds]);
+			expect(formatFilterQuery(session.snapshot().activeFilter)).toBe(contract.canonical);
+			await session.stop();
+		});
+	}
 });

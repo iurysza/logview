@@ -1,5 +1,18 @@
-import { clipToWidth, displayWidth, LIST_FOCUS, type FilterSpec, type InteractionState, type SearchMode } from "@logview/core";
-import { type SessionSnapshot as EngineSessionSnapshot } from "@logview/engine";
+import {
+	clipToWidth,
+	completeQuery,
+	displayWidth,
+	EMPTY_CANDIDATES,
+	formatQuery,
+	LIST_FOCUS,
+	parseQuery,
+	type QueryCandidates,
+	type FilterSpec,
+	type InteractionState,
+	type QueryError,
+	type SearchMode,
+} from "@logview/core";
+import { type BelowThreshold, type SessionSnapshot as EngineSessionSnapshot } from "@logview/engine";
 import { paintStyled, rgbSgr, styleOn, type CellStyle, type Rgb } from "./catppuccin.ts";
 import { type PaintStyle } from "./color.ts";
 import { severityStyle, THEME } from "./theme.ts";
@@ -80,11 +93,25 @@ export function keyHints(
 	interaction: InteractionState,
 	searchMode: SearchMode = "text",
 	semanticAvailable = false,
+	belowThreshold: BelowThreshold = "dim",
 ): readonly KeyHint[] {
 	if (interaction.focus === "filters") {
 		return [
 			{ key: "Tab", label: "Next" },
 			{ key: "Enter", label: "Apply" },
+			{ key: "Esc", label: "Cancel" },
+			{ key: "^C", label: "Quit" },
+		];
+	}
+
+	if (interaction.focus === "query") {
+		const jev = draftSearchMode(interaction.draft) === "jev";
+
+		return [
+			{ key: "Enter", label: jev ? "Ask Jev" : "Done" },
+			{ key: "Tab", label: "Complete" },
+			...(semanticAvailable && !jev ? [{ key: "~", label: "Ask Jev" }] : []),
+			{ key: "↑↓", label: "History" },
 			{ key: "Esc", label: "Cancel" },
 			{ key: "^C", label: "Quit" },
 		];
@@ -103,14 +130,26 @@ export function keyHints(
 
 	return [
 		{ key: "Enter", label: "Inspect" },
-		{ key: "/", label: "Search" },
+		{ key: "/", label: "Query" },
+		...(semanticAvailable ? [{ key: "m", label: searchMode === "jev" ? "Use text" : "Ask Jev" }] : []),
+		...(semanticAvailable && searchMode === "jev" ? [{ key: "v", label: belowThreshold === "hide" ? "Show all" : "Hide weak" }] : []),
 		{ key: "f", label: "Filters" },
+		{ key: "x", label: "Clear" },
+		{ key: "u", label: "Undo" },
+		{ key: "c", label: "Copy query" },
 		{ key: "G", label: "Tail" },
-		...(semanticAvailable ? [{ key: "m", label: searchMode === "jev" ? "Jev" : "Text" }] : []),
 		{ key: "y", label: "Copy" },
 		{ key: "?", label: "Help" },
 		{ key: "q", label: "Quit" },
 	];
+}
+
+export function eventCountLabel(snapshot: Snapshot): string {
+	if (activeFilterCount(snapshot.activeFilter) > 0) {
+		return `${snapshot.stats.matchedEvents} of ${snapshot.stats.retainedEvents}`;
+	}
+
+	return `${snapshot.stats.retainedEvents} events`;
 }
 
 export function formatHints(
@@ -122,7 +161,7 @@ export function formatHints(
 }
 
 export function formatStatus(snapshot: Snapshot): string {
-	return `logview   ${snapshot.label}   ${sourceStatusText(snapshot)}   ${snapshot.stats.retainedEvents} events   ${activeFilterCount(snapshot.activeFilter)} filters`;
+	return `logview   ${snapshot.label}   ${sourceStatusText(snapshot)}   ${eventCountLabel(snapshot)}   ${activeFilterCount(snapshot.activeFilter)} filters`;
 }
 
 export function formatFilter(snapshot: Snapshot): string {
@@ -133,12 +172,14 @@ export function formatFilter(snapshot: Snapshot): string {
 		filter.tag ? `Tag: ${filter.tag}` : "Tag: any",
 		filter.pid === null ? "PID: any" : `PID: ${filter.pid}`,
 		filter.packageName ? `Package: ${filter.packageName}` : "Package: any",
-		filter.text ? `Text: ${snapshot.searchMode === "jev" ? "~" : "/"} ${filter.text}` : "Text: /",
+		filter.text ? `${snapshot.searchMode === "jev" ? "Jev: ~" : "Text: /"} ${filter.text}` : "Text: /",
 	].join("  ");
 }
 
 function displayBadge(snapshot: Snapshot, interaction: InteractionState): string {
 	if (interaction.focus === "filters") return "FILTER";
+
+	if (interaction.focus === "query") return "QUERY";
 
 	if (interaction.focus === "inspect") return "INSPECT";
 
@@ -181,6 +222,45 @@ function fitGroups(groups: readonly ChromeSpan[], columns: number): ChromeSpan[]
 	return out;
 }
 
+/** The mode the draft will apply in: `~` before the text asks Jev. */
+export function draftSearchMode(draft: string): SearchMode {
+	const parsed = parseQuery(draft);
+
+	if (parsed.ok) return parsed.value.searchMode;
+
+	return /(^|\s)~/.test(draft) ? "jev" : "text";
+}
+
+const JEV_ERROR_COPY = {
+	auth: "API key rejected",
+	timeout: "timed out",
+	"rate-limited": "rate limited",
+	"invalid-response": "bad response",
+	unavailable: "unreachable",
+} as const;
+
+/** Jev state for the status bar, or null when Jev is not the active search. */
+export function jevStatusSpans(snapshot: Snapshot): ChromeSpan[] | null {
+	const semantic = snapshot.semantic;
+
+	if (semantic === null || snapshot.searchMode !== "jev" || snapshot.activeFilter.text.length === 0) return null;
+
+	const badge = bold(" ✦ Jev ", THEME.canvas, THEME.purple);
+
+	if (semantic.lastError !== null) return [badge, plain(` ${JEV_ERROR_COPY[semantic.lastError]}`, THEME.red)];
+
+	if (semantic.pendingEvents > 0 || semantic.inFlight > 0) {
+		return [badge, plain(` asking · ${semantic.pendingEvents} left`, THEME.muted)];
+	}
+
+	const relevant = plain(` ${semantic.relevantEvents} relevant`, THEME.purple);
+	const below = semantic.classifiedEvents - semantic.relevantEvents;
+
+	if (snapshot.belowThreshold === "hide" && below > 0) return [badge, relevant, plain(` · ${below} hidden`, THEME.muted)];
+
+	return [badge, relevant];
+}
+
 export function paintStatus(snapshot: Snapshot, columns: number, style: PaintStyle): string {
 	let statusColor = THEME.muted;
 
@@ -189,11 +269,15 @@ export function paintStatus(snapshot: Snapshot, columns: number, style: PaintSty
 	if (snapshot.source.kind === "running") statusColor = THEME.green;
 	const left = [bold("logview", THEME.accent), plain("  "), plain(snapshot.label, THEME.muted)];
 
+	const jev = jevStatusSpans(snapshot);
+	const jevGroup = jev === null ? [] : [plain("  "), ...jev];
+
 	const right = [
 		plain("  "),
 		bold(sourceStatusText(snapshot), statusColor),
 		plain("  "),
-		plain(`${snapshot.stats.retainedEvents} events`, THEME.text),
+		plain(eventCountLabel(snapshot), THEME.text),
+		...jevGroup,
 		plain("  "),
 		plain(`${activeFilterCount(snapshot.activeFilter)} filters`, THEME.muted),
 	];
@@ -207,7 +291,8 @@ export function paintStatus(snapshot: Snapshot, columns: number, style: PaintSty
 		plain("  "),
 		bold(sourceStatusText(snapshot), statusColor),
 		plain("  "),
-		plain(`${snapshot.stats.retainedEvents} events`, THEME.text),
+		plain(eventCountLabel(snapshot), THEME.text),
+		...jevGroup,
 	];
 
 	return paintChromeLine(fitGroups(retained, columns), columns, style, THEME.bar);
@@ -217,7 +302,75 @@ function filterChip(label: string, active: boolean, color: Rgb = THEME.accent): 
 	return active ? bold(` ${label} `, color, THEME.chip) : plain(` ${label} `, THEME.muted);
 }
 
-export function paintFilterLine(snapshot: Snapshot, interaction: InteractionState, columns: number, style: PaintStyle): string {
+function textChip(text: string, searchMode: SearchMode): ChromeSpan {
+	if (text.length === 0) return filterChip("Text /", false);
+
+	if (searchMode === "jev") return bold(` ✦ Jev ${text} `, THEME.canvas, THEME.purple);
+
+	return filterChip(`Text / ${text}`, true, THEME.accent);
+}
+
+function queryEditorSpans(
+	draft: string,
+	cursor: number,
+	error: QueryError | null,
+	candidates: QueryCandidates,
+	semanticAvailable: boolean,
+): ChromeSpan[] {
+	const chars = [...draft];
+	const index = Math.min(Math.max(cursor, 0), chars.length);
+	const atCursor = chars[index];
+	const jev = draftSearchMode(draft) === "jev";
+	const completion = error === null || error.field !== "text" ? completeQuery(draft, index, candidates) : null;
+	const ghost = [...(completion?.ghost ?? "")];
+
+	const spans: ChromeSpan[] = [
+		jev ? bold(" ✦ Jev ", THEME.canvas, THEME.purple) : bold(" / ", THEME.canvas, THEME.accent),
+		plain(" "),
+		plain(chars.slice(0, index).join(""), THEME.text),
+	];
+
+	if (atCursor === undefined && ghost.length > 0) {
+		spans.push(bold(ghost[0]!, THEME.canvas, THEME.subtle), plain(ghost.slice(1).join(""), THEME.subtle));
+	} else {
+		spans.push(bold(atCursor ?? " ", THEME.canvas, jev ? THEME.purple : THEME.accent));
+		spans.push(plain(ghost.join(""), THEME.subtle));
+	}
+
+	if (atCursor !== undefined) spans.push(plain(chars.slice(index + 1).join(""), THEME.text));
+
+	if (error) spans.push(plain(`  ! ${error.message}`, THEME.red));
+	else if (jev) spans.push(plain("   Enter asks Jev", THEME.muted));
+	else if (completion !== null && completion.alternatives.length > 0) {
+		spans.push(plain(`   ${completion.alternatives.join("  ")}`, THEME.subtle));
+	} else if (draft.length === 0) {
+		spans.push(plain(semanticAvailable ? "type to filter · ~question asks Jev" : "type to filter · Tab completes", THEME.subtle));
+	}
+
+	return spans;
+}
+
+export function emptyMatchCopy(snapshot: Snapshot): readonly [string, string] | null {
+	if (snapshot.rows.length > 0 || snapshot.stats.retainedEvents === 0 || snapshot.notice === "applying-filter") return null;
+
+	if (activeFilterCount(snapshot.activeFilter) === 0) return null;
+
+	return [`No events match ${formatQuery(snapshot.activeFilter, snapshot.searchMode)}`, "x clear · u undo"];
+}
+
+export function paintFilterLine(
+	snapshot: Snapshot,
+	interaction: InteractionState,
+	columns: number,
+	style: PaintStyle,
+	candidates: QueryCandidates = EMPTY_CANDIDATES,
+): string {
+	if (interaction.focus === "query") {
+		const spans = queryEditorSpans(interaction.draft, interaction.cursor, interaction.error, candidates, snapshot.semantic !== null);
+
+		return paintChromeLine(spans, columns, style, THEME.bar);
+	}
+
 	if (interaction.focus === "filters") {
 		const names = { minLevel: "Level", tag: "Tag", pid: "PID", packageName: "Package", text: "Text" } as const;
 		const draft = interaction.draft[interaction.field];
@@ -242,7 +395,7 @@ export function paintFilterLine(snapshot: Snapshot, interaction: InteractionStat
 		plain(" "),
 		filterChip(filter.packageName ? `Package ${filter.packageName}` : "Package any", filter.packageName !== null, THEME.green),
 		plain(" "),
-		filterChip(filter.text ? `Text ${snapshot.searchMode === "jev" ? "~" : "/"} ${filter.text}` : "Text /", filter.text.length > 0, THEME.purple),
+		textChip(filter.text, snapshot.searchMode),
 	];
 
 	if (snapshot.notice === "applying-filter") spans.push(plain("  applying", THEME.amber));
@@ -254,7 +407,7 @@ export function paintFooter(snapshot: Snapshot, interaction: InteractionState, c
 	const badge = displayBadge(snapshot, interaction);
 	const badgeColor = badge === "BROWSE" ? THEME.amber : THEME.accent;
 	const badgeSpan = bold(` ${badge} `, THEME.canvas, badgeColor);
-	const hints = keyHints(interaction, snapshot.searchMode, snapshot.semantic !== null);
+	const hints = keyHints(interaction, snapshot.searchMode, snapshot.semantic !== null, snapshot.belowThreshold);
 	const quit = hints.at(-1)!;
 	const optional = hints.slice(0, -1);
 

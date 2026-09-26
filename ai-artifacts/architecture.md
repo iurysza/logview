@@ -112,6 +112,8 @@ A recording is UTF-8 JSON Lines:
 
 ## Filters and navigation
 
+`parseQuery` in `packages/core/src/query.ts` turns the one-line query into a `FilterSpec` and a `SearchMode`. A `~` before the text selects Jev; the TUI and `logview query` share this parser. `completeQuery` in `packages/core/src/completion.ts` returns a ghost suffix and alternatives from `Session.queryCandidates()`, which `packages/engine/src/vocabulary.ts` counts as events arrive.
+
 `@logview/core` prepares a filter from minimum level, exact tag, PID, and text. Local filtering combines populated fields with AND. The text match is a case-insensitive literal match over retained source text. `reduceInteraction` turns normalized keys into session commands or local focus changes. It keeps editor drafts in the TUI layer until Enter commits a filter command.
 
 When a filter changes, `Session` starts a revisioned `FilterJob` in `packages/engine/src/reindex.ts`. The old visible index remains active while the new candidate index scans retained events in slices. New arrivals are tested against both filters. Only the newest completed revision can replace the active index. This prevents an old scan from publishing after a later query.
@@ -132,7 +134,7 @@ Semantic filtering is active only when the CLI has created a Jev classifier and 
 - It validates response session ID, request ID, query revision, and every returned event ID before applying annotations.
 - It retries one transient batch failure. It marks a permanent failure, skipped item, or oversized item as unknown.
 
-The session retains semantic annotations separately from `LogEvent` data. The terminal UI displays their state and dims scored rows below the configured threshold. Semantic work never blocks source ingestion or removes raw events from history.
+`set-filter` carries an optional `searchMode`, so a `~` query and a literal query use one command. The session retains semantic annotations separately from `LogEvent` data. `SemanticStats` reports relevant, pending, failed, and skipped counts plus `lastError`. The terminal UI displays their state and dims scored rows below the configured threshold. `toggle-below-threshold` switches the snapshot to `belowThreshold: "hide"`; the session then builds navigation and rows from a relevant-only view of the active index. `readMatches` still returns every local match. `Session.classificationOf(id)` exposes one row's score, which `logview query` uses to add `score` and `verdict` to NDJSON after `sourceDone` resolves. Semantic work never blocks source ingestion or removes raw events from history.
 
 ## Terminal UI and shutdown
 
